@@ -1,0 +1,24 @@
+{
+    "name": "iamthewit/stock-exchange",
+    "type": "project",
+    "require": {
+        "ramsey/uuid": "^4.1",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "kint-php/kint": "^3.3"
+    },
+    "authors": [
+        {
+            "name": "Ben Cross",
+            "email": "bencross86@gmail.com"
+        }
+    ],
+    "description": "",
+    "autoload": {
+        "psr-4": {
+            "StockExchange\\": "src"
+        }
+    }
+}
