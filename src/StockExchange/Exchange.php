@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace StockExchange\StockExchange;
 
 use Ramsey\Uuid\Uuid;
+use StockExchange\StockExchange\Event\BidAdded;
 
 class Exchange
 {
@@ -104,6 +105,9 @@ class Exchange
             // if match found execute a trade
             $this->trade($bid, $chosenAsk);
         }
+
+        $bidAdded = new BidAdded($bid);
+        $this->addDispatchableEvent($bidAdded);
     }
 
     /**
