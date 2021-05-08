@@ -40,8 +40,6 @@ class Bid
         $bid->symbol = $symbol;
         $bid->price = $price;
 
-        // TODO - Dispatch BidCreated event
-
         return $bid;
     }
 

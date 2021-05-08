@@ -12,6 +12,7 @@ class Exchange
     private BidCollection $bids; // TODO: move this to an orderbook class
     private AskCollection $asks;  // TODO: move this to an orderbook class
     private TradeCollection $trades;
+    private array $dispatchableEvents = [];
 
     /**
      * Exchange constructor.
@@ -84,6 +85,7 @@ class Exchange
      * @throws Exception\AskCollectionCreationException
      * @throws Exception\BidCollectionCreationException
      * @throws Exception\TradeCollectionCreationException
+     * @throws Exception\ShareCollectionCreationException
      */
     public function bid(Bid $bid)
     {
@@ -116,6 +118,7 @@ class Exchange
      * @throws Exception\AskCollectionCreationException
      * @throws Exception\BidCollectionCreationException
      * @throws Exception\TradeCollectionCreationException
+     * @throws Exception\ShareCollectionCreationException
      */
     public function ask(Ask $ask)
     {
@@ -144,6 +147,7 @@ class Exchange
      * @throws Exception\AskCollectionCreationException
      * @throws Exception\BidCollectionCreationException
      * @throws Exception\TradeCollectionCreationException
+     * @throws Exception\ShareCollectionCreationException
      */
     private function trade(Bid $bid, Ask $ask)
     {
@@ -173,6 +177,8 @@ class Exchange
      * @param Share  $share
      * @param Seller $seller
      * @param Buyer  $buyer
+     *
+     * @throws Exception\ShareCollectionCreationException
      */
     private function transferShare(Share $share, Seller $seller, Buyer $buyer)
     {
@@ -210,5 +216,10 @@ class Exchange
         unset($asks[$ask->id()->toString()]);
 
         $this->asks = new AskCollection($asks);
+    }
+
+    private function addDispatchableEvent(BidAdded $bidAdded)
+    {
+        $this->dispatchableEvents[] = $bidAdded;
     }
 }
