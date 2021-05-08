@@ -23,7 +23,12 @@ class Symbol
     {
     }
 
-    public static function fromValue(string $value)
+    /**
+     * @param string $value
+     *
+     * @return Symbol
+     */
+    public static function fromValue(string $value): self
     {
         $symbol = new self();
         $symbol->value = $value;
@@ -31,6 +36,9 @@ class Symbol
         return $symbol;
     }
 
+    /**
+     * @return string
+     */
     public function value(): string
     {
         return $this->value;

@@ -1,4 +1,7 @@
 # TODO
 
 - Domain Events
-- Tests
+- Event Streams
+- Exchange Simulation
+- Event Loop
+- Layers (infra, application)

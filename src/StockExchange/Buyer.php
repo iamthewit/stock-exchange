@@ -15,6 +15,10 @@ class Buyer
     {
     }
 
+    /**
+     * @return static
+     * @throws Exception\ShareCollectionCreationException
+     */
     public static function create(): self
     {
         $buyer = new self();
@@ -24,16 +28,27 @@ class Buyer
         return $buyer;
     }
 
-    public function id()
+    /**
+     * @return UuidInterface
+     */
+    public function id(): UuidInterface
     {
         return $this->id;
     }
 
+    /**
+     * @return ShareCollection
+     */
     public function shares(): ShareCollection
     {
         return $this->shares;
     }
 
+    /**
+     * @param Share $share
+     *
+     * @throws Exception\ShareCollectionCreationException
+     */
     public function addShare(Share $share)
     {
         $this->shares = new ShareCollection($this->shares->toArray() + [$share]);

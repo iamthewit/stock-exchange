@@ -32,7 +32,7 @@ class Bid
         Seller $seller,
         Symbol $symbol,
         Price $price
-    )
+    ): self
     {
         $bid = new self();
         $bid->id = $id;

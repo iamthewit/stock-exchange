@@ -17,6 +17,11 @@ class Share
     {
     }
 
+    /**
+     * @param Symbol $symbol
+     *
+     * @return static
+     */
     public static function fromSymbol(Symbol $symbol): self
     {
         $share = new self();
@@ -26,17 +31,33 @@ class Share
         return $share;
     }
 
-
-    public function id()
+    /**
+     * @return UuidInterface
+     */
+    public function id(): UuidInterface
     {
         return $this->id;
     }
 
-    public function symbol()
+    /**
+     * @return Symbol
+     */
+    public function symbol(): Symbol
     {
         return $this->symbol;
     }
 
+    /**
+     * @return UuidInterface|null
+     */
+    public function ownerId(): ?UuidInterface
+    {
+        return $this->ownerId;
+    }
+
+    /**
+     * @param Buyer $buyer
+     */
     public function transferOwnershipToBuyer(Buyer $buyer)
     {
         // TODO:

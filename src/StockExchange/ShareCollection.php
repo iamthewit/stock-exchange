@@ -56,11 +56,20 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
         return count($this->shares);
     }
 
+    /**
+     * @return array
+     */
     public function jsonSerialize(): array
     {
         return $this->toArray();
     }
 
+    /**
+     * @param Symbol $symbol
+     *
+     * @return $this
+     * @throws ShareCollectionCreationException
+     */
     public function filterBySymbol(Symbol $symbol): self
     {
         return new self(
@@ -68,10 +77,5 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
                 return $share->symbol()->value() === $symbol->value();
             })
         );
-    }
-
-    public function remove(Share $share)
-    {
-
     }
 }

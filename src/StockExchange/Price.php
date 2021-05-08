@@ -12,6 +12,11 @@ class Price
     {
     }
 
+    /**
+     * @param int $value
+     *
+     * @return Price
+     */
     public static function fromValue(int $value)
     {
         $price = new self();
@@ -20,6 +25,9 @@ class Price
         return $price;
     }
 
+    /**
+     * @return int
+     */
     public function value(): int
     {
         return $this->value;

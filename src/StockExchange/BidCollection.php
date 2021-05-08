@@ -57,11 +57,21 @@ class BidCollection implements IteratorAggregate, Countable, JsonSerializable
         return count($this->bids);
     }
 
+    /**
+     * @return array
+     */
     public function jsonSerialize(): array
     {
         return $this->toArray();
     }
 
+    /**
+     * @param Symbol $symbol
+     * @param Price  $price
+     *
+     * @return $this
+     * @throws BidCollectionCreationException
+     */
     public function filterBySymbolAndPrice(Symbol $symbol, Price $price): self
     {
         return new self(

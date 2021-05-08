@@ -33,16 +33,25 @@ class SymbolCollection implements IteratorAggregate, Countable, JsonSerializable
         }
     }
 
+    /**
+     * @return ArrayIterator
+     */
     public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->symbols);
     }
 
+    /**
+     * @return int
+     */
     public function count(): int
     {
         return count($this->symbols);
     }
 
+    /**
+     * @return array
+     */
     public function jsonSerialize(): array
     {
         return $this->symbols;

@@ -15,11 +15,18 @@ class Trade
     {
     }
 
+    /**
+     * @param UuidInterface $id
+     * @param Bid           $bid
+     * @param Ask           $ask
+     *
+     * @return Trade
+     */
     public static function fromBidAndAsk(
         UuidInterface $id,
         Bid $bid,
         Ask $ask
-    )
+    ): self
     {
         $trade = new self();
         $trade->id = $id;

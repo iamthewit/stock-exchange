@@ -20,5 +20,8 @@
         "psr-4": {
             "StockExchange\\": "src"
         }
+    },
+    "scripts": {
+        "phpunit-cc": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html ./code-coverage"
     }
 }

@@ -3,51 +3,52 @@
 namespace StockExchange;
 
 use Ramsey\Uuid\Uuid;
-use StockExchange\StockExchange\Ask;
-use StockExchange\StockExchange\AskCollection;
 use PHPUnit\Framework\TestCase;
-use StockExchange\StockExchange\Buyer;
+use StockExchange\StockExchange\Bid;
+use StockExchange\StockExchange\BidCollection;
 use StockExchange\StockExchange\Price;
+use StockExchange\StockExchange\Seller;
+use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\Symbol;
 
-class AskCollectionTest extends TestCase
+class BidCollectionTest extends TestCase
 {
     public function testFilterBySymbolAndPrice()
     {
-        $collection = new AskCollection([
-            Ask::create(
+        $collection = new BidCollection([
+            Bid::create(
                 Uuid::uuid4(),
-                Buyer::create(),
+                Seller::create(new ShareCollection([])),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(100)
             ),
-            Ask::create(
+            Bid::create(
                 Uuid::uuid4(),
-                Buyer::create(),
+                Seller::create(new ShareCollection([])),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(200)
             ),
-            Ask::create(
+            Bid::create(
                 Uuid::uuid4(),
-                Buyer::create(),
+                Seller::create(new ShareCollection([])),
                 Symbol::fromValue('BAR'),
                 Price::fromValue(100)
             ),
-            Ask::create(
+            Bid::create(
                 Uuid::uuid4(),
-                Buyer::create(),
+                Seller::create(new ShareCollection([])),
                 Symbol::fromValue('BAR'),
                 Price::fromValue(200)
             ),
-            Ask::create(
+            Bid::create(
                 Uuid::uuid4(),
-                Buyer::create(),
+                Seller::create(new ShareCollection([])),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(100)
             ),
-            Ask::create(
+            Bid::create(
                 Uuid::uuid4(),
-                Buyer::create(),
+                Seller::create(new ShareCollection([])),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(200)
             ),

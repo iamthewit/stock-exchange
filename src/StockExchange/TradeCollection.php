@@ -57,6 +57,9 @@ class TradeCollection implements IteratorAggregate, Countable, JsonSerializable
         return count($this->trades);
     }
 
+    /**
+     * @return array
+     */
     public function jsonSerialize(): array
     {
         return $this->toArray();

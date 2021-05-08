@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
-use Kint\Kint;
 use Ramsey\Uuid\Uuid;
 
 class Exchange
@@ -24,9 +23,11 @@ class Exchange
      * Open the exchange so that shares can be traded.
      *
      * @param SymbolCollection $symbols
-     * @param BidCollection $bids
-     * @param AskCollection $asks
-     * @param TradeCollection $trades
+     * @param BidCollection    $bids
+     * @param AskCollection    $asks
+     * @param TradeCollection  $trades
+     *
+     * @return Exchange
      */
     public static function create(
         SymbolCollection $symbols,
@@ -76,10 +77,21 @@ class Exchange
         return $this->trades;
     }
 
+    /**
+     * @param Bid $bid
+     *
+     * @throws Exception\AskCollectionCreationException
+     * @throws Exception\BidCollectionCreationException
+     * @throws Exception\TradeCollectionCreationException
+     */
     public function bid(Bid $bid)
     {
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
+
+        // TODO: instead of executing trades on the bid/ask method
+        // create another method that checks all bid/asks and executes
+        // any trades possible
 
         // check ask collection for any matching asks
         $asks = $this->asks()->filterBySymbolAndPrice($bid->symbol(), $bid->price());
@@ -94,22 +106,41 @@ class Exchange
         }
     }
 
+    /**
+     * @param Ask $ask
+     *
+     * @throws Exception\AskCollectionCreationException
+     * @throws Exception\BidCollectionCreationException
+     * @throws Exception\TradeCollectionCreationException
+     */
     public function ask(Ask $ask)
     {
         // add ask to collection
-        $this->asks = new AskCollection($this->bids()->toArray() + [$ask]);
+        $this->asks = new AskCollection($this->asks()->toArray() + [$ask]);
+
+        // TODO: instead of executing trades on the bid/ask method
+        // create another method that checks all bid/asks and executes
+        // any trades possible
 
         // check bid collection for any matching bids
         $bids = $this->bids()->filterBySymbolAndPrice($ask->symbol(), $ask->price());
 
         // if match found execute trade
         if (count($bids)) {
-            $chosenBid = $bids[0];
+            $chosenBid = current($bids->toArray());
 
             $this->trade($chosenBid, $ask);
         }
     }
 
+    /**
+     * @param Bid $bid
+     * @param Ask $ask
+     *
+     * @throws Exception\AskCollectionCreationException
+     * @throws Exception\BidCollectionCreationException
+     * @throws Exception\TradeCollectionCreationException
+     */
     private function trade(Bid $bid, Ask $ask)
     {
         // execute the trade between the buyer and the seller
@@ -134,6 +165,11 @@ class Exchange
         $this->removeAsk($ask);
     }
 
+    /**
+     * @param Share  $share
+     * @param Seller $seller
+     * @param Buyer  $buyer
+     */
     private function transferShare(Share $share, Seller $seller, Buyer $buyer)
     {
         // remove share from sellers share collection
@@ -146,6 +182,11 @@ class Exchange
         $share->transferOwnershipToBuyer($buyer);
     }
 
+    /**
+     * @param Bid $bid
+     *
+     * @throws Exception\BidCollectionCreationException
+     */
     private function removeBid(Bid $bid)
     {
         $bids = $this->bids()->toArray();
@@ -154,6 +195,11 @@ class Exchange
         $this->bids = new BidCollection($bids);
     }
 
+    /**
+     * @param Ask $ask
+     *
+     * @throws Exception\AskCollectionCreationException
+     */
     private function removeAsk(Ask $ask)
     {
         $asks = $this->asks()->toArray();

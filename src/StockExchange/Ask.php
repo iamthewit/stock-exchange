@@ -16,6 +16,14 @@ class Ask
     {
     }
 
+    /**
+     * @param UuidInterface $id
+     * @param Buyer         $buyer
+     * @param Symbol        $symbol
+     * @param Price         $price
+     *
+     * @return static
+     */
     public static function create(
         UuidInterface $id,
         Buyer $buyer,

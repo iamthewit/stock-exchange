@@ -15,6 +15,11 @@ class Seller
     {
     }
 
+    /**
+     * @param ShareCollection $shares
+     *
+     * @return static
+     */
     public static function create(ShareCollection $shares): self
     {
         $seller = new self();
@@ -24,16 +29,27 @@ class Seller
         return $seller;
     }
 
-    public function id()
+    /**
+     * @return UuidInterface
+     */
+    public function id(): UuidInterface
     {
         return $this->id;
     }
 
+    /**
+     * @return ShareCollection
+     */
     public function shares(): ShareCollection
     {
         return $this->shares;
     }
 
+    /**
+     * @param Share $share
+     *
+     * @throws Exception\ShareCollectionCreationException
+     */
     public function removeShare(Share $share)
     {
         $shares = $this->shares()->toArray();

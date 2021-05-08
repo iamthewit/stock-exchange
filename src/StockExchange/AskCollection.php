@@ -57,11 +57,21 @@ class AskCollection implements IteratorAggregate, Countable, JsonSerializable
         return count($this->asks);
     }
 
+    /**
+     * @return array
+     */
     public function jsonSerialize(): array
     {
         return $this->toArray();
     }
 
+    /**
+     * @param Symbol $symbol
+     * @param Price  $price
+     *
+     * @return $this
+     * @throws AskCollectionCreationException
+     */
     public function filterBySymbolAndPrice(Symbol $symbol, Price $price): self
     {
         return new self(
