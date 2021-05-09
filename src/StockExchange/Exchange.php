@@ -161,10 +161,10 @@ class Exchange
         // find one of the sellers shares, update the ownership of the share to the buyer
         /** @var Share $share */
         $share = current(
-            $bid->seller()->shares()->filterBySymbol($bid->symbol())->toArray()
+            $bid->trader()->shares()->filterBySymbol($bid->symbol())->toArray()
         ); // TODO: some proper error checking
 
-        $this->transferShare($share, $bid->seller(), $ask->buyer());
+        $this->transferShare($share, $bid->trader(), $ask->trader());
 
         // remove bid from collection
         $this->removeBid($bid);
@@ -175,12 +175,12 @@ class Exchange
 
     /**
      * @param Share  $share
-     * @param Seller $seller
-     * @param Buyer  $buyer
+     * @param Trader $seller
+     * @param Trader $buyer
      *
      * @throws Exception\ShareCollectionCreationException
      */
-    private function transferShare(Share $share, Seller $seller, Buyer $buyer)
+    private function transferShare(Share $share, Trader $seller, Trader $buyer)
     {
         // remove share from sellers share collection
         $seller->removeShare($share);
@@ -189,7 +189,7 @@ class Exchange
         $buyer->addShare($share);
 
         // update the shares owner id
-        $share->transferOwnershipToBuyer($buyer);
+        $share->transferOwnershipToTrader($buyer);
     }
 
     /**

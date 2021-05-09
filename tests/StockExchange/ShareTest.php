@@ -2,7 +2,8 @@
 
 namespace StockExchange;
 
-use StockExchange\StockExchange\Buyer;
+use Ramsey\Uuid\Uuid;
+use StockExchange\StockExchange\Trader;
 use StockExchange\StockExchange\Share;
 use PHPUnit\Framework\TestCase;
 use StockExchange\StockExchange\Symbol;
@@ -12,10 +13,10 @@ class ShareTest extends TestCase
 
     public function testItTransfersOwnershipToBuyer()
     {
-        $buyer = Buyer::create();
+        $buyer = Trader::create(Uuid::uuid4());
         $share = Share::fromSymbol(Symbol::fromValue('FOO'));
 
-        $share->transferOwnershipToBuyer($buyer);
+        $share->transferOwnershipToTrader($buyer);
 
         $this->assertEquals($buyer->id()->toString(), $share->ownerId()->toString());
     }

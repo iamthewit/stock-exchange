@@ -2,19 +2,16 @@
 
 namespace StockExchange;
 
-use Kint\Kint;
+use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use StockExchange\StockExchange\Ask;
 use StockExchange\StockExchange\AskCollection;
 use StockExchange\StockExchange\Bid;
 use StockExchange\StockExchange\BidCollection;
-use StockExchange\StockExchange\Buyer;
+use StockExchange\StockExchange\Trader;
 use StockExchange\StockExchange\Exchange;
-use PHPUnit\Framework\TestCase;
 use StockExchange\StockExchange\Price;
-use StockExchange\StockExchange\Seller;
 use StockExchange\StockExchange\Share;
-use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\Symbol;
 use StockExchange\StockExchange\SymbolCollection;
 use StockExchange\StockExchange\Trade;
@@ -32,14 +29,13 @@ class ExchangeTest extends TestCase
             new TradeCollection([])
         );
 
-        $sellerShares = new ShareCollection([
-            Share::fromSymbol($symbol)
-        ]);
+        $seller = Trader::create(Uuid::uuid4());
+        $seller->addShare(Share::fromSymbol($symbol));
 
         $exchange->bid(
             Bid::create(
                 Uuid::uuid4(),
-                Seller::create($sellerShares),
+                $seller,
                 $symbol,
                 Price::fromValue(100)
             )
@@ -61,7 +57,7 @@ class ExchangeTest extends TestCase
         $exchange->ask(
             Ask::create(
                 Uuid::uuid4(),
-                Buyer::create(),
+                Trader::create(Uuid::uuid4()),
                 $symbol,
                 Price::fromValue(100)
             )
@@ -80,7 +76,7 @@ class ExchangeTest extends TestCase
             new TradeCollection([])
         );
 
-        $buyer = Buyer::create();
+        $buyer = Trader::create(Uuid::uuid4());
         $price = Price::fromValue(100);
 
         $exchange->ask(
@@ -92,11 +88,8 @@ class ExchangeTest extends TestCase
             )
         );
 
-        $sellerShares = new ShareCollection([
-            Share::fromSymbol($symbol)
-        ]);
-
-        $seller = Seller::create($sellerShares);
+        $seller = Trader::create(Uuid::uuid4());
+        $seller->addShare(Share::fromSymbol($symbol));
 
         $exchange->bid(
             Bid::create(
@@ -138,14 +131,11 @@ class ExchangeTest extends TestCase
             new TradeCollection([])
         );
 
-        $buyer = Buyer::create();
+        $buyer = Trader::create(Uuid::uuid4());
         $price = Price::fromValue(100);
 
-        $sellerShares = new ShareCollection([
-            Share::fromSymbol($symbol)
-        ]);
-
-        $seller = Seller::create($sellerShares);
+        $seller = Trader::create(Uuid::uuid4());
+        $seller->addShare(Share::fromSymbol($symbol));
 
         $exchange->bid(
             Bid::create(

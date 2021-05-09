@@ -56,13 +56,13 @@ class Share
     }
 
     /**
-     * @param Buyer $buyer
+     * @param Trader $trader
      */
-    public function transferOwnershipToBuyer(Buyer $buyer)
+    public function transferOwnershipToTrader(Trader $trader)
     {
         // TODO:
         // dispatch an event
 
-        $this->ownerId = $buyer->id();
+        $this->ownerId = $trader->id();
     }
 }

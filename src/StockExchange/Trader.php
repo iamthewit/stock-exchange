@@ -1,12 +1,15 @@
 <?php
-declare(strict_types=1);
+
 
 namespace StockExchange\StockExchange;
 
-use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-class Seller
+/**
+ * Class Trader
+ * @package StockExchange\StockExchange
+ */
+class Trader
 {
     private UuidInterface $id;
     private ShareCollection $shares;
@@ -16,15 +19,16 @@ class Seller
     }
 
     /**
-     * @param ShareCollection $shares
+     * @param UuidInterface $id
      *
      * @return static
+     * @throws Exception\ShareCollectionCreationException
      */
-    public static function create(ShareCollection $shares): self
+    public static function create(UuidInterface $id): self
     {
         $seller = new self();
-        $seller->id = Uuid::uuid4();
-        $seller->shares = $shares;
+        $seller->id = $id;
+        $seller->shares = new ShareCollection([]);
 
         return $seller;
     }
@@ -43,6 +47,16 @@ class Seller
     public function shares(): ShareCollection
     {
         return $this->shares;
+    }
+
+    /**
+     * @param Share $share
+     *
+     * @throws Exception\ShareCollectionCreationException
+     */
+    public function addShare(Share $share)
+    {
+        $this->shares = new ShareCollection($this->shares->toArray() + [$share]);
     }
 
     /**

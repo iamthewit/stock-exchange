@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 use StockExchange\StockExchange\Bid;
 use StockExchange\StockExchange\BidCollection;
 use StockExchange\StockExchange\Price;
-use StockExchange\StockExchange\Seller;
+use StockExchange\StockExchange\Trader;
 use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\Symbol;
 
@@ -18,37 +18,37 @@ class BidCollectionTest extends TestCase
         $collection = new BidCollection([
             Bid::create(
                 Uuid::uuid4(),
-                Seller::create(new ShareCollection([])),
+                Trader::create(Uuid::uuid4()),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(100)
             ),
             Bid::create(
                 Uuid::uuid4(),
-                Seller::create(new ShareCollection([])),
+                Trader::create(Uuid::uuid4()),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(200)
             ),
             Bid::create(
                 Uuid::uuid4(),
-                Seller::create(new ShareCollection([])),
+                Trader::create(Uuid::uuid4()),
                 Symbol::fromValue('BAR'),
                 Price::fromValue(100)
             ),
             Bid::create(
                 Uuid::uuid4(),
-                Seller::create(new ShareCollection([])),
+                Trader::create(Uuid::uuid4()),
                 Symbol::fromValue('BAR'),
                 Price::fromValue(200)
             ),
             Bid::create(
                 Uuid::uuid4(),
-                Seller::create(new ShareCollection([])),
+                Trader::create(Uuid::uuid4()),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(100)
             ),
             Bid::create(
                 Uuid::uuid4(),
-                Seller::create(new ShareCollection([])),
+                Trader::create(Uuid::uuid4()),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(200)
             ),

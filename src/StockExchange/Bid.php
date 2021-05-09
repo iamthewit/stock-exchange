@@ -1,17 +1,15 @@
 <?php
 declare(strict_types=1);
 
-
 namespace StockExchange\StockExchange;
 
-use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 class Bid
 {
     private UuidInterface $id;
-    private Seller $seller;
-    private Symbol $symbol;
+    private Trader        $trader;
+    private Symbol        $symbol;
     private Price $price;
 
     private function __construct()
@@ -22,21 +20,22 @@ class Bid
      * TODO: is issue a better name? are bids issued rather than created?
      *
      * @param UuidInterface $id
-     * @param Seller $seller
-     * @param Symbol $symbol
-     * @param Price $price
+     * @param Trader        $trader
+     * @param Symbol        $symbol
+     * @param Price         $price
+     *
      * @return Bid
      */
     public static function create(
         UuidInterface $id,
-        Seller $seller,
+        Trader $trader,
         Symbol $symbol,
         Price $price
     ): self
     {
         $bid = new self();
         $bid->id = $id;
-        $bid->seller = $seller;
+        $bid->trader = $trader;
         $bid->symbol = $symbol;
         $bid->price = $price;
 
@@ -52,11 +51,11 @@ class Bid
     }
 
     /**
-     * @return Seller
+     * @return Trader
      */
-    public function seller(): Seller
+    public function trader(): Trader
     {
-        return $this->seller;
+        return $this->trader;
     }
 
     /**

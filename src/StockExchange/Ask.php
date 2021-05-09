@@ -8,8 +8,8 @@ use Ramsey\Uuid\UuidInterface;
 class Ask
 {
     private UuidInterface $id;
-    private Buyer $buyer;
-    private Symbol $symbol;
+    private Trader        $trader;
+    private Symbol        $symbol;
     private Price $price;
 
     private function __construct()
@@ -18,7 +18,7 @@ class Ask
 
     /**
      * @param UuidInterface $id
-     * @param Buyer         $buyer
+     * @param Trader        $trader
      * @param Symbol        $symbol
      * @param Price         $price
      *
@@ -26,14 +26,14 @@ class Ask
      */
     public static function create(
         UuidInterface $id,
-        Buyer $buyer,
+        Trader $trader,
         Symbol $symbol,
         Price $price
     ): self
     {
         $ask = new self();
         $ask->id = $id;
-        $ask->buyer = $buyer;
+        $ask->trader = $trader;
         $ask->symbol = $symbol;
         $ask->price = $price;
 
@@ -49,11 +49,11 @@ class Ask
     }
 
     /**
-     * @return Buyer
+     * @return Trader
      */
-    public function buyer(): Buyer
+    public function trader(): Trader
     {
-        return $this->buyer;
+        return $this->trader;
     }
 
     /**
