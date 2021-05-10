@@ -5,15 +5,15 @@ namespace StockExchange\StockExchange;
 
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\AskCreated;
-use StockExchange\StockExchange\Event\EventInterface;
 
-class Ask
+class Ask implements DispatchableEventsInterface
 {
+    use HasDispatchableEvents;
+
     private UuidInterface $id;
     private Trader $trader;
     private Symbol $symbol;
     private Price $price;
-    private array $dispatchableEvents = [];
 
     private function __construct()
     {
@@ -76,15 +76,4 @@ class Ask
     {
         return $this->price;
     }
-
-    public function dispatchableEvents(): array
-    {
-        return $this->dispatchableEvents;
-    }
-
-    private function addDispatchableEvent(EventInterface $event)
-    {
-        $this->dispatchableEvents[] = $event;
-    }
-
 }

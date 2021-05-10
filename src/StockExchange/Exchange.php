@@ -10,13 +10,14 @@ use StockExchange\StockExchange\Event\AskCreated;
 use StockExchange\StockExchange\Event\BidAddedToExchange;
 use StockExchange\StockExchange\Event\EventInterface;
 
-class Exchange
+class Exchange implements DispatchableEventsInterface
 {
+    use HasDispatchableEvents;
+
     private SymbolCollection $symbols;
     private BidCollection $bids; // TODO: move this to an orderbook class
     private AskCollection $asks;  // TODO: move this to an orderbook class
     private TradeCollection $trades;
-    private array $dispatchableEvents = [];
 
     /**
      * Exchange constructor.
@@ -81,11 +82,6 @@ class Exchange
     public function trades(): TradeCollection
     {
         return $this->trades;
-    }
-
-    public function dispatchableEvents(): array
-    {
-        return $this->dispatchableEvents;
     }
 
     /**
@@ -256,10 +252,5 @@ class Exchange
         unset($asks[$ask->id()->toString()]);
 
         $this->asks = new AskCollection($asks);
-    }
-
-    private function addDispatchableEvent(EventInterface $event)
-    {
-        $this->dispatchableEvents[] = $event;
     }
 }
