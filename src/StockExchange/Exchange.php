@@ -4,7 +4,11 @@ declare(strict_types=1);
 namespace StockExchange\StockExchange;
 
 use Ramsey\Uuid\Uuid;
-use StockExchange\StockExchange\Event\BidAdded;
+use Ramsey\Uuid\UuidInterface;
+use StockExchange\StockExchange\Event\AskAddedToExchange;
+use StockExchange\StockExchange\Event\AskCreated;
+use StockExchange\StockExchange\Event\BidAddedToExchange;
+use StockExchange\StockExchange\Event\EventInterface;
 
 class Exchange
 {
@@ -79,16 +83,35 @@ class Exchange
         return $this->trades;
     }
 
+    public function dispatchableEvents(): array
+    {
+        return $this->dispatchableEvents;
+    }
+
     /**
-     * @param Bid $bid
-     *
+     * @param UuidInterface $id
+     * @param Trader $trader
+     * @param Symbol $symbol
+     * @param Price $price
      * @throws Exception\AskCollectionCreationException
      * @throws Exception\BidCollectionCreationException
-     * @throws Exception\TradeCollectionCreationException
      * @throws Exception\ShareCollectionCreationException
+     * @throws Exception\TradeCollectionCreationException
      */
-    public function bid(Bid $bid)
+    public function bid(
+        UuidInterface $id,
+        Trader $trader,
+        Symbol $symbol,
+        Price $price
+    )
     {
+        //create the bid
+        $bid = Bid::create($id, $trader, $symbol, $price);
+
+        foreach ($bid->dispatchableEvents() as $event) {
+            $this->addDispatchableEvent($event);
+        }
+
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
 
@@ -108,20 +131,34 @@ class Exchange
             $this->trade($bid, $chosenAsk);
         }
 
-        $bidAdded = new BidAdded($bid);
+        $bidAdded = new BidAddedToExchange($bid);
         $this->addDispatchableEvent($bidAdded);
     }
 
     /**
-     * @param Ask $ask
-     *
+     * @param UuidInterface $id
+     * @param Trader $trader
+     * @param Symbol $symbol
+     * @param Price $price
      * @throws Exception\AskCollectionCreationException
      * @throws Exception\BidCollectionCreationException
-     * @throws Exception\TradeCollectionCreationException
      * @throws Exception\ShareCollectionCreationException
+     * @throws Exception\TradeCollectionCreationException
      */
-    public function ask(Ask $ask)
+    public function ask(
+        UuidInterface $id,
+        Trader $trader,
+        Symbol $symbol,
+        Price $price
+    )
     {
+        //create the ask
+        $ask = Ask::create($id, $trader, $symbol, $price);
+
+        foreach ($ask->dispatchableEvents() as $event) {
+            $this->addDispatchableEvent($event);
+        }
+
         // add ask to collection
         $this->asks = new AskCollection($this->asks()->toArray() + [$ask]);
 
@@ -138,6 +175,9 @@ class Exchange
 
             $this->trade($chosenBid, $ask);
         }
+
+        $askCreated = new AskAddedToExchange($ask);
+        $this->addDispatchableEvent($askCreated);
     }
 
     /**
@@ -218,8 +258,8 @@ class Exchange
         $this->asks = new AskCollection($asks);
     }
 
-    private function addDispatchableEvent(BidAdded $bidAdded)
+    private function addDispatchableEvent(EventInterface $event)
     {
-        $this->dispatchableEvents[] = $bidAdded;
+        $this->dispatchableEvents[] = $event;
     }
 }

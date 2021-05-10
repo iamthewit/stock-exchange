@@ -4,10 +4,10 @@ namespace StockExchange\StockExchange\Event;
 
 use StockExchange\StockExchange\Bid;
 
-class BidAdded
+class BidCreated implements EventInterface
 {
     /**
-     * BidAdded constructor.
+     * BidCreated constructor.
      * @param Bid $bid
      */
     public function __construct(Bid $bid)

@@ -8,6 +8,10 @@ use StockExchange\StockExchange\Ask;
 use StockExchange\StockExchange\AskCollection;
 use StockExchange\StockExchange\Bid;
 use StockExchange\StockExchange\BidCollection;
+use StockExchange\StockExchange\Event\AskAddedToExchange;
+use StockExchange\StockExchange\Event\AskCreated;
+use StockExchange\StockExchange\Event\BidAddedToExchange;
+use StockExchange\StockExchange\Event\BidCreated;
 use StockExchange\StockExchange\Trader;
 use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\Price;
@@ -33,15 +37,18 @@ class ExchangeTest extends TestCase
         $seller->addShare(Share::fromSymbol($symbol));
 
         $exchange->bid(
-            Bid::create(
-                Uuid::uuid4(),
-                $seller,
-                $symbol,
-                Price::fromValue(100)
-            )
+            Uuid::uuid4(),
+            $seller,
+            $symbol,
+            Price::fromValue(100)
         );
 
         $this->assertCount(1, $exchange->bids());
+
+        // assert that the domain will dispatch the bid events in the correct order
+        $this->assertCount(2, $exchange->dispatchableEvents());
+        $this->assertInstanceOf(BidCreated::class, $exchange->dispatchableEvents()[0]);
+        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->dispatchableEvents()[1]);
     }
 
     public function testAnAskCanBeMade()
@@ -55,15 +62,18 @@ class ExchangeTest extends TestCase
         );
 
         $exchange->ask(
-            Ask::create(
-                Uuid::uuid4(),
-                Trader::create(Uuid::uuid4()),
-                $symbol,
-                Price::fromValue(100)
-            )
+            Uuid::uuid4(),
+            Trader::create(Uuid::uuid4()),
+            $symbol,
+            Price::fromValue(100)
         );
 
         $this->assertCount(1, $exchange->asks());
+
+        // assert that the domain will dispatch the ask events in the correct order
+        $this->assertCount(2, $exchange->dispatchableEvents());
+        $this->assertInstanceOf(AskCreated::class, $exchange->dispatchableEvents()[0]);
+        $this->assertInstanceOf(AskAddedToExchange::class, $exchange->dispatchableEvents()[1]);
     }
 
     public function testSharesCanBeTradedWhenABidIsMade()
@@ -80,24 +90,20 @@ class ExchangeTest extends TestCase
         $price = Price::fromValue(100);
 
         $exchange->ask(
-            Ask::create(
-                Uuid::uuid4(),
-                $buyer,
-                $symbol,
-                $price
-            )
+            Uuid::uuid4(),
+            $buyer,
+            $symbol,
+            $price
         );
 
         $seller = Trader::create(Uuid::uuid4());
         $seller->addShare(Share::fromSymbol($symbol));
 
         $exchange->bid(
-            Bid::create(
-                Uuid::uuid4(),
-                $seller,
-                $symbol,
-                $price
-            )
+            Uuid::uuid4(),
+            $seller,
+            $symbol,
+            $price
         );
         
         // 1 trade occurred
@@ -138,21 +144,17 @@ class ExchangeTest extends TestCase
         $seller->addShare(Share::fromSymbol($symbol));
 
         $exchange->bid(
-            Bid::create(
-                Uuid::uuid4(),
-                $seller,
-                $symbol,
-                $price
-            )
+            Uuid::uuid4(),
+            $seller,
+            $symbol,
+            $price
         );
 
         $exchange->ask(
-            Ask::create(
-                Uuid::uuid4(),
-                $buyer,
-                $symbol,
-                $price
-            )
+            Uuid::uuid4(),
+            $buyer,
+            $symbol,
+            $price
         );
 
         // 1 trade occurred

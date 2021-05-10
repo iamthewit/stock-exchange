@@ -4,13 +4,16 @@ declare(strict_types=1);
 namespace StockExchange\StockExchange;
 
 use Ramsey\Uuid\UuidInterface;
+use StockExchange\StockExchange\Event\BidCreated;
+use StockExchange\StockExchange\Event\EventInterface;
 
 class Bid
 {
     private UuidInterface $id;
-    private Trader        $trader;
-    private Symbol        $symbol;
+    private Trader $trader;
+    private Symbol $symbol;
     private Price $price;
+    private array $dispatchableEvents = [];
 
     private function __construct()
     {
@@ -38,6 +41,8 @@ class Bid
         $bid->trader = $trader;
         $bid->symbol = $symbol;
         $bid->price = $price;
+
+        $bid->addDispatchableEvent(new BidCreated($bid));
 
         return $bid;
     }
@@ -72,5 +77,15 @@ class Bid
     public function price(): Price
     {
         return $this->price;
+    }
+
+    public function dispatchableEvents(): array
+    {
+        return $this->dispatchableEvents;
+    }
+
+    private function addDispatchableEvent(EventInterface $event)
+    {
+        $this->dispatchableEvents[] = $event;
     }
 }
