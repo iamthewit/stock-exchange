@@ -1,12 +1,11 @@
 <?php
 
-namespace StockExchange;
+namespace StockExchange\Tests\StockExchange;
 
 use Ramsey\Uuid\Uuid;
 use StockExchange\StockExchange\Trader;
 use PHPUnit\Framework\TestCase;
 use StockExchange\StockExchange\Share;
-use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\Symbol;
 
 class TraderTest extends TestCase

@@ -1,14 +1,5 @@
 {
     "name": "iamthewit/stock-exchange",
-    "type": "project",
-    "require": {
-        "ramsey/uuid": "^4.1",
-        "ext-json": "*"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.5",
-        "kint-php/kint": "^3.3"
-    },
     "authors": [
         {
             "name": "Ben Cross",
@@ -16,12 +7,71 @@
         }
     ],
     "description": "",
+    "type": "project",
+    "license": "proprietary",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=7.2.5",
+        "ext-ctype": "*",
+        "ext-iconv": "*",
+        "ext-json": "*",
+        "symfony/console": "5.2.*",
+        "symfony/dotenv": "5.2.*",
+        "symfony/flex": "^1.3.1",
+        "symfony/framework-bundle": "5.2.*",
+        "symfony/yaml": "5.2.*",
+        "ramsey/uuid": "^4.1"
+    },
+    "require-dev": {
+        "kint-php/kint": "^3.3",
+        "phpunit/phpunit": "^9.5",
+        "symfony/browser-kit": "^5.2",
+        "symfony/css-selector": "^5.2",
+        "symfony/phpunit-bridge": "^5.2"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
     "autoload": {
         "psr-4": {
             "StockExchange\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "StockExchange\\Tests\\": "tests"
+        }
+    },
+    "replace": {
+        "symfony/polyfill-ctype": "*",
+        "symfony/polyfill-iconv": "*",
+        "symfony/polyfill-php72": "*"
+    },
     "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        },
+        "post-install-cmd": [
+            "@auto-scripts"
+        ],
+        "post-update-cmd": [
+            "@auto-scripts"
+        ],
         "phpunit-cc": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html ./code-coverage"
+    },
+    "conflict": {
+        "symfony/symfony": "*"
+    },
+    "extra": {
+        "symfony": {
+            "allow-contrib": false,
+            "require": "5.2.*"
+        }
     }
 }

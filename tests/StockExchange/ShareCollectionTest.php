@@ -1,6 +1,6 @@
 <?php
 
-namespace StockExchange;
+namespace StockExchange\Tests\StockExchange;
 
 use StockExchange\StockExchange\Share;
 use StockExchange\StockExchange\ShareCollection;

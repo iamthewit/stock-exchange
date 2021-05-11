@@ -1,6 +1,6 @@
 <?php
 
-namespace StockExchange;
+namespace StockExchange\Tests\StockExchange;
 
 use Ramsey\Uuid\Uuid;
 use PHPUnit\Framework\TestCase;
@@ -8,7 +8,6 @@ use StockExchange\StockExchange\Bid;
 use StockExchange\StockExchange\BidCollection;
 use StockExchange\StockExchange\Price;
 use StockExchange\StockExchange\Trader;
-use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\Symbol;
 
 class BidCollectionTest extends TestCase

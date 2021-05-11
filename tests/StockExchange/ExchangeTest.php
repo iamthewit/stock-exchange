@@ -1,12 +1,10 @@
 <?php
 
-namespace StockExchange;
+namespace StockExchange\Tests\StockExchange;
 
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use StockExchange\StockExchange\Ask;
 use StockExchange\StockExchange\AskCollection;
-use StockExchange\StockExchange\Bid;
 use StockExchange\StockExchange\BidCollection;
 use StockExchange\StockExchange\Event\AskAddedToExchange;
 use StockExchange\StockExchange\Event\AskCreated;
@@ -46,9 +44,9 @@ class ExchangeTest extends TestCase
         $this->assertCount(1, $exchange->bids());
 
         // assert that the domain will dispatch the bid events in the correct order
-        $this->assertCount(2, $exchange->dispatchableEvents());
-        $this->assertInstanceOf(BidCreated::class, $exchange->dispatchableEvents()[0]);
-        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->dispatchableEvents()[1]);
+        $this->assertCount(3, $exchange->dispatchableEvents());
+        $this->assertInstanceOf(BidCreated::class, $exchange->dispatchableEvents()[1]);
+        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->dispatchableEvents()[2]);
     }
 
     public function testAnAskCanBeMade()
@@ -71,9 +69,9 @@ class ExchangeTest extends TestCase
         $this->assertCount(1, $exchange->asks());
 
         // assert that the domain will dispatch the ask events in the correct order
-        $this->assertCount(2, $exchange->dispatchableEvents());
-        $this->assertInstanceOf(AskCreated::class, $exchange->dispatchableEvents()[0]);
-        $this->assertInstanceOf(AskAddedToExchange::class, $exchange->dispatchableEvents()[1]);
+        $this->assertCount(3, $exchange->dispatchableEvents());
+        $this->assertInstanceOf(AskCreated::class, $exchange->dispatchableEvents()[1]);
+        $this->assertInstanceOf(AskAddedToExchange::class, $exchange->dispatchableEvents()[2]);
     }
 
     public function testSharesCanBeTradedWhenABidIsMade()

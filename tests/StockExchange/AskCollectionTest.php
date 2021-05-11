@@ -1,6 +1,6 @@
 <?php
 
-namespace StockExchange;
+namespace StockExchange\Tests\StockExchange;
 
 use Ramsey\Uuid\Uuid;
 use StockExchange\StockExchange\Ask;
