@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
+use Exception;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\AskAddedToExchange;
@@ -55,6 +56,27 @@ class Exchange implements DispatchableEventsInterface
         return $exchange;
     }
 
+    public static function restoreStateFromEvents(array $events)
+    {
+        $exchange = new self();
+        foreach ($events as $event) {
+            if (!is_a($event, EventInterface::class)) {
+                // TODO: create a proper exception for this:
+                throw new Exception('Can only restore state from event objects');
+            }
+
+            switch ($event) {
+                case is_a($event, ExchangeCreated::class):
+                    $exchange->applyExchangeCreated($event);
+                    break;
+
+                case is_a($event, BidAddedToExchange::class):
+                    $exchange->applyBidAddedToExchange();
+                    break;
+            }
+        }
+    }
+
     /**
      * @return SymbolCollection
      */
@@ -104,7 +126,7 @@ class Exchange implements DispatchableEventsInterface
         Price $price
     )
     {
-        //create the bid
+        // create the bid
         $bid = Bid::create($id, $trader, $symbol, $price);
 
         foreach ($bid->dispatchableEvents() as $event) {
@@ -255,5 +277,10 @@ class Exchange implements DispatchableEventsInterface
         unset($asks[$ask->id()->toString()]);
 
         $this->asks = new AskCollection($asks);
+    }
+
+    private function applyExchangeCreated(ExchangeCreated $event)
+    {
+        $this->
     }
 }

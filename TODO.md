@@ -1,11 +1,10 @@
 # TODO
 
-- Domain Events
-- AggregateRoot / or maybe some interfaces and traits
+- Commands/Queries and Handlers
+- restore domain entities from events
 - Event Streams
 - Exchange Simulation
 - Event Loop
-- Layers (infra, application)
 - Docker container
 
 
