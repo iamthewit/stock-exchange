@@ -9,6 +9,7 @@ use StockExchange\StockExchange\Event\AskAddedToExchange;
 use StockExchange\StockExchange\Event\AskCreated;
 use StockExchange\StockExchange\Event\BidAddedToExchange;
 use StockExchange\StockExchange\Event\EventInterface;
+use StockExchange\StockExchange\Event\ExchangeCreated;
 
 class Exchange implements DispatchableEventsInterface
 {
@@ -48,6 +49,8 @@ class Exchange implements DispatchableEventsInterface
         $exchange->bids = $bids;
         $exchange->asks = $asks;
         $exchange->trades = $trades;
+
+        $exchange->addDispatchableEvent(new ExchangeCreated($exchange));
 
         return $exchange;
     }
