@@ -1,15 +1,17 @@
 <?php
 
+
 namespace StockExchange\StockExchange\Event;
+
 
 use StockExchange\StockExchange\Ask;
 
-class AskAddedToExchange implements EventInterface
+class RemoveAskFromExchange implements EventInterface
 {
     private Ask $ask;
 
     /**
-     * AskAdded constructor.
+     * RemoveAskFromExchange constructor.
      * @param Ask $ask
      */
     public function __construct(Ask $ask)

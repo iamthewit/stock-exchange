@@ -1,0 +1,22 @@
+paths:
+    - ./src
+layers:
+    - name: Infrastructure
+      collectors:
+          - type: className
+            regex: .*\\Infrastructure\\.*
+    - name: StockExchange
+      collectors:
+          - type: className
+            regex: .*\\StockExchange\\.*
+    - name: Application
+      collectors:
+          - type: className
+            regex: .*\\Application\\.*
+ruleset:
+    Infrastructure:
+        - Application
+        - StockExchange
+    Application:
+        - StockExchange
+    StockExchange:

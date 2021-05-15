@@ -1,7 +1,6 @@
 # TODO
 
 - Commands/Queries and Handlers
-- restore domain entities from events
 - Event Streams
 - Exchange Simulation
 - Event Loop

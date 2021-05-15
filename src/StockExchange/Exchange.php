@@ -9,6 +9,9 @@ use StockExchange\StockExchange\Event\AskAddedToExchange;
 use StockExchange\StockExchange\Event\BidAddedToExchange;
 use StockExchange\StockExchange\Event\EventInterface;
 use StockExchange\StockExchange\Event\ExchangeCreated;
+use StockExchange\StockExchange\Event\RemoveAskFromExchange;
+use StockExchange\StockExchange\Event\RemoveBidFromExchange;
+use StockExchange\StockExchange\Event\TradeExecuted;
 use StockExchange\StockExchange\Exception\AskCollectionCreationException;
 use StockExchange\StockExchange\Exception\BidCollectionCreationException;
 use StockExchange\StockExchange\Exception\ShareCollectionCreationException;
@@ -77,6 +80,22 @@ class Exchange implements DispatchableEventsInterface
 
                 case is_a($event, BidAddedToExchange::class):
                     $exchange->applyBidAddedToExchange($event);
+                    break;
+
+                case is_a($event, AskAddedToExchange::class):
+                    $exchange->applyAskAddedToExchange($event);
+                    break;
+
+                case is_a($event, RemoveBidFromExchange::class):
+                    $exchange->applyRemoveBidFromExchange($event);
+                    break;
+
+                case is_a($event, RemoveAskFromExchange::class):
+                    $exchange->applyRemoveAskFromExchange($event);
+                    break;
+
+                case is_a($event, TradeExecuted::class):
+                    $exchange->applyTradeExecuted($event);
                     break;
             }
         }
@@ -227,11 +246,6 @@ class Exchange implements DispatchableEventsInterface
     private function trade(Bid $bid, Ask $ask)
     {
         // execute the trade between the buyer and the seller
-        $this->trades = new TradeCollection(
-            $this->trades()->toArray() + [
-                Trade::fromBidAndAsk(Uuid::uuid4(), $bid, $ask)
-            ]
-        );
 
         // find one of the sellers shares, update the ownership of the share to the buyer
         /** @var Share $share */
@@ -246,6 +260,16 @@ class Exchange implements DispatchableEventsInterface
 
         // remove ask from collection
         $this->removeAsk($ask);
+
+        // add trade to collection
+        $trade = Trade::fromBidAndAsk(Uuid::uuid4(), $bid, $ask);
+
+        $this->trades = new TradeCollection(
+            $this->trades()->toArray() + [$trade]
+        );
+
+        $event = new TradeExecuted($trade);
+        $this->addDispatchableEvent($event);
     }
 
     /**
@@ -278,6 +302,9 @@ class Exchange implements DispatchableEventsInterface
         unset($bids[$bid->id()->toString()]);
 
         $this->bids = new BidCollection($bids);
+
+        $event = new RemoveBidFromExchange($bid);
+        $this->addDispatchableEvent($event);
     }
 
     /**
@@ -291,6 +318,9 @@ class Exchange implements DispatchableEventsInterface
         unset($asks[$ask->id()->toString()]);
 
         $this->asks = new AskCollection($asks);
+
+        $event = new RemoveAskFromExchange($ask);
+        $this->addDispatchableEvent($event);
     }
 
     /**
@@ -322,6 +352,58 @@ class Exchange implements DispatchableEventsInterface
     private function applyBidAddedToExchange(BidAddedToExchange $event)
     {
         $this->bids = new BidCollection($this->bids()->toArray() + [$event->bid()]);
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param RemoveBidFromExchange $event
+     * @throws BidCollectionCreationException
+     */
+    private function applyRemoveBidFromExchange(RemoveBidFromExchange $event)
+    {
+        $bids = $this->bids()->toArray();
+        unset($bids[$event->bid()->id()->toString()]);
+
+        $this->bids = new BidCollection($bids);
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param AskAddedToExchange $event
+     * @throws AskCollectionCreationException
+     */
+    private function applyAskAddedToExchange(AskAddedToExchange $event)
+    {
+        $this->asks = new AskCollection($this->asks()->toArray() + [$event->ask()]);
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param RemoveAskFromExchange $event
+     * @throws AskCollectionCreationException
+     */
+    private function applyRemoveAskFromExchange(RemoveAskFromExchange $event)
+    {
+        $asks = $this->asks()->toArray();
+        unset($asks[$event->ask()->id()->toString()]);
+
+        $this->asks = new AskCollection($asks);
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param TradeExecuted $event
+     * @throws TradeCollectionCreationException
+     */
+    private function applyTradeExecuted(TradeExecuted $event)
+    {
+        $this->trades = new TradeCollection(
+            $this->trades()->toArray() + [$event->trade()]
+        );
 
         $this->addAppliedEvent($event);
     }

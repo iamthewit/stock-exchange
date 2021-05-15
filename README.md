@@ -22,3 +22,7 @@ TODO
 
 `composer phpunit-cc`
 
+## Check dependencies between software layers
+
+`./vendor/bin/deptrac` 
+
