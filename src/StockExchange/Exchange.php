@@ -3,23 +3,27 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
-use Exception;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\AskAddedToExchange;
-use StockExchange\StockExchange\Event\AskCreated;
 use StockExchange\StockExchange\Event\BidAddedToExchange;
 use StockExchange\StockExchange\Event\EventInterface;
 use StockExchange\StockExchange\Event\ExchangeCreated;
+use StockExchange\StockExchange\Exception\AskCollectionCreationException;
+use StockExchange\StockExchange\Exception\BidCollectionCreationException;
+use StockExchange\StockExchange\Exception\ShareCollectionCreationException;
+use StockExchange\StockExchange\Exception\StateRestorationException;
+use StockExchange\StockExchange\Exception\TradeCollectionCreationException;
 
 class Exchange implements DispatchableEventsInterface
 {
     use HasDispatchableEvents;
 
     private SymbolCollection $symbols;
-    private BidCollection $bids; // TODO: move this to an orderbook class
-    private AskCollection $asks;  // TODO: move this to an orderbook class
-    private TradeCollection $trades;
+    private BidCollection    $bids; // TODO: move this to an orderbook class
+    private AskCollection    $asks;  // TODO: move this to an orderbook class
+    private TradeCollection  $trades;
+    private array            $appliedEvents = [];
 
     /**
      * Exchange constructor.
@@ -56,13 +60,14 @@ class Exchange implements DispatchableEventsInterface
         return $exchange;
     }
 
-    public static function restoreStateFromEvents(array $events)
+    public static function restoreStateFromEvents(\Iterator $events): Exchange
     {
         $exchange = new self();
+
         foreach ($events as $event) {
             if (!is_a($event, EventInterface::class)) {
                 // TODO: create a proper exception for this:
-                throw new Exception('Can only restore state from event objects');
+                throw new StateRestorationException('Can only restore state from objects that implement EventInterface.');
             }
 
             switch ($event) {
@@ -71,10 +76,12 @@ class Exchange implements DispatchableEventsInterface
                     break;
 
                 case is_a($event, BidAddedToExchange::class):
-                    $exchange->applyBidAddedToExchange();
+                    $exchange->applyBidAddedToExchange($event);
                     break;
             }
         }
+
+        return $exchange;
     }
 
     /**
@@ -109,15 +116,21 @@ class Exchange implements DispatchableEventsInterface
         return $this->trades;
     }
 
+    public function appliedEvents(): array
+    {
+        return $this->appliedEvents;
+    }
+
     /**
      * @param UuidInterface $id
-     * @param Trader $trader
-     * @param Symbol $symbol
-     * @param Price $price
-     * @throws Exception\AskCollectionCreationException
-     * @throws Exception\BidCollectionCreationException
-     * @throws Exception\ShareCollectionCreationException
-     * @throws Exception\TradeCollectionCreationException
+     * @param Trader        $trader
+     * @param Symbol        $symbol
+     * @param Price         $price
+     *
+     * @throws AskCollectionCreationException
+     * @throws BidCollectionCreationException
+     * @throws ShareCollectionCreationException
+     * @throws TradeCollectionCreationException
      */
     public function bid(
         UuidInterface $id,
@@ -136,6 +149,9 @@ class Exchange implements DispatchableEventsInterface
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
 
+        $bidAdded = new BidAddedToExchange($bid);
+        $this->addDispatchableEvent($bidAdded);
+
         // TODO: instead of executing trades on the bid/ask method
         // create another method that checks all bid/asks and executes
         // any trades possible
@@ -151,20 +167,18 @@ class Exchange implements DispatchableEventsInterface
             // if match found execute a trade
             $this->trade($bid, $chosenAsk);
         }
-
-        $bidAdded = new BidAddedToExchange($bid);
-        $this->addDispatchableEvent($bidAdded);
     }
 
     /**
      * @param UuidInterface $id
-     * @param Trader $trader
-     * @param Symbol $symbol
-     * @param Price $price
-     * @throws Exception\AskCollectionCreationException
-     * @throws Exception\BidCollectionCreationException
-     * @throws Exception\ShareCollectionCreationException
-     * @throws Exception\TradeCollectionCreationException
+     * @param Trader        $trader
+     * @param Symbol        $symbol
+     * @param Price         $price
+     *
+     * @throws AskCollectionCreationException
+     * @throws BidCollectionCreationException
+     * @throws ShareCollectionCreationException
+     * @throws TradeCollectionCreationException
      */
     public function ask(
         UuidInterface $id,
@@ -183,6 +197,9 @@ class Exchange implements DispatchableEventsInterface
         // add ask to collection
         $this->asks = new AskCollection($this->asks()->toArray() + [$ask]);
 
+        $askCreated = new AskAddedToExchange($ask);
+        $this->addDispatchableEvent($askCreated);
+
         // TODO: instead of executing trades on the bid/ask method
         // create another method that checks all bid/asks and executes
         // any trades possible
@@ -196,19 +213,16 @@ class Exchange implements DispatchableEventsInterface
 
             $this->trade($chosenBid, $ask);
         }
-
-        $askCreated = new AskAddedToExchange($ask);
-        $this->addDispatchableEvent($askCreated);
     }
 
     /**
      * @param Bid $bid
      * @param Ask $ask
      *
-     * @throws Exception\AskCollectionCreationException
-     * @throws Exception\BidCollectionCreationException
-     * @throws Exception\TradeCollectionCreationException
-     * @throws Exception\ShareCollectionCreationException
+     * @throws AskCollectionCreationException
+     * @throws BidCollectionCreationException
+     * @throws TradeCollectionCreationException
+     * @throws ShareCollectionCreationException
      */
     private function trade(Bid $bid, Ask $ask)
     {
@@ -239,7 +253,7 @@ class Exchange implements DispatchableEventsInterface
      * @param Trader $seller
      * @param Trader $buyer
      *
-     * @throws Exception\ShareCollectionCreationException
+     * @throws ShareCollectionCreationException
      */
     private function transferShare(Share $share, Trader $seller, Trader $buyer)
     {
@@ -256,7 +270,7 @@ class Exchange implements DispatchableEventsInterface
     /**
      * @param Bid $bid
      *
-     * @throws Exception\BidCollectionCreationException
+     * @throws BidCollectionCreationException
      */
     private function removeBid(Bid $bid)
     {
@@ -269,7 +283,7 @@ class Exchange implements DispatchableEventsInterface
     /**
      * @param Ask $ask
      *
-     * @throws Exception\AskCollectionCreationException
+     * @throws AskCollectionCreationException
      */
     private function removeAsk(Ask $ask)
     {
@@ -279,8 +293,36 @@ class Exchange implements DispatchableEventsInterface
         $this->asks = new AskCollection($asks);
     }
 
+    /**
+     * @param EventInterface $event
+     */
+    private function addAppliedEvent(EventInterface $event)
+    {
+        $this->appliedEvents[] = $event;
+    }
+
+    /**
+     * @param ExchangeCreated $event
+     */
     private function applyExchangeCreated(ExchangeCreated $event)
     {
-        $this->
+        $this->symbols = $event->exchange()->symbols();
+        $this->bids = $event->exchange()->bids();
+        $this->asks = $event->exchange()->asks();
+        $this->trades = $event->exchange()->trades();
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param BidAddedToExchange $event
+     *
+     * @throws BidCollectionCreationException
+     */
+    private function applyBidAddedToExchange(BidAddedToExchange $event)
+    {
+        $this->bids = new BidCollection($this->bids()->toArray() + [$event->bid()]);
+
+        $this->addAppliedEvent($event);
     }
 }

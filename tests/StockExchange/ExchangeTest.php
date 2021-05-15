@@ -5,11 +5,13 @@ namespace StockExchange\Tests\StockExchange;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use StockExchange\StockExchange\AskCollection;
+use StockExchange\StockExchange\Bid;
 use StockExchange\StockExchange\BidCollection;
 use StockExchange\StockExchange\Event\AskAddedToExchange;
 use StockExchange\StockExchange\Event\AskCreated;
 use StockExchange\StockExchange\Event\BidAddedToExchange;
 use StockExchange\StockExchange\Event\BidCreated;
+use StockExchange\StockExchange\Event\ExchangeCreated;
 use StockExchange\StockExchange\Trader;
 use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\Price;
@@ -174,5 +176,38 @@ class ExchangeTest extends TestCase
         /** @var Share $buyerShare */
         $buyerShare = current($buyer->shares()->toArray());
         $this->assertEquals($symbol->value(), $buyerShare->symbol()->value());
+    }
+
+    public function testStateCanBeRestoredFromEvents()
+    {
+        $events = new \ArrayIterator([
+            new ExchangeCreated(
+                Exchange::create(
+                    new SymbolCollection([]),
+                    new BidCollection([]),
+                    new AskCollection([]),
+                    new TradeCollection([])
+                )
+            ),
+            new BidAddedToExchange(
+                Bid::create(
+                    Uuid::uuid4(),
+                    Trader::create(
+                        Uuid::uuid4()
+                    ),
+                    Symbol::fromValue('FOO'),
+                    Price::fromValue(100)
+                )
+            )
+        ]);
+
+        $exchange = Exchange::restoreStateFromEvents($events);
+
+        $this->assertInstanceOf(Exchange::class, $exchange);
+        $this->assertCount(2, $exchange->appliedEvents());
+        $this->assertInstanceOf(ExchangeCreated::class, $exchange->appliedEvents()[0]);
+        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->appliedEvents()[1]);
+
+        $this->assertCount(1, $exchange->bids());
     }
 }
