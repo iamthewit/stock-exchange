@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
-class Symbol
+class Symbol implements \JsonSerializable, ArrayableInterface
 {
     private string $value;
 
@@ -42,5 +42,15 @@ class Symbol
     public function value(): string
     {
         return $this->value;
+    }
+
+    public function asArray(): array
+    {
+        return ['value' => $this->value()];
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->asArray();
     }
 }

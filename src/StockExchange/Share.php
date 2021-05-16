@@ -6,7 +6,7 @@ namespace StockExchange\StockExchange;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-class Share
+class Share implements \JsonSerializable, ArrayableInterface
 {
     private UuidInterface $id;
     private Symbol $symbol;
@@ -64,5 +64,19 @@ class Share
         // dispatch an event
 
         $this->ownerId = $trader->id();
+    }
+
+    public function asArray(): array
+    {
+        return [
+            'id' => $this->id(),
+            'symbol' => $this->symbol(),
+            'owner_id' => $this->ownerId(),
+        ];
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->asArray();
     }
 }

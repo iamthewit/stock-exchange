@@ -20,7 +20,7 @@ use StockExchange\StockExchange\Exception\TradeCollectionCreationException;
 
 class Exchange implements DispatchableEventsInterface, \JsonSerializable, ArrayableInterface
 {
-    use HasDispatchableEvents;
+    use HasDispatchableEventsTrait;
 
     private UuidInterface    $id;
     private SymbolCollection $symbols;

@@ -6,9 +6,9 @@ namespace StockExchange\StockExchange;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\BidCreated;
 
-class Bid implements DispatchableEventsInterface
+class Bid implements DispatchableEventsInterface, \JsonSerializable, ArrayableInterface
 {
-    use HasDispatchableEvents;
+    use HasDispatchableEventsTrait;
 
     private UuidInterface $id;
     private Trader $trader;
@@ -77,5 +77,20 @@ class Bid implements DispatchableEventsInterface
     public function price(): Price
     {
         return $this->price;
+    }
+
+    public function asArray(): array
+    {
+        return [
+            'id' => $this->id(),
+            'trader' => $this->trader(),
+            'symbol' => $this->symbol(),
+            'price' => $this->price(),
+        ];
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->asArray();
     }
 }

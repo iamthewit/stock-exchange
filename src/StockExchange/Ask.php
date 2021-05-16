@@ -8,7 +8,7 @@ use StockExchange\StockExchange\Event\AskCreated;
 
 class Ask implements DispatchableEventsInterface, \JsonSerializable, ArrayableInterface
 {
-    use HasDispatchableEvents;
+    use HasDispatchableEventsTrait;
 
     private UuidInterface $id;
     private Trader $trader;

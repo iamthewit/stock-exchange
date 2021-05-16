@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9a8b78adaca8268e58010a6287489a4e",
+    "content-hash": "a2ccf7e5f3d8794fecf4853519f72f75",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -341,6 +341,78 @@
                 "source": "https://github.com/prooph/event-store/tree/v7.6.1"
             },
             "time": "2021-04-20T02:06:16+00:00"
+        },
+        {
+            "name": "prooph/pdo-event-store",
+            "version": "v1.13.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/prooph/pdo-event-store.git",
+                "reference": "c66f1bd33c6d0590757f889291a0cc1fa70e9b30"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/prooph/pdo-event-store/zipball/c66f1bd33c6d0590757f889291a0cc1fa70e9b30",
+                "reference": "c66f1bd33c6d0590757f889291a0cc1fa70e9b30",
+                "shasum": ""
+            },
+            "require": {
+                "ext-pdo": "*",
+                "php": "^7.3 | ^8.0",
+                "prooph/event-store": "^v7.6"
+            },
+            "conflict": {
+                "sandrokeil/interop-config": "<2.0.1"
+            },
+            "require-dev": {
+                "phpspec/prophecy": "^1.9",
+                "phpspec/prophecy-phpunit": "^2.0",
+                "phpunit/php-invoker": "^3.1",
+                "phpunit/phpunit": "^9.3",
+                "prooph/bookdown-template": "^0.2.3",
+                "prooph/php-cs-fixer-config": "^0.4",
+                "psr/container": "^1.0",
+                "sandrokeil/interop-config": "^2.0.1",
+                "satooshi/php-coveralls": "^1.0"
+            },
+            "suggest": {
+                "ext-pdo_mysql": "For usage with MySQL",
+                "ext-pdo_pgsql": "For usage with PostgreSQL",
+                "psr/container": "^1.0 for usage of provided factories",
+                "sandrokeil/interop-config": "^2.0.1 for usage of provided factories"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.7-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Prooph\\EventStore\\Pdo\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Alexander Miertsch",
+                    "email": "kontakt@codeliner.ws"
+                },
+                {
+                    "name": "Sascha-Oliver Prolic",
+                    "email": "saschaprolic@googlemail.com"
+                }
+            ],
+            "description": "Prooph PDO EventStore",
+            "homepage": "http://getprooph.org/",
+            "support": {
+                "issues": "https://github.com/prooph/pdo-event-store/issues",
+                "source": "https://github.com/prooph/pdo-event-store/tree/v1.13.0"
+            },
+            "time": "2021-03-13T17:02:08+00:00"
         },
         {
             "name": "psr/cache",

@@ -9,7 +9,7 @@ use Ramsey\Uuid\UuidInterface;
  * Class Trader
  * @package StockExchange\StockExchange
  */
-class Trader
+class Trader implements \JsonSerializable, ArrayableInterface
 {
     private UuidInterface $id;
     private ShareCollection $shares;
@@ -70,5 +70,18 @@ class Trader
         unset($shares[$share->id()->toString()]);
 
         $this->shares = new ShareCollection($shares);
+    }
+
+    public function asArray(): array
+    {
+        return [
+            'id' => $this->id(),
+            'shares' => $this->shares()
+        ];
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->asArray();
     }
 }

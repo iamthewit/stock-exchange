@@ -5,7 +5,7 @@ namespace StockExchange\StockExchange;
 
 use Ramsey\Uuid\UuidInterface;
 
-class Trade
+class Trade implements \JsonSerializable, ArrayableInterface
 {
     private UuidInterface $id;
     private Bid $bid;
@@ -60,4 +60,17 @@ class Trade
         return $this->ask;
     }
 
+    public function asArray(): array
+    {
+        return [
+            'id' => $this->id(),
+            'bid' => $this->bid(),
+            'ask' => $this->ask()
+        ];
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->asArray();
+    }
 }

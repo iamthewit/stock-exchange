@@ -6,7 +6,7 @@ namespace StockExchange\StockExchange;
 
 use StockExchange\StockExchange\Event\EventInterface;
 
-trait HasDispatchableEvents
+trait HasDispatchableEventsTrait
 {
     private array $dispatchableEvents = [];
 
