@@ -12,11 +12,14 @@ services:
             - '@app.event_store.mysql.persistence_strategy'
 
     app.event_store.pdo_connection.mysql:
-        class: \PDO
+        class: PDO
         arguments:
             - '%env(MYSQL_DSN)%'
             - '%env(MYSQL_USER)%'
             - '%env(MYSQL_PASSWORD)%'
 
     app.event_store.mysql.persistence_strategy:
-        class: Prooph\EventStore\Pdo\PersistenceStrategy\MySqlSingleStreamStrategy
+        class: Prooph\EventStore\Pdo\PersistenceStrategy\MySqlAggregateStreamStrategy
+
+    prooph_event_store.message_factory:
+        class: Prooph\Common\Messaging\FQCNMessageFactory

@@ -26,3 +26,27 @@ TODO
 
 `./vendor/bin/deptrac` 
 
+## Database
+
+### Migrations
+
+#### Event Store
+
+Check the `config/scripts` directory
+
+#### Read Models
+
+TODO
+
+### Run a MySQL database in a docker container
+
+```
+ddocker run --name docker-mysql_1 \
+    -e MYSQL_ROOT_PASSWORD=root \
+    -e MYSQL_DATABASE=event_streams \
+    -e MYSQL_USER=user \
+    -e MYSQL_PASSWORD=password \
+    -p 3306:3306 \
+    -d mysql/mysql-server:latest
+
+```

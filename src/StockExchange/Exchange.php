@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
+use Kint\Kint;
+use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\AskAddedToExchange;
@@ -62,7 +64,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         $exchange->asks = $asks;
         $exchange->trades = $trades;
 
-        $exchange->addDispatchableEvent(new ExchangeCreated($exchange));
+        $exchangeCreated = new ExchangeCreated($exchange);
+        $exchangeCreated = $exchangeCreated->withMetadata($exchange->eventMetaData());
+        $exchange->addDispatchableEvent($exchangeCreated);
 
         return $exchange;
     }
@@ -440,5 +444,31 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         );
 
         $this->addAppliedEvent($event);
+    }
+
+    private function aggregateVersion(): int
+    {
+        if (count($this->appliedEvents)) {
+            /** @var DomainEvent $lastEvent */
+            $lastEvent = end($this->appliedEvents);
+
+            return $lastEvent->metadata()['_aggregate_version'];
+        }
+
+        return 0;
+    }
+
+    private function nextAggregateVersion(): int
+    {
+        return $this->aggregateVersion() + 1;
+    }
+
+    protected function eventMetaData(): array
+    {
+        return [
+            '_aggregate_id' => $this->id()->toString(),
+            '_aggregate_version' => $this->nextAggregateVersion(),
+            '_aggregate_type' => static::class
+        ];
     }
 }

@@ -1,6 +1,5 @@
 # TODO
 
-- Domain Models should all implement JsonSerializable and ArrayableInterface
 - Event Streams
 - Exchange Simulation
 - Read Models
