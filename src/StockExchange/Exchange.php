@@ -22,6 +22,7 @@ class Exchange implements DispatchableEventsInterface
 {
     use HasDispatchableEvents;
 
+    private UuidInterface    $id;
     private SymbolCollection $symbols;
     private BidCollection    $bids; // TODO: move this to an orderbook class
     private AskCollection    $asks;  // TODO: move this to an orderbook class
@@ -38,14 +39,16 @@ class Exchange implements DispatchableEventsInterface
     /**
      * Open the exchange so that shares can be traded.
      *
+     * @param UuidInterface $id
      * @param SymbolCollection $symbols
-     * @param BidCollection    $bids
-     * @param AskCollection    $asks
-     * @param TradeCollection  $trades
+     * @param BidCollection $bids
+     * @param AskCollection $asks
+     * @param TradeCollection $trades
      *
      * @return Exchange
      */
     public static function create(
+        UuidInterface $id,
         SymbolCollection $symbols,
         BidCollection $bids,
         AskCollection $asks,
@@ -53,6 +56,7 @@ class Exchange implements DispatchableEventsInterface
     ): self
     {
         $exchange = new self();
+        $exchange->id = $id;
         $exchange->symbols = $symbols;
         $exchange->bids = $bids;
         $exchange->asks = $asks;
@@ -158,6 +162,8 @@ class Exchange implements DispatchableEventsInterface
         Price $price
     )
     {
+        // TODO: check symbol exists in symbol collection
+
         // create the bid
         $bid = Bid::create($id, $trader, $symbol, $price);
 
@@ -206,6 +212,8 @@ class Exchange implements DispatchableEventsInterface
         Price $price
     )
     {
+        // TODO: check symbol exists in symbol collection
+
         //create the ask
         $ask = Ask::create($id, $trader, $symbol, $price);
 

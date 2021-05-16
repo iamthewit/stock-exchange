@@ -2,11 +2,11 @@
 
 namespace StockExchange\Application\Handler;
 
-use StockExchange\Application\Command\CreateBidCommand;
+use StockExchange\Application\Command\CreateAskCommand;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class CreateBidHandler implements MessageHandlerInterface
+class CreateAskHandler implements MessageHandlerInterface
 {
     private MessageBusInterface $messageBus;
 
@@ -15,10 +15,10 @@ class CreateBidHandler implements MessageHandlerInterface
         $this->messageBus = $messageBus;
     }
 
-    public function __invoke(CreateBidCommand $command)
+    public function __invoke(CreateAskCommand $command)
     {
         $exchange = $command->exchange();
-        $exchange->bid(
+        $exchange->ask(
             $command->id(),
             $command->trader(),
             $command->symbol(),

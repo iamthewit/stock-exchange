@@ -31,6 +31,7 @@ class ExchangeTest extends TestCase
     {
         $symbol = Symbol::fromValue('FOO');
         $exchange = Exchange::create(
+            Uuid::uuid4(),
             new SymbolCollection([$symbol]),
             new BidCollection([]),
             new AskCollection([]),
@@ -59,6 +60,7 @@ class ExchangeTest extends TestCase
     {
         $symbol = Symbol::fromValue('FOO');
         $exchange = Exchange::create(
+            Uuid::uuid4(),
             new SymbolCollection([$symbol]),
             new BidCollection([]),
             new AskCollection([]),
@@ -84,6 +86,7 @@ class ExchangeTest extends TestCase
     {
         $symbol = Symbol::fromValue('FOO');
         $exchange = Exchange::create(
+            Uuid::uuid4(),
             new SymbolCollection([$symbol]),
             new BidCollection([]),
             new AskCollection([]),
@@ -135,6 +138,7 @@ class ExchangeTest extends TestCase
     {
         $symbol = Symbol::fromValue('FOO');
         $exchange = Exchange::create(
+            Uuid::uuid4(),
             new SymbolCollection([$symbol]),
             new BidCollection([]),
             new AskCollection([]),
@@ -203,6 +207,7 @@ class ExchangeTest extends TestCase
         $events = new \ArrayIterator([
             new ExchangeCreated(
                 Exchange::create(
+                    Uuid::uuid4(),
                     new SymbolCollection([]),
                     new BidCollection([]),
                     new AskCollection([]),

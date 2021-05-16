@@ -1,6 +1,5 @@
 # TODO
 
-- Commands/Queries and Handlers
 - Event Streams
 - Exchange Simulation
 - Event Loop
