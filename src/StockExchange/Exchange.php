@@ -9,8 +9,8 @@ use StockExchange\StockExchange\Event\AskAddedToExchange;
 use StockExchange\StockExchange\Event\BidAddedToExchange;
 use StockExchange\StockExchange\Event\EventInterface;
 use StockExchange\StockExchange\Event\ExchangeCreated;
-use StockExchange\StockExchange\Event\RemoveAskFromExchange;
-use StockExchange\StockExchange\Event\RemoveBidFromExchange;
+use StockExchange\StockExchange\Event\AskRemovedFromExchange;
+use StockExchange\StockExchange\Event\BidRemovedFromExchange;
 use StockExchange\StockExchange\Event\TradeExecuted;
 use StockExchange\StockExchange\Exception\AskCollectionCreationException;
 use StockExchange\StockExchange\Exception\BidCollectionCreationException;
@@ -86,12 +86,12 @@ class Exchange implements DispatchableEventsInterface
                     $exchange->applyAskAddedToExchange($event);
                     break;
 
-                case is_a($event, RemoveBidFromExchange::class):
-                    $exchange->applyRemoveBidFromExchange($event);
+                case is_a($event, BidRemovedFromExchange::class):
+                    $exchange->applyBidRemovedFromExchange($event);
                     break;
 
-                case is_a($event, RemoveAskFromExchange::class):
-                    $exchange->applyRemoveAskFromExchange($event);
+                case is_a($event, AskRemovedFromExchange::class):
+                    $exchange->applyAskRemovedFromExchange($event);
                     break;
 
                 case is_a($event, TradeExecuted::class):
@@ -303,7 +303,7 @@ class Exchange implements DispatchableEventsInterface
 
         $this->bids = new BidCollection($bids);
 
-        $event = new RemoveBidFromExchange($bid);
+        $event = new BidRemovedFromExchange($bid);
         $this->addDispatchableEvent($event);
     }
 
@@ -319,7 +319,7 @@ class Exchange implements DispatchableEventsInterface
 
         $this->asks = new AskCollection($asks);
 
-        $event = new RemoveAskFromExchange($ask);
+        $event = new AskRemovedFromExchange($ask);
         $this->addDispatchableEvent($event);
     }
 
@@ -357,10 +357,11 @@ class Exchange implements DispatchableEventsInterface
     }
 
     /**
-     * @param RemoveBidFromExchange $event
+     * @param BidRemovedFromExchange $event
+     *
      * @throws BidCollectionCreationException
      */
-    private function applyRemoveBidFromExchange(RemoveBidFromExchange $event)
+    private function applyBidRemovedFromExchange(BidRemovedFromExchange $event)
     {
         $bids = $this->bids()->toArray();
         unset($bids[$event->bid()->id()->toString()]);
@@ -382,10 +383,11 @@ class Exchange implements DispatchableEventsInterface
     }
 
     /**
-     * @param RemoveAskFromExchange $event
+     * @param AskRemovedFromExchange $event
+     *
      * @throws AskCollectionCreationException
      */
-    private function applyRemoveAskFromExchange(RemoveAskFromExchange $event)
+    private function applyAskRemovedFromExchange(AskRemovedFromExchange $event)
     {
         $asks = $this->asks()->toArray();
         unset($asks[$event->ask()->id()->toString()]);

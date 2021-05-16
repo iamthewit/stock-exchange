@@ -6,7 +6,7 @@ namespace StockExchange\StockExchange\Event;
 
 use StockExchange\StockExchange\Ask;
 
-class RemoveAskFromExchange implements EventInterface
+class AskRemovedFromExchange implements EventInterface
 {
     private Ask $ask;
 

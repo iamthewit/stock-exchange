@@ -4,7 +4,7 @@ namespace StockExchange\StockExchange\Event;
 
 use StockExchange\StockExchange\Bid;
 
-class RemoveBidFromExchange implements EventInterface
+class BidRemovedFromExchange implements EventInterface
 {
     private Bid $bid;
 
