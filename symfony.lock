@@ -1,4 +1,7 @@
 {
+    "beberlei/assert": {
+        "version": "v3.3.1"
+    },
     "brick/math": {
         "version": "0.9.2"
     },
@@ -7,6 +10,9 @@
     },
     "kint-php/kint": {
         "version": "3.3"
+    },
+    "marc-mabe/php-enum": {
+        "version": "v4.4.0"
     },
     "myclabs/deep-copy": {
         "version": "1.10.2"
@@ -60,6 +66,12 @@
             "phpunit.xml.dist",
             "tests/bootstrap.php"
         ]
+    },
+    "prooph/common": {
+        "version": "v4.5.0"
+    },
+    "prooph/event-store": {
+        "version": "v7.6.1"
     },
     "psr/cache": {
         "version": "2.0.0"

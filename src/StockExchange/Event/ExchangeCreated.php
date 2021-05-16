@@ -2,10 +2,12 @@
 
 namespace StockExchange\StockExchange\Event;
 
+use Prooph\Common\Messaging\DomainEvent;
 use StockExchange\StockExchange\Exchange;
 
-class ExchangeCreated implements EventInterface
+class ExchangeCreated extends DomainEvent implements EventInterface
 {
+    protected array $payload;
     private Exchange $exchange;
 
     /**
@@ -14,6 +16,8 @@ class ExchangeCreated implements EventInterface
      */
     public function __construct(Exchange $exchange)
     {
+        $this->init();
+        $this->setPayload($exchange->asArray());
         $this->exchange = $exchange;
     }
 
@@ -23,5 +27,15 @@ class ExchangeCreated implements EventInterface
     public function exchange(): Exchange
     {
         return $this->exchange;
+    }
+
+    protected function setPayload(array $payload): void
+    {
+        $this->payload = $payload;
+    }
+
+    public function payload(): array
+    {
+        return $this->payload;
     }
 }

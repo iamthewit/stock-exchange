@@ -18,7 +18,7 @@ use StockExchange\StockExchange\Exception\ShareCollectionCreationException;
 use StockExchange\StockExchange\Exception\StateRestorationException;
 use StockExchange\StockExchange\Exception\TradeCollectionCreationException;
 
-class Exchange implements DispatchableEventsInterface
+class Exchange implements DispatchableEventsInterface, \JsonSerializable, ArrayableInterface
 {
     use HasDispatchableEvents;
 
@@ -105,6 +105,14 @@ class Exchange implements DispatchableEventsInterface
         }
 
         return $exchange;
+    }
+
+    /**
+     * @return UuidInterface
+     */
+    public function id(): UuidInterface
+    {
+        return $this->id;
     }
 
     /**
@@ -240,6 +248,22 @@ class Exchange implements DispatchableEventsInterface
 
             $this->trade($chosenBid, $ask);
         }
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->asArray();
+    }
+
+    public function asArray(): array
+    {
+        return [
+            'id' => $this->id(),
+            'symbols' => $this->symbols(),
+            'bids' => $this->bids(),
+            'asks' => $this->asks(),
+            'trades' => $this->trades(),
+        ];
     }
 
     /**

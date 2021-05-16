@@ -6,7 +6,7 @@ namespace StockExchange\StockExchange;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\AskCreated;
 
-class Ask implements DispatchableEventsInterface
+class Ask implements DispatchableEventsInterface, \JsonSerializable, ArrayableInterface
 {
     use HasDispatchableEvents;
 
@@ -75,5 +75,20 @@ class Ask implements DispatchableEventsInterface
     public function price(): Price
     {
         return $this->price;
+    }
+
+    public function asArray(): array
+    {
+        return [
+            'id' => $this->id(),
+            'trader' => $this->trader(),
+            'symbol' => $this->symbol(),
+            'price' => $this->price()
+        ];
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->asArray();
     }
 }

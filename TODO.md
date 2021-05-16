@@ -1,7 +1,9 @@
 # TODO
 
+- Domain Models should all implement JsonSerializable and ArrayableInterface
 - Event Streams
 - Exchange Simulation
+- Read Models
 - Event Loop
 - Docker container
 
