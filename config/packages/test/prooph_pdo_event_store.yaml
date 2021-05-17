@@ -1,0 +1,6 @@
+services:
+    _defaults:
+        public: true
+
+    Prooph\EventStore\Projection\ProjectionManager: '@app.projection_manager.default'
+

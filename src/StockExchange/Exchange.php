@@ -179,14 +179,16 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // create the bid
         $bid = Bid::create($id, $trader, $symbol, $price);
 
-        foreach ($bid->dispatchableEvents() as $event) {
-            $this->addDispatchableEvent($event);
-        }
+        // TODO: add event meta data to Bid object
+//        foreach ($bid->dispatchableEvents() as $event) {
+//            $this->addDispatchableEvent($event);
+//        }
 
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
 
         $bidAdded = new BidAddedToExchange($bid);
+        $bidAdded = $bidAdded->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($bidAdded);
 
         // TODO: instead of executing trades on the bid/ask method
@@ -236,8 +238,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // add ask to collection
         $this->asks = new AskCollection($this->asks()->toArray() + [$ask]);
 
-        $askCreated = new AskAddedToExchange($ask);
-        $this->addDispatchableEvent($askCreated);
+        $askAdded = new AskAddedToExchange($ask);
+        $askAdded = $askAdded->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($askAdded);
 
         // TODO: instead of executing trades on the bid/ask method
         // create another method that checks all bid/asks and executes
@@ -262,7 +265,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     public function asArray(): array
     {
         return [
-            'id' => $this->id(),
+            'id' => $this->id()->toString(),
             'symbols' => $this->symbols(),
             'bids' => $this->bids(),
             'asks' => $this->asks(),
@@ -372,10 +375,18 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     private function applyExchangeCreated(ExchangeCreated $event)
     {
-        $this->symbols = $event->exchange()->symbols();
-        $this->bids = $event->exchange()->bids();
-        $this->asks = $event->exchange()->asks();
-        $this->trades = $event->exchange()->trades();
+        $this->id = Uuid::fromString($event->payload()['id']);
+
+        // TODO: rebuild collections
+//        $this->symbols = new SymbolCollection($event->payload()['symbols']);
+//        $this->bids = new BidCollection($event->payload()['bids']);
+//        $this->asks = new AskCollection($event->payload()['asks']);
+//        $this->trades = new TradeCollection($event->payload()['trades']);
+
+        $this->symbols = new SymbolCollection([]);
+        $this->bids = new BidCollection([]);
+        $this->asks = new AskCollection([]);
+        $this->trades = new TradeCollection([]);
 
         $this->addAppliedEvent($event);
     }

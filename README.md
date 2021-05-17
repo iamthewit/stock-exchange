@@ -48,5 +48,11 @@ ddocker run --name docker-mysql_1 \
     -e MYSQL_PASSWORD=password \
     -p 3306:3306 \
     -d mysql/mysql-server:latest
-
 ```
+
+#### Migrate the DB
+
+Run this from inside the project directory (or fix the path to the sql files yourself)
+
+`docker exec -i docker-mysql_1 sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -Devent_streams' < ./config/scripts/mysql/01_event_streams_table.sql`
+`docker exec -i docker-mysql_1 sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -Devent_streams' < ./config/scripts/mysql/02_projections_table.sql`

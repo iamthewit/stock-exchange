@@ -4,12 +4,20 @@ services:
 
     Prooph\EventStore\EventStore: '@app.event_store.default'
 
+    Prooph\EventStore\Projection\ProjectionManager: '@app.projection_manager.default'
+
     app.event_store.default:
         class: Prooph\EventStore\Pdo\MySqlEventStore
         arguments:
             - '@prooph_event_store.message_factory'
             - '@app.event_store.pdo_connection.mysql'
             - '@app.event_store.mysql.persistence_strategy'
+
+    app.projection_manager.default:
+        class: Prooph\EventStore\Pdo\Projection\MySqlProjectionManager
+        arguments:
+            - '@app.event_store.default'
+            - '@app.event_store.pdo_connection.mysql'
 
     app.event_store.pdo_connection.mysql:
         class: PDO

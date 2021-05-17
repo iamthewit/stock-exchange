@@ -7,7 +7,8 @@ use StockExchange\StockExchange\Exchange;
 
 class ExchangeCreated extends DomainEvent implements EventInterface
 {
-    protected array $payload;
+    use HasEventPayloadTrait;
+
     private Exchange $exchange;
 
     /**
@@ -27,15 +28,5 @@ class ExchangeCreated extends DomainEvent implements EventInterface
     public function exchange(): Exchange
     {
         return $this->exchange;
-    }
-
-    protected function setPayload(array $payload): void
-    {
-        $this->payload = $payload;
-    }
-
-    public function payload(): array
-    {
-        return $this->payload;
     }
 }

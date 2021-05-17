@@ -2,10 +2,13 @@
 
 namespace StockExchange\StockExchange\Event;
 
+use Prooph\Common\Messaging\DomainEvent;
 use StockExchange\StockExchange\Bid;
 
-class BidAddedToExchange implements EventInterface
+class BidAddedToExchange extends DomainEvent implements EventInterface
 {
+    use HasEventPayloadTrait;
+
     private Bid $bid;
 
     /**
@@ -14,6 +17,8 @@ class BidAddedToExchange implements EventInterface
      */
     public function __construct(Bid $bid)
     {
+        $this->init();
+        $this->setPayload($bid->asArray());
         $this->bid = $bid;
     }
 

@@ -1,5 +1,7 @@
 # TODO
 
+- Rebuild exchange collections in applyExchangeCreated
+- Add event meta data to all domain objects
 - Event Streams
 - Exchange Simulation
 - Read Models

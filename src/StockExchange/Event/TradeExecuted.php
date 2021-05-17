@@ -2,10 +2,13 @@
 
 namespace StockExchange\StockExchange\Event;
 
+use Prooph\Common\Messaging\DomainEvent;
 use StockExchange\StockExchange\Trade;
 
-class TradeExecuted implements EventInterface
+class TradeExecuted extends DomainEvent implements EventInterface
 {
+    use HasEventPayloadTrait;
+
     private Trade $trade;
     /**
      * TradeExecuted constructor.
@@ -13,6 +16,8 @@ class TradeExecuted implements EventInterface
      */
     public function __construct(Trade $trade)
     {
+        $this->init();
+        $this->setPayload($trade->asArray());
         $this->trade = $trade;
     }
 

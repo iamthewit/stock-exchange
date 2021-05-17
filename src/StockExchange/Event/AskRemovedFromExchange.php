@@ -4,10 +4,13 @@
 namespace StockExchange\StockExchange\Event;
 
 
+use Prooph\Common\Messaging\DomainEvent;
 use StockExchange\StockExchange\Ask;
 
-class AskRemovedFromExchange implements EventInterface
+class AskRemovedFromExchange extends DomainEvent implements EventInterface
 {
+    use HasEventPayloadTrait;
+
     private Ask $ask;
 
     /**
@@ -16,6 +19,8 @@ class AskRemovedFromExchange implements EventInterface
      */
     public function __construct(Ask $ask)
     {
+        $this->init();
+        $this->setPayload($ask->asArray());
         $this->ask = $ask;
     }
 
