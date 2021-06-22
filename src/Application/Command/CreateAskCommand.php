@@ -72,5 +72,4 @@ class CreateAskCommand
     {
         return $this->price;
     }
-
 }

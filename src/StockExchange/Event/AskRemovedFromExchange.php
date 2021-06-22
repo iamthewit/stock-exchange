@@ -1,8 +1,6 @@
 <?php
 
-
 namespace StockExchange\StockExchange\Event;
-
 
 use Prooph\Common\Messaging\DomainEvent;
 use StockExchange\StockExchange\Ask;

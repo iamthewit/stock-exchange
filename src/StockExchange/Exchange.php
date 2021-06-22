@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
@@ -24,12 +25,12 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 {
     use HasDispatchableEventsTrait;
 
-    private UuidInterface    $id;
+    private UuidInterface $id;
     private SymbolCollection $symbols;
-    private BidCollection    $bids; // TODO: move this to an orderbook class
-    private AskCollection    $asks;  // TODO: move this to an orderbook class
-    private TradeCollection  $trades;
-    private array            $appliedEvents = [];
+    private BidCollection $bids; // TODO: move this to an orderbook class
+    private AskCollection $asks;  // TODO: move this to an orderbook class
+    private TradeCollection $trades;
+    private array $appliedEvents = [];
 
     /**
      * Exchange constructor.
@@ -55,8 +56,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         BidCollection $bids,
         AskCollection $asks,
         TradeCollection $trades
-    ): self
-    {
+    ): self {
         $exchange = new self();
         $exchange->id = $id;
         $exchange->symbols = $symbols;
@@ -78,7 +78,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         foreach ($events as $event) {
             if (!is_a($event, EventInterface::class)) {
                 // TODO: create a proper exception for this:
-                throw new StateRestorationException('Can only restore state from objects that implement EventInterface.');
+                throw new StateRestorationException(
+                    'Can only restore state from objects that implement EventInterface.'
+                );
             }
 
             switch ($event) {
@@ -172,8 +174,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         Trader $trader,
         Symbol $symbol,
         Price $price
-    )
-    {
+    ) {
         // TODO: check symbol exists in symbol collection
 
         // create the bid
@@ -198,7 +199,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // check ask collection for any matching asks
         $asks = $this->asks()->filterBySymbolAndPrice($bid->symbol(), $bid->price());
 
-        if(count($asks)) {
+        if (count($asks)) {
             // TODO: implement a proper way of determining which ask
             // to pick for the trade if there is more than 1 available
             $chosenAsk = current($asks->toArray());
@@ -224,8 +225,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         Trader $trader,
         Symbol $symbol,
         Price $price
-    )
-    {
+    ) {
         // TODO: check symbol exists in symbol collection
 
         //create the ask

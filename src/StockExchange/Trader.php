@@ -1,6 +1,5 @@
 <?php
 
-
 namespace StockExchange\StockExchange;
 
 use Ramsey\Uuid\UuidInterface;

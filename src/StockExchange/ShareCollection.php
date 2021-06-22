@@ -73,7 +73,7 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
     public function filterBySymbol(Symbol $symbol): self
     {
         return new self(
-            array_filter($this->shares, function(Share $share) use ($symbol) {
+            array_filter($this->shares, function (Share $share) use ($symbol) {
                 return $share->symbol()->value() === $symbol->value();
             })
         );

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
@@ -26,8 +27,7 @@ class Trade implements \JsonSerializable, ArrayableInterface
         UuidInterface $id,
         Bid $bid,
         Ask $ask
-    ): self
-    {
+    ): self {
         $trade = new self();
         $trade->id = $id;
         $trade->bid = $bid;

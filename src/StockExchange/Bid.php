@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
@@ -34,8 +35,7 @@ class Bid implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
         Trader $trader,
         Symbol $symbol,
         Price $price
-    ): self
-    {
+    ): self {
         $bid = new self();
         $bid->id = $id;
         $bid->trader = $trader;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
@@ -75,7 +76,7 @@ class AskCollection implements IteratorAggregate, Countable, JsonSerializable
     public function filterBySymbolAndPrice(Symbol $symbol, Price $price): self
     {
         return new self(
-            array_filter($this->asks, function(Ask $ask) use ($symbol, $price) {
+            array_filter($this->asks, function (Ask $ask) use ($symbol, $price) {
                     return $ask->symbol()->value() === $symbol->value()
                         && $ask->price()->value() === $price->value();
             })

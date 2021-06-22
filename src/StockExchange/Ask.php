@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
@@ -32,8 +33,7 @@ class Ask implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
         Trader $trader,
         Symbol $symbol,
         Price $price
-    ): self
-    {
+    ): self {
         $ask = new self();
         $ask->id = $id;
         $ask->trader = $trader;
@@ -44,7 +44,7 @@ class Ask implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
 
         return $ask;
     }
-    
+
     /**
      * @return UuidInterface
      */

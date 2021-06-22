@@ -1,8 +1,6 @@
 <?php
 
-
 namespace StockExchange\StockExchange;
-
 
 use StockExchange\StockExchange\Event\EventInterface;
 

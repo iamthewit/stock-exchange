@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
@@ -75,7 +76,7 @@ class BidCollection implements IteratorAggregate, Countable, JsonSerializable
     public function filterBySymbolAndPrice(Symbol $symbol, Price $price): self
     {
         return new self(
-            array_filter($this->bids, function(Bid $bid) use ($symbol, $price) {
+            array_filter($this->bids, function (Bid $bid) use ($symbol, $price) {
                 return $bid->symbol()->value() === $symbol->value()
                     && $bid->price()->value() === $price->value();
             })
