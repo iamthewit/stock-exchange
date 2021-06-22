@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
-use Kint\Kint;
 use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;

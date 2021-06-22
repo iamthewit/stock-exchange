@@ -2,6 +2,7 @@
 
 namespace StockExchange\Application\Handler;
 
+use ArrayIterator;
 use Prooph\Common\Messaging\Message;
 use Prooph\EventStore\Projection\ProjectionManager;
 use StockExchange\Application\Query\GetExchangeByIdQuery;
@@ -34,7 +35,7 @@ class GetExchangeByIdHandler
         ;
 
         return Exchange::restoreStateFromEvents(
-            new \ArrayIterator($getExchangeQuery->getState())
+            new ArrayIterator($getExchangeQuery->getState())
         );
     }
 }
