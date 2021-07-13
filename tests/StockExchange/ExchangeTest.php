@@ -206,7 +206,7 @@ class ExchangeTest extends TestCase
             Symbol::fromValue('FOO'),
             Price::fromValue(100)
         );
-        $events = new \ArrayIterator([
+        $events = [
             new ExchangeCreated(
                 Exchange::create(
                     Uuid::uuid4(),
@@ -221,7 +221,7 @@ class ExchangeTest extends TestCase
             new BidRemovedFromExchange($bid),
             new AskRemovedFromExchange($ask),
             new TradeExecuted(Trade::fromBidAndAsk(Uuid::uuid4(), $bid, $ask))
-        ]);
+        ];
 
         $exchange = Exchange::restoreStateFromEvents($events);
 

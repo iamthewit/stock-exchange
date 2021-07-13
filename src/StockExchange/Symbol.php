@@ -45,9 +45,14 @@ class Symbol implements \JsonSerializable, ArrayableInterface
         return $this->value;
     }
 
+    /**
+     * @return array{value: string}
+     */
     public function asArray(): array
     {
-        return ['value' => $this->value()];
+        return [
+            'value' => $this->value()
+        ];
     }
 
     public function jsonSerialize()

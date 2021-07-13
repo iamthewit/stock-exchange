@@ -15,7 +15,7 @@ class CreateBidHandler implements MessageHandlerInterface
         $this->messageBus = $messageBus;
     }
 
-    public function __invoke(CreateBidCommand $command)
+    public function __invoke(CreateBidCommand $command): void
     {
         $exchange = $command->exchange();
         $exchange->bid(

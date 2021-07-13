@@ -26,14 +26,14 @@ class Ask implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
      * @param Symbol        $symbol
      * @param Price         $price
      *
-     * @return static
+     * @return Ask
      */
     public static function create(
         UuidInterface $id,
         Trader $trader,
         Symbol $symbol,
         Price $price
-    ): self {
+    ): Ask {
         $ask = new self();
         $ask->id = $id;
         $ask->trader = $trader;
@@ -77,10 +77,13 @@ class Ask implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
         return $this->price;
     }
 
+    /**
+     * @return array{id: string, trader: Trader, symbol: Symbol, price: Price}
+     */
     public function asArray(): array
     {
         return [
-            'id' => $this->id(),
+            'id' => $this->id()->toString(),
             'trader' => $this->trader(),
             'symbol' => $this->symbol(),
             'price' => $this->price()

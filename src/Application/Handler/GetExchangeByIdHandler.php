@@ -17,7 +17,7 @@ class GetExchangeByIdHandler
         $this->projectionManager = $projectionManager;
     }
 
-    public function __invoke(GetExchangeByIdQuery $query)
+    public function __invoke(GetExchangeByIdQuery $query): Exchange
     {
         // rebuild the state of the exchange
         $getExchangeQuery = $this->projectionManager->createQuery();
@@ -34,8 +34,6 @@ class GetExchangeByIdHandler
             ->run()
         ;
 
-        return Exchange::restoreStateFromEvents(
-            new ArrayIterator($getExchangeQuery->getState())
-        );
+        return Exchange::restoreStateFromEvents($getExchangeQuery->getState());
     }
 }

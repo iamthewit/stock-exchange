@@ -21,9 +21,9 @@ class Share implements \JsonSerializable, ArrayableInterface
     /**
      * @param Symbol $symbol
      *
-     * @return static
+     * @return Share
      */
-    public static function fromSymbol(Symbol $symbol): self
+    public static function fromSymbol(Symbol $symbol): Share
     {
         $share = new self();
         $share->id = Uuid::uuid4();
@@ -59,7 +59,7 @@ class Share implements \JsonSerializable, ArrayableInterface
     /**
      * @param Trader $trader
      */
-    public function transferOwnershipToTrader(Trader $trader)
+    public function transferOwnershipToTrader(Trader $trader): void
     {
         // TODO:
         // dispatch an event
@@ -67,16 +67,22 @@ class Share implements \JsonSerializable, ArrayableInterface
         $this->ownerId = $trader->id();
     }
 
+    /**
+     * @return array{id: string, symbol: string, owner_id: string|null}
+     */
     public function asArray(): array
     {
         return [
-            'id' => $this->id(),
-            'symbol' => $this->symbol(),
-            'owner_id' => $this->ownerId(),
+            'id' => $this->id()->toString(),
+            'symbol' => $this->symbol()->value(),
+            'owner_id' => !is_null($this->ownerId()) ? $this->ownerId()->toString() : null,
         ];
     }
 
-    public function jsonSerialize()
+    /**
+     * @return array{id: string, symbol: string, owner_id: string|null}
+     */
+    public function jsonSerialize(): array
     {
         return $this->asArray();
     }

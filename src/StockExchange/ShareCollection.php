@@ -8,13 +8,22 @@ use IteratorAggregate;
 use JsonSerializable;
 use StockExchange\StockExchange\Exception\ShareCollectionCreationException;
 
+/**
+ * Class ShareCollection
+ * @package StockExchange\StockExchange
+ *
+ * @implements IteratorAggregate<string, Share>
+ */
 class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
 {
+    /**
+     * @var Share[]
+     */
     private array $shares;
 
     /**
      * Images constructor.
-     * @param array $shares
+     * @param Share[] $shares
      * @throws ShareCollectionCreationException
      */
     public function __construct(array $shares)
@@ -33,7 +42,7 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return Share[]
      */
     public function toArray(): array
     {
@@ -57,7 +66,7 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return Share[]
      */
     public function jsonSerialize(): array
     {
@@ -67,10 +76,10 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
     /**
      * @param Symbol $symbol
      *
-     * @return $this
+     * @return ShareCollection
      * @throws ShareCollectionCreationException
      */
-    public function filterBySymbol(Symbol $symbol): self
+    public function filterBySymbol(Symbol $symbol): ShareCollection
     {
         return new self(
             array_filter($this->shares, function (Share $share) use ($symbol) {

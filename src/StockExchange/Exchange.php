@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
+use Iterator;
 use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -29,6 +30,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private BidCollection $bids; // TODO: move this to an orderbook class
     private AskCollection $asks;  // TODO: move this to an orderbook class
     private TradeCollection $trades;
+    /**
+     * @var EventInterface[]
+     */
     private array $appliedEvents = [];
 
     /**
@@ -70,7 +74,15 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         return $exchange;
     }
 
-    public static function restoreStateFromEvents(\Iterator $events): Exchange
+    /**
+     * @param EventInterface[] $events
+     * @return Exchange
+     * @throws AskCollectionCreationException
+     * @throws BidCollectionCreationException
+     * @throws StateRestorationException
+     * @throws TradeCollectionCreationException
+     */
+    public static function restoreStateFromEvents(array $events): Exchange
     {
         $exchange = new self();
 
@@ -152,6 +164,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         return $this->trades;
     }
 
+    /**
+     * @return EventInterface[]
+     */
     public function appliedEvents(): array
     {
         return $this->appliedEvents;
@@ -173,7 +188,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         Trader $trader,
         Symbol $symbol,
         Price $price
-    ) {
+    ): void {
         // TODO: check symbol exists in symbol collection
 
         // create the bid
@@ -203,6 +218,11 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
             // to pick for the trade if there is more than 1 available
             $chosenAsk = current($asks->toArray());
 
+            if ($chosenAsk === false) {
+                // TODO: sort this out properly
+                throw new \Exception('ruh roh');
+            }
+
             // if match found execute a trade
             $this->trade($bid, $chosenAsk);
         }
@@ -224,7 +244,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         Trader $trader,
         Symbol $symbol,
         Price $price
-    ) {
+    ): void {
         // TODO: check symbol exists in symbol collection
 
         //create the ask
@@ -252,15 +272,38 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         if (count($bids)) {
             $chosenBid = current($bids->toArray());
 
+            if ($chosenBid === false) {
+                // TODO: sort this out properly
+                throw new \Exception('ruh roh');
+            }
+
             $this->trade($chosenBid, $ask);
         }
     }
 
-    public function jsonSerialize()
+    /**
+     * @return array{
+     * id: string,
+     * symbols: SymbolCollection,
+     * bids: BidCollection,
+     * asks: AskCollection,
+     * trades: TradeCollection
+     * }
+     */
+    public function jsonSerialize(): array
     {
         return $this->asArray();
     }
 
+    /**
+     * @return array{
+     * id: string,
+     * symbols: SymbolCollection,
+     * bids: BidCollection,
+     * asks: AskCollection,
+     * trades: TradeCollection
+     * }
+     */
     public function asArray(): array
     {
         return [
@@ -281,7 +324,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      * @throws TradeCollectionCreationException
      * @throws ShareCollectionCreationException
      */
-    private function trade(Bid $bid, Ask $ask)
+    private function trade(Bid $bid, Ask $ask): void
     {
         // execute the trade between the buyer and the seller
 
@@ -317,7 +360,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      *
      * @throws ShareCollectionCreationException
      */
-    private function transferShare(Share $share, Trader $seller, Trader $buyer)
+    private function transferShare(Share $share, Trader $seller, Trader $buyer): void
     {
         // remove share from sellers share collection
         $seller->removeShare($share);
@@ -334,7 +377,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      *
      * @throws BidCollectionCreationException
      */
-    private function removeBid(Bid $bid)
+    private function removeBid(Bid $bid): void
     {
         $bids = $this->bids()->toArray();
         unset($bids[$bid->id()->toString()]);
@@ -350,7 +393,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      *
      * @throws AskCollectionCreationException
      */
-    private function removeAsk(Ask $ask)
+    private function removeAsk(Ask $ask): void
     {
         $asks = $this->asks()->toArray();
         unset($asks[$ask->id()->toString()]);
@@ -364,7 +407,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     /**
      * @param EventInterface $event
      */
-    private function addAppliedEvent(EventInterface $event)
+    private function addAppliedEvent(EventInterface $event): void
     {
         $this->appliedEvents[] = $event;
     }
@@ -372,7 +415,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     /**
      * @param ExchangeCreated $event
      */
-    private function applyExchangeCreated(ExchangeCreated $event)
+    private function applyExchangeCreated(ExchangeCreated $event): void
     {
         $this->id = Uuid::fromString($event->payload()['id']);
 
@@ -395,7 +438,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      *
      * @throws BidCollectionCreationException
      */
-    private function applyBidAddedToExchange(BidAddedToExchange $event)
+    private function applyBidAddedToExchange(BidAddedToExchange $event): void
     {
         $this->bids = new BidCollection($this->bids()->toArray() + [$event->bid()]);
 
@@ -407,7 +450,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      *
      * @throws BidCollectionCreationException
      */
-    private function applyBidRemovedFromExchange(BidRemovedFromExchange $event)
+    private function applyBidRemovedFromExchange(BidRemovedFromExchange $event): void
     {
         $bids = $this->bids()->toArray();
         unset($bids[$event->bid()->id()->toString()]);
@@ -421,7 +464,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      * @param AskAddedToExchange $event
      * @throws AskCollectionCreationException
      */
-    private function applyAskAddedToExchange(AskAddedToExchange $event)
+    private function applyAskAddedToExchange(AskAddedToExchange $event): void
     {
         $this->asks = new AskCollection($this->asks()->toArray() + [$event->ask()]);
 
@@ -433,7 +476,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      *
      * @throws AskCollectionCreationException
      */
-    private function applyAskRemovedFromExchange(AskRemovedFromExchange $event)
+    private function applyAskRemovedFromExchange(AskRemovedFromExchange $event): void
     {
         $asks = $this->asks()->toArray();
         unset($asks[$event->ask()->id()->toString()]);
@@ -447,7 +490,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      * @param TradeExecuted $event
      * @throws TradeCollectionCreationException
      */
-    private function applyTradeExecuted(TradeExecuted $event)
+    private function applyTradeExecuted(TradeExecuted $event): void
     {
         $this->trades = new TradeCollection(
             $this->trades()->toArray() + [$event->trade()]
@@ -473,6 +516,13 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         return $this->aggregateVersion() + 1;
     }
 
+    /**
+     * @return array{
+     * _aggregate_id: string,
+     * _aggregate_version: int,
+     * _aggregate_type: string
+     * }
+     */
     protected function eventMetaData(): array
     {
         return [

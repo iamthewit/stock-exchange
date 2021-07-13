@@ -20,7 +20,7 @@ class CreateExchangeHandler implements MessageHandlerInterface
         $this->messageBus = $messageBus;
     }
 
-    public function __invoke(CreateExchangeCommand $command)
+    public function __invoke(CreateExchangeCommand $command): void
     {
         $exchange = Exchange::create(
             $command->id(),

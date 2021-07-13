@@ -79,10 +79,13 @@ class Bid implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
         return $this->price;
     }
 
+    /**
+     * @return array{id: string, trader: Trader, symbol: Symbol, price: Price}
+     */
     public function asArray(): array
     {
         return [
-            'id' => $this->id(),
+            'id' => $this->id()->toString(),
             'trader' => $this->trader(),
             'symbol' => $this->symbol(),
             'price' => $this->price(),

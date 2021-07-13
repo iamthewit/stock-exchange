@@ -18,7 +18,7 @@ class StockExchangeEventListener implements MessageHandlerInterface
         $this->eventStore = $eventStore;
     }
 
-    public function __invoke(DomainEvent $event)
+    public function __invoke(DomainEvent $event): void
     {
         // store the command in our event store
         $aggregate = $event->metadata()['_aggregate_type'];

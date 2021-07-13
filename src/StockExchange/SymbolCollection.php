@@ -10,13 +10,22 @@ use IteratorAggregate;
 use JsonSerializable;
 use StockExchange\StockExchange\Exception\SymbolCollectionCreationException;
 
+/**
+ * Class SymbolCollection
+ * @package StockExchange\StockExchange
+ *
+ * @implements IteratorAggregate<int, Symbol>
+ */
 class SymbolCollection implements IteratorAggregate, Countable, JsonSerializable
 {
+    /**
+     * @var array<int, Symbol>
+     */
     private array $symbols;
 
     /**
      * SymbolCollection constructor.
-     * @param array $symbols
+     * @param array<int, Symbol> $symbols
      * @throws SymbolCollectionCreationException
      */
     public function __construct(array $symbols)
@@ -35,7 +44,7 @@ class SymbolCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return ArrayIterator
+     * @return ArrayIterator<int, Symbol>
      */
     public function getIterator(): ArrayIterator
     {
@@ -51,7 +60,7 @@ class SymbolCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array<int, Symbol>
      */
     public function jsonSerialize(): array
     {

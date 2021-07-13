@@ -10,13 +10,22 @@ use IteratorAggregate;
 use JsonSerializable;
 use StockExchange\StockExchange\Exception\AskCollectionCreationException;
 
+/**
+ * Class AskCollection
+ * @package StockExchange\StockExchange
+ *
+ * @implements IteratorAggregate<string, Ask>
+ */
 class AskCollection implements IteratorAggregate, Countable, JsonSerializable
 {
+    /**
+     * @var Ask[]
+     */
     private array $asks;
 
     /**
      * Images constructor.
-     * @param array $asks
+     * @param Ask[] $asks
      * @throws AskCollectionCreationException
      */
     public function __construct(array $asks)
@@ -35,7 +44,7 @@ class AskCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return Ask[]
      */
     public function toArray(): array
     {
@@ -43,7 +52,7 @@ class AskCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return ArrayIterator
+     * @return ArrayIterator<string, Ask>
      */
     public function getIterator(): ArrayIterator
     {
@@ -59,7 +68,7 @@ class AskCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return Ask[]
      */
     public function jsonSerialize(): array
     {
@@ -70,10 +79,10 @@ class AskCollection implements IteratorAggregate, Countable, JsonSerializable
      * @param Symbol $symbol
      * @param Price  $price
      *
-     * @return $this
+     * @return AskCollection
      * @throws AskCollectionCreationException
      */
-    public function filterBySymbolAndPrice(Symbol $symbol, Price $price): self
+    public function filterBySymbolAndPrice(Symbol $symbol, Price $price): AskCollection
     {
         return new self(
             array_filter($this->asks, function (Ask $ask) use ($symbol, $price) {

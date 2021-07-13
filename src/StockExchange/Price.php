@@ -34,12 +34,20 @@ class Price implements \JsonSerializable, ArrayableInterface
         return $this->value;
     }
 
+    /**
+     * @return array{value: int}
+     */
     public function asArray(): array
     {
-        return ['value' => $this->value()];
+        return [
+            'value' => $this->value()
+        ];
     }
 
-    public function jsonSerialize()
+    /**
+     * @return array{value: int}
+     */
+    public function jsonSerialize(): array
     {
         return $this->asArray();
     }

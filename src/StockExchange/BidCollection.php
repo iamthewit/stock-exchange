@@ -10,13 +10,22 @@ use IteratorAggregate;
 use JsonSerializable;
 use StockExchange\StockExchange\Exception\BidCollectionCreationException;
 
+/**
+ * Class BidCollection
+ * @package StockExchange\StockExchange
+ *
+ * @implements IteratorAggregate<string, Bid>
+ */
 class BidCollection implements IteratorAggregate, Countable, JsonSerializable
 {
+    /**
+     * @var Bid[]
+     */
     private array $bids;
 
     /**
      * Images constructor.
-     * @param array $bids
+     * @param Bid[] $bids
      * @throws BidCollectionCreationException
      */
     public function __construct(array $bids)
@@ -35,7 +44,7 @@ class BidCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return Bid[]
      */
     public function toArray(): array
     {
@@ -43,7 +52,7 @@ class BidCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return ArrayIterator
+     * @return ArrayIterator<string, Bid>
      */
     public function getIterator(): ArrayIterator
     {
@@ -59,7 +68,7 @@ class BidCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return Bid[]
      */
     public function jsonSerialize(): array
     {
@@ -70,10 +79,10 @@ class BidCollection implements IteratorAggregate, Countable, JsonSerializable
      * @param Symbol $symbol
      * @param Price  $price
      *
-     * @return $this
+     * @return BidCollection
      * @throws BidCollectionCreationException
      */
-    public function filterBySymbolAndPrice(Symbol $symbol, Price $price): self
+    public function filterBySymbolAndPrice(Symbol $symbol, Price $price): BidCollection
     {
         return new self(
             array_filter($this->bids, function (Bid $bid) use ($symbol, $price) {
