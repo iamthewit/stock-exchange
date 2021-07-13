@@ -10,13 +10,20 @@ use IteratorAggregate;
 use JsonSerializable;
 use StockExchange\StockExchange\Exception\TradeCollectionCreationException;
 
+/**
+ * Class TradeCollection
+ * @package StockExchange\StockExchange
+ *
+ * @implements IteratorAggregate<int, Trade>
+ */
 class TradeCollection implements IteratorAggregate, Countable, JsonSerializable
 {
+    /** @var array<int, Trade> */
     private array $trades;
 
     /**
      * Images constructor.
-     * @param array $trades
+     * @param array<int, Trade> $trades
      * @throws TradeCollectionCreationException
      */
     public function __construct(array $trades)
@@ -35,7 +42,7 @@ class TradeCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array<int, Trade>
      */
     public function toArray(): array
     {
@@ -59,7 +66,7 @@ class TradeCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array<int, Trade>
      */
     public function jsonSerialize(): array
     {
