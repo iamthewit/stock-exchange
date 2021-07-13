@@ -41,7 +41,7 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return ArrayIterator
+     * @return ArrayIterator<string, Share>
      */
     public function getIterator(): ArrayIterator
     {

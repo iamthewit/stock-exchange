@@ -20,7 +20,7 @@ class Trader implements \JsonSerializable, ArrayableInterface
     /**
      * @param UuidInterface $id
      *
-     * @return static
+     * @return self
      * @throws Exception\ShareCollectionCreationException
      */
     public static function create(UuidInterface $id): self
@@ -53,9 +53,11 @@ class Trader implements \JsonSerializable, ArrayableInterface
      *
      * @throws Exception\ShareCollectionCreationException
      */
-    public function addShare(Share $share)
+    public function addShare(Share $share): void
     {
         $this->shares = new ShareCollection($this->shares->toArray() + [$share]);
+
+        // TODO: emit share added event
     }
 
     /**
@@ -63,18 +65,23 @@ class Trader implements \JsonSerializable, ArrayableInterface
      *
      * @throws Exception\ShareCollectionCreationException
      */
-    public function removeShare(Share $share)
+    public function removeShare(Share $share): void
     {
         $shares = $this->shares()->toArray();
         unset($shares[$share->id()->toString()]);
 
         $this->shares = new ShareCollection($shares);
+
+        // TODO: emit share removed event
     }
 
+    /**
+     * @return array<string, ShareCollection|string>
+     */
     public function asArray(): array
     {
         return [
-            'id' => $this->id(),
+            'id' => $this->id()->toString(),
             'shares' => $this->shares()
         ];
     }

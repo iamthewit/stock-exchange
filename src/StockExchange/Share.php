@@ -12,7 +12,7 @@ class Share implements \JsonSerializable, ArrayableInterface
     private UuidInterface $id;
     private Symbol $symbol;
     // TODO: owner could be buyer/seller or the issuer (company) - needs more thought
-    private ?UuidInterface $ownerId;
+    private ?UuidInterface $ownerId = null;
 
     private function __construct()
     {

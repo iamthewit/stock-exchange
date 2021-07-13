@@ -15,7 +15,7 @@ class CreateAskHandler implements MessageHandlerInterface
         $this->messageBus = $messageBus;
     }
 
-    public function __invoke(CreateAskCommand $command)
+    public function __invoke(CreateAskCommand $command): void
     {
         $exchange = $command->exchange();
         $exchange->ask(

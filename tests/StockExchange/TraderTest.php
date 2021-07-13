@@ -33,4 +33,14 @@ class TraderTest extends TestCase
 
         $this->assertCount(0, $trader->shares());
     }
+
+    public function testItTransformsToJSON()
+    {
+        $trader = Trader::create(Uuid::uuid4());
+
+        $trader->addShare(Share::fromSymbol(Symbol::fromValue('FOO')));
+        $trader->addShare(Share::fromSymbol(Symbol::fromValue('BAR')));
+
+        \Kint::dump(json_encode($trader));die;
+    }
 }

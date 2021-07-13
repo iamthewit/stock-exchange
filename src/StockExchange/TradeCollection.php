@@ -43,7 +43,7 @@ class TradeCollection implements IteratorAggregate, Countable, JsonSerializable
     }
 
     /**
-     * @return ArrayIterator
+     * @return ArrayIterator<int, Trade>
      */
     public function getIterator(): ArrayIterator
     {
