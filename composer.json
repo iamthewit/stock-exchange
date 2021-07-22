@@ -73,7 +73,7 @@
         "phpcs": "./vendor/bin/phpcs --standard=PSR12 ./src",
         "phpmd": "./vendor/bin/phpmd src text cleancode,codesize,controversial,design,naming,unusedcode",
         "phpstan": "./vendor/bin/phpstan analyse src -l 8",
-	"deptract": "./vendor/bin/deptrac"
+        "deptract": "./vendor/bin/deptrac"
     },
     "conflict": {
         "symfony/symfony": "*"

@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<ruleset name="My first PHPMD rule set"
+         xmlns="http://pmd.sf.net/ruleset/1.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0
+                     http://pmd.sf.net/ruleset_xml_schema.xsd"
+         xsi:noNamespaceSchemaLocation="
+                     http://pmd.sf.net/ruleset_xml_schema.xsd">
+    <description>
+        My custom rule set that checks my code...
+    </description>
+
+    <!--  Clean Code  -->
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/cleancode.xml" />
+
+    <!--  Code Size  -->
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/codesize.xml" />
+
+    <!--  Controversial  -->
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/controversial.xml" />
+
+    <!--  Design  -->
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/design.xml" />
+
+    <!--  Naming  -->
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/naming.xml">
+        <exclude name="ShortVariable" />
+        <exclude name="LongVariable" />
+        <exclude name="ShortMethodName" />
+    </rule>
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/naming.xml/ShortVariable">
+        <properties>
+            <property name="exceptions">
+                <value>
+                    id
+                </value>
+            </property>
+        </properties>
+    </rule>
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/naming.xml/LongVariable">
+        <properties>
+            <property name="maximum">
+                <value>
+                    30
+                </value>
+            </property>
+        </properties>
+    </rule>
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/naming.xml/ShortMethodName">
+        <properties>
+            <property name="exceptions">
+                <value>
+                    id
+                </value>
+            </property>
+        </properties>
+    </rule>
+
+    <!--  Unused Code  -->
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/unusedcode.xml" />
+</ruleset>
