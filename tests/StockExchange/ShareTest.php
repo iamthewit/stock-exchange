@@ -14,7 +14,7 @@ class ShareTest extends TestCase
     public function testItTransfersOwnershipToBuyer()
     {
         $buyer = Trader::create(Uuid::uuid4());
-        $share = Share::fromSymbol(Symbol::fromValue('FOO'));
+        $share = Share::create(Uuid::uuid4(), Symbol::fromValue('FOO'));
 
         $share->transferOwnershipToTrader($buyer);
 

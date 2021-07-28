@@ -39,7 +39,7 @@ class ExchangeTest extends TestCase
         );
 
         $seller = Trader::create(Uuid::uuid4());
-        $seller->addShare(Share::fromSymbol($symbol));
+        $seller->addShare(Share::create(Uuid::uuid4(), $symbol));
 
         $exchange->bid(
             Uuid::uuid4(),
@@ -106,7 +106,7 @@ class ExchangeTest extends TestCase
         );
 
         $seller = Trader::create(Uuid::uuid4());
-        $seller->addShare(Share::fromSymbol($symbol));
+        $seller->addShare(Share::create(Uuid::uuid4(), $symbol));
 
         $exchange->bid(
             Uuid::uuid4(),
@@ -151,7 +151,7 @@ class ExchangeTest extends TestCase
         $price = Price::fromValue(100);
 
         $seller = Trader::create(Uuid::uuid4());
-        $seller->addShare(Share::fromSymbol($symbol));
+        $seller->addShare(Share::create(Uuid::uuid4(), $symbol));
 
         $exchange->bid(
             Uuid::uuid4(),

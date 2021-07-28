@@ -4,6 +4,9 @@ namespace StockExchange\Infrastructure\CLI;
 
 use Ramsey\Uuid\Uuid;
 use StockExchange\Application\Command\CreateExchangeCommand;
+use StockExchange\Application\Command\CreateShareCommand;
+use StockExchange\Application\Command\CreateTraderCommand;
+use StockExchange\StockExchange\Symbol;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -50,9 +53,27 @@ class SeedEventStreamDatabaseCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         // create the exchange
-
         $exchangeId = $this->params->get('stock_exchange.default_exchange_id');
         $this->messageBus->dispatch(new CreateExchangeCommand(Uuid::fromString($exchangeId)));
+
+        // create a trader
+        $this->messageBus->dispatch(new CreateTraderCommand(Uuid::uuid4()));
+
+        // get trader by id
+            // TODO create query + handler for this
+
+        // create some shares
+        $shareId = Uuid::uuid4();
+        $this->messageBus->dispatch(
+            new CreateShareCommand(
+                $shareId,
+                Symbol::fromValue('FOO')
+            )
+        );
+
+        // for each share
+            // transfer ownership to trader
+            // add share to traders share collection
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 

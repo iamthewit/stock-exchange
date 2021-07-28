@@ -12,7 +12,7 @@ class TraderTest extends TestCase
 {
     public function testItAddsAShare()
     {
-        $share = Share::fromSymbol(Symbol::fromValue('FOO'));
+        $share = Share::create(Uuid::uuid4(), Symbol::fromValue('FOO'));
         $trader = Trader::create(Uuid::uuid4());
 
         $trader->addShare($share);
@@ -25,7 +25,7 @@ class TraderTest extends TestCase
 
     public function testItRemovesAShare()
     {
-        $share = Share::fromSymbol(Symbol::fromValue('FOO'));
+        $share = Share::create(Uuid::uuid4(), Symbol::fromValue('FOO'));
         $trader = Trader::create(Uuid::uuid4());
         $trader->addShare($share);
 
@@ -39,8 +39,8 @@ class TraderTest extends TestCase
         $this->markTestIncomplete();
         $trader = Trader::create(Uuid::uuid4());
 
-        $trader->addShare(Share::fromSymbol(Symbol::fromValue('FOO')));
-        $trader->addShare(Share::fromSymbol(Symbol::fromValue('BAR')));
+        $trader->addShare(Share::create(Uuid::uuid4(), Symbol::fromValue('FOO')));
+        $trader->addShare(Share::create(Uuid::uuid4(), Symbol::fromValue('BAR')));
 
 //        \Kint::dump(json_encode($trader));die;
     }

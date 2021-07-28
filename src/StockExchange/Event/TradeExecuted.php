@@ -10,6 +10,7 @@ class TradeExecuted extends DomainEvent implements EventInterface
     use HasEventPayloadTrait;
 
     private Trade $trade;
+
     /**
      * TradeExecuted constructor.
      * @param Trade $trade

@@ -2,6 +2,7 @@
 
 namespace StockExchange\Tests\StockExchange;
 
+use Ramsey\Uuid\Uuid;
 use StockExchange\StockExchange\Share;
 use StockExchange\StockExchange\ShareCollection;
 use PHPUnit\Framework\TestCase;
@@ -13,17 +14,21 @@ class ShareCollectionTest extends TestCase
     public function testItFiltersBySymbol()
     {
         $collection = new ShareCollection([
-            Share::fromSymbol(
-                Symbol::fromValue('FOO'),
+            Share::create(
+                Uuid::uuid4(),
+                Symbol::fromValue('FOO')
             ),
-            Share::fromSymbol(
-                Symbol::fromValue('FOO'),
+            Share::create(
+                Uuid::uuid4(),
+                Symbol::fromValue('FOO')
             ),
-            Share::fromSymbol(
-                Symbol::fromValue('BAR'),
+            Share::create(
+                Uuid::uuid4(),
+                Symbol::fromValue('BAR')
             ),
-            Share::fromSymbol(
-                Symbol::fromValue('BAR'),
+            Share::create(
+                Uuid::uuid4(),
+                Symbol::fromValue('BAR')
             ),
         ]);
 

@@ -4,30 +4,74 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
+use JsonSerializable;
+use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use StockExchange\StockExchange\Event\EventInterface;
+use StockExchange\StockExchange\Event\ShareCreatedFromSymbol;
+use StockExchange\StockExchange\Event\TraderCreated;
+use StockExchange\StockExchange\Exception\StateRestorationException;
 
-class Share implements \JsonSerializable, ArrayableInterface
+class Share implements JsonSerializable, ArrayableInterface
 {
+    use HasDispatchableEventsTrait;
+
     private UuidInterface $id;
     private Symbol $symbol;
     // TODO: owner could be buyer/seller or the issuer (company) - needs more thought
     private ?UuidInterface $ownerId = null;
+    /**
+     * @var EventInterface[]
+     */
+    private array $appliedEvents = [];
 
     private function __construct()
     {
     }
 
     /**
+     * @param UuidInterface $id
      * @param Symbol $symbol
      *
      * @return Share
      */
-    public static function fromSymbol(Symbol $symbol): Share
+    public static function create(UuidInterface $id, Symbol $symbol): Share
     {
         $share = new self();
-        $share->id = Uuid::uuid4();
+        $share->id = $id;
         $share->symbol = $symbol;
+
+        $shareCreatedFromSymbolEvent = new ShareCreatedFromSymbol($share);
+        $shareCreatedFromSymbolEvent = $shareCreatedFromSymbolEvent->withMetadata($share->eventMetaData());
+        $share->addDispatchableEvent($shareCreatedFromSymbolEvent);
+
+        return $share;
+    }
+
+    /**
+     * @param EventInterface[] $events
+     * @return Share
+     * @throws StateRestorationException
+     */
+    public static function restoreStateFromEvents(array $events): Share
+    {
+        $share = new self();
+
+        foreach ($events as $event) {
+            if (!is_a($event, EventInterface::class)) {
+                // TODO: create a proper exception for this:
+                throw new StateRestorationException(
+                    'Can only restore state from objects that implement EventInterface.'
+                );
+            }
+
+            switch ($event) {
+                case is_a($event, ShareCreatedFromSymbol::class):
+                    $share->applyShareCreatedFromSymbol($event);
+                    break;
+            }
+        }
 
         return $share;
     }
@@ -85,5 +129,54 @@ class Share implements \JsonSerializable, ArrayableInterface
     public function jsonSerialize(): array
     {
         return $this->asArray();
+    }
+
+    /**
+     * @param EventInterface $event
+     */
+    private function addAppliedEvent(EventInterface $event): void
+    {
+        $this->appliedEvents[] = $event;
+    }
+
+    private function applyShareCreatedFromSymbol(ShareCreatedFromSymbol $event)
+    {
+        $this->id = Uuid::fromString($event->payload()['id']);
+        $this->symbol = Symbol::fromValue($event->payload()['symbol']);
+
+        $this->addAppliedEvent($event);
+    }
+
+    private function aggregateVersion(): int
+    {
+        if (count($this->appliedEvents)) {
+            /** @var DomainEvent $lastEvent */
+            $lastEvent = end($this->appliedEvents);
+
+            return $lastEvent->metadata()['_aggregate_version'];
+        }
+
+        return 0;
+    }
+
+    private function nextAggregateVersion(): int
+    {
+        return $this->aggregateVersion() + 1;
+    }
+
+    /**
+     * @return array{
+     * _aggregate_id: string,
+     * _aggregate_version: int,
+     * _aggregate_type: string
+     * }
+     */
+    protected function eventMetaData(): array
+    {
+        return [
+            '_aggregate_id' => $this->id()->toString(),
+            '_aggregate_version' => $this->nextAggregateVersion(),
+            '_aggregate_type' => static::class
+        ];
     }
 }
