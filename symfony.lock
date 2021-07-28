@@ -8,8 +8,26 @@
     "composer/xdebug-handler": {
         "version": "2.0.1"
     },
+    "doctrine/annotations": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "a2759dd6123694c8d901d0ec80006e044c2e6457"
+        },
+        "files": [
+            "config/routes/annotations.yaml"
+        ]
+    },
+    "doctrine/inflector": {
+        "version": "2.0.3"
+    },
     "doctrine/instantiator": {
         "version": "1.4.0"
+    },
+    "doctrine/lexer": {
+        "version": "1.2.1"
     },
     "kint-php/kint": {
         "version": "3.3"
@@ -109,6 +127,9 @@
     "psr/log": {
         "version": "1.1.4"
     },
+    "psy/psysh": {
+        "version": "v0.10.8"
+    },
     "qossmic/deptrac-shim": {
         "version": "0.7",
         "recipe": {
@@ -123,6 +144,9 @@
     },
     "ramsey/collection": {
         "version": "1.1.3"
+    },
+    "ramsey/composer-repl": {
+        "version": "1.2.2"
     },
     "ramsey/uuid": {
         "version": "4.1.1"
@@ -285,6 +309,15 @@
     "symfony/http-kernel": {
         "version": "v5.2.7"
     },
+    "symfony/maker-bundle": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
+        }
+    },
     "symfony/messenger": {
         "version": "4.3",
         "recipe": {
@@ -329,6 +362,9 @@
     },
     "symfony/polyfill-php81": {
         "version": "v1.23.0"
+    },
+    "symfony/process": {
+        "version": "v5.2.12"
     },
     "symfony/redis-messenger": {
         "version": "v5.2.7"

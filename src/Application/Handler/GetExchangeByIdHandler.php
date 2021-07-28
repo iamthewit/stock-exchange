@@ -7,8 +7,9 @@ use Prooph\Common\Messaging\Message;
 use Prooph\EventStore\Projection\ProjectionManager;
 use StockExchange\Application\Query\GetExchangeByIdQuery;
 use StockExchange\StockExchange\Exchange;
+use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-class GetExchangeByIdHandler
+class GetExchangeByIdHandler implements MessageHandlerInterface
 {
     private ProjectionManager $projectionManager;
 
