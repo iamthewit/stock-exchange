@@ -4,11 +4,11 @@ namespace StockExchange\Application\Handler;
 
 use Prooph\Common\Messaging\Message;
 use Prooph\EventStore\Projection\ProjectionManager;
-use StockExchange\Application\Query\GetExchangeByIdQuery;
-use StockExchange\StockExchange\Exchange;
+use StockExchange\Application\Query\GetShareByIdQuery;
+use StockExchange\StockExchange\Share;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-class GetExchangeByIdHandler implements MessageHandlerInterface
+class GetShareByIdHandler implements MessageHandlerInterface
 {
     private ProjectionManager $projectionManager;
 
@@ -17,15 +17,15 @@ class GetExchangeByIdHandler implements MessageHandlerInterface
         $this->projectionManager = $projectionManager;
     }
 
-    public function __invoke(GetExchangeByIdQuery $query): Exchange
+    public function __invoke(GetShareByIdQuery $query): Share
     {
-        // rebuild the state of the exchange
-        $getExchangeQuery = $this->projectionManager->createQuery();
-        $getExchangeQuery
+        // rebuild the state of the trader
+        $getShareQuery = $this->projectionManager->createQuery();
+        $getShareQuery
             ->init(function (): array {
                 return [];
             })
-            ->fromStream(Exchange::class . '-' . $query->id())
+            ->fromStream(Share::class . '-' . $query->id())
             ->whenAny(function (array $state, Message $event): array {
                 $state[] = $event;
 
@@ -34,6 +34,6 @@ class GetExchangeByIdHandler implements MessageHandlerInterface
             ->run()
         ;
 
-        return Exchange::restoreStateFromEvents($getExchangeQuery->getState());
+        return Share::restoreStateFromEvents($getShareQuery->getState());
     }
 }

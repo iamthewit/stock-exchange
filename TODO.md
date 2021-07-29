@@ -1,7 +1,6 @@
 # TODO
 
-- Add query and handler to get trader by id
-- Add query and handler to get share by id
+- Add tests for all the new handlers
 - Read Models
 - Rebuild exchange collections in applyExchangeCreated
 - Add event meta data to all domain objects

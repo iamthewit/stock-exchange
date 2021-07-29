@@ -10,6 +10,7 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\EventInterface;
 use StockExchange\StockExchange\Event\ShareCreatedFromSymbol;
+use StockExchange\StockExchange\Event\ShareOwnershipTransferred;
 use StockExchange\StockExchange\Event\TraderCreated;
 use StockExchange\StockExchange\Exception\StateRestorationException;
 
@@ -70,6 +71,9 @@ class Share implements JsonSerializable, ArrayableInterface
                 case is_a($event, ShareCreatedFromSymbol::class):
                     $share->applyShareCreatedFromSymbol($event);
                     break;
+                case is_a($event, ShareOwnershipTransferred::class):
+                    $share->applyShareOwnershipTransferred($event);
+                    break;
             }
         }
 
@@ -82,6 +86,19 @@ class Share implements JsonSerializable, ArrayableInterface
     public function id(): UuidInterface
     {
         return $this->id;
+    }
+
+    public static function fromValues(
+        UuidInterface $id,
+        Symbol $symbol,
+        ?UuidInterface $ownerId
+    ): Share {
+        $share = new self();
+        $share->id = $id;
+        $share->symbol = $symbol;
+        $share->ownerId = $ownerId;
+
+        return $share;
     }
 
     /**
@@ -105,10 +122,11 @@ class Share implements JsonSerializable, ArrayableInterface
      */
     public function transferOwnershipToTrader(Trader $trader): void
     {
-        // TODO:
-        // dispatch an event
-
         $this->ownerId = $trader->id();
+
+        $shareOwnershipTransferred = new ShareOwnershipTransferred($trader);
+        $shareOwnershipTransferred = $shareOwnershipTransferred->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($shareOwnershipTransferred);
     }
 
     /**
@@ -143,6 +161,13 @@ class Share implements JsonSerializable, ArrayableInterface
     {
         $this->id = Uuid::fromString($event->payload()['id']);
         $this->symbol = Symbol::fromValue($event->payload()['symbol']);
+
+        $this->addAppliedEvent($event);
+    }
+
+    private function applyShareOwnershipTransferred(EventInterface $event)
+    {
+        $this->ownerId = Uuid::fromString($event->payload()['trader_id']);
 
         $this->addAppliedEvent($event);
     }

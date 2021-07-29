@@ -2,11 +2,17 @@
 
 namespace StockExchange\Infrastructure\CLI;
 
+use Kint\Kint;
 use Ramsey\Uuid\Uuid;
 use StockExchange\Application\Command\CreateExchangeCommand;
 use StockExchange\Application\Command\CreateShareCommand;
 use StockExchange\Application\Command\CreateTraderCommand;
+use StockExchange\Application\MessageBus\QueryHandlerBus;
+use StockExchange\Application\Query\GetShareByIdQuery;
+use StockExchange\Application\Query\GetTraderByIdQuery;
+use StockExchange\StockExchange\Share;
 use StockExchange\StockExchange\Symbol;
+use StockExchange\StockExchange\Trader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,17 +30,24 @@ class SeedEventStreamDatabaseCommand extends Command
 
     private $params;
     private MessageBusInterface $messageBus;
+    private QueryHandlerBus $queryHandlerBus;
 
     /**
      * SeedEventStreamDatabaseCommand constructor.
      *
      * @param ParameterBagInterface $params
-     * @param MessageBusInterface   $messageBus
+     * @param MessageBusInterface $messageBus
+     * @param QueryHandlerBus $queryHandlerBus
      */
-    public function __construct(ParameterBagInterface $params, MessageBusInterface $messageBus)
+    public function __construct(
+        ParameterBagInterface $params,
+        MessageBusInterface $messageBus,
+        QueryHandlerBus $queryHandlerBus
+    )
     {
         $this->params = $params;
         $this->messageBus = $messageBus;
+        $this->queryHandlerBus = $queryHandlerBus;
 
         parent::__construct();
     }
@@ -57,10 +70,15 @@ class SeedEventStreamDatabaseCommand extends Command
         $this->messageBus->dispatch(new CreateExchangeCommand(Uuid::fromString($exchangeId)));
 
         // create a trader
-        $this->messageBus->dispatch(new CreateTraderCommand(Uuid::uuid4()));
+
+        $traderId = Uuid::uuid4();
+        $this->messageBus->dispatch(new CreateTraderCommand($traderId));
 
         // get trader by id
-            // TODO create query + handler for this
+        /** @var Trader $trader */
+        $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId));
+
+//        Kint::dump($trader);die;
 
         // create some shares
         $shareId = Uuid::uuid4();
@@ -72,8 +90,41 @@ class SeedEventStreamDatabaseCommand extends Command
         );
 
         // for each share
-            // transfer ownership to trader
-            // add share to traders share collection
+        /** @var Share $share */
+        $share = $this->queryHandlerBus->query(new GetShareByIdQuery($shareId));
+
+        // transfer ownership to trader
+
+        // create command + handler to do this:
+        $share->transferOwnershipToTrader($trader);
+
+        // dispatch events
+        // TODO: this should be done via the exchange as that is our aggregate root.
+        // We need to add a new method to the exchange specifically for assigning
+        // shares to a trader that have not yet been traded
+
+        // This goes for everything. Currently we are creating traders and shares
+        // directly via command handlers that dispatch events from the Trader and
+        // Share objects. Instead we should be doing everything via the Exchange e.g:
+            // Exchange::createTrader()
+            // Exchange::createShare()
+            // Exchange::assignShareToTrader()
+        foreach ($share->dispatchableEvents() as $event) {
+            $this->messageBus->dispatch($event);
+        }
+
+        // add share to traders share collection
+        $trader->addShare($share);
+        foreach ($trader->dispatchableEvents() as $event) {
+            $this->messageBus->dispatch($event);
+        }
+
+
+        // get trader by id
+        /** @var Trader $trader */
+        $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId));
+
+        Kint::dump($trader);die;
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 

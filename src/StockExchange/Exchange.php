@@ -364,12 +364,15 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     {
         // remove share from sellers share collection
         $seller->removeShare($share);
+        // TODO: dispatch seller events
 
         // add share to buyers share collection
         $buyer->addShare($share);
+        // TODO: dispatch buyer events
 
         // update the shares owner id
         $share->transferOwnershipToTrader($buyer);
+        // TODO: dispatch share events
     }
 
     /**
