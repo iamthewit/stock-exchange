@@ -19,12 +19,13 @@ class CreateShareHandler implements MessageHandlerInterface
 
     public function __invoke(CreateShareCommand $command): void
     {
-        $share = Share::create($command->id(), $command->symbol());
+        $command->exchange()->createShare($command->shareId(), $command->symbol());
 
-        foreach ($share->dispatchableEvents() as $event) {
+        foreach ($command->exchange()->dispatchableEvents() as $event) {
             $this->messageBus->dispatch($event);
-
         }
+
+        $command->exchange()->clearDispatchableEvents();
     }
 }
 

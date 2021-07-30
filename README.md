@@ -28,31 +28,24 @@ TODO
 
 ## Database
 
+Start the DB container:
+
+`./start-mysql-event-streams.sh`
+
+Stop the DB container:
+
+`./stop-mysql-event-streams.sh`
+
+Drop and Re-seed the DB:
+
+`./reseed-mysql-event-streams.sh`
+
 ### Migrations
 
 #### Event Store
 
-Check the `config/scripts` directory
+The script (above) that starts the DB container will run the event sotre migrations for you.
 
 #### Read Models
 
 TODO
-
-### Run a MySQL database in a docker container
-
-```
-ddocker run --name docker-mysql_1 \
-    -e MYSQL_ROOT_PASSWORD=root \
-    -e MYSQL_DATABASE=event_streams \
-    -e MYSQL_USER=user \
-    -e MYSQL_PASSWORD=password \
-    -p 3306:3306 \
-    -d mysql/mysql-server:latest
-```
-
-#### Migrate the DB
-
-Run this from inside the project directory (or fix the path to the sql files yourself)
-
-`docker exec -i docker-mysql_1 sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -Devent_streams' < ./config/scripts/mysql/01_event_streams_table.sql`
-`docker exec -i docker-mysql_1 sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -Devent_streams' < ./config/scripts/mysql/02_projections_table.sql`

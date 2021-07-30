@@ -21,6 +21,12 @@ class Trader implements \JsonSerializable, ArrayableInterface
 
     private UuidInterface $id;
     private ShareCollection $shares;
+
+    // we should probably store the exchange id against the trader too
+    // at the moment only one exchange exists, though the exchange has an ID
+    // and it is not impossible to imagine that multiple exchanges might
+    // exist in the future
+
     /**
      * @var EventInterface[]
      */

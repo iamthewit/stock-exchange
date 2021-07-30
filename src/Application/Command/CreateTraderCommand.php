@@ -3,25 +3,34 @@
 namespace StockExchange\Application\Command;
 
 use Ramsey\Uuid\UuidInterface;
+use StockExchange\StockExchange\Exchange;
 
 class CreateTraderCommand
 {
-    private UuidInterface $id;
+    private Exchange $exchange;
+    private UuidInterface $traderId;
 
     /**
      * CreateTraderCommand constructor.
-     * @param UuidInterface $id
+     *
+     * @param Exchange $exchange * @param UuidInterface $id
      */
-    public function __construct(UuidInterface $id)
+    public function __construct(Exchange $exchange, UuidInterface $traderId)
     {
-        $this->id = $id;
+        $this->exchange = $exchange;
+        $this->traderId = $traderId;
+    }
+
+    public function exchange(): Exchange
+    {
+        return $this->exchange;
     }
 
     /**
      * @return UuidInterface
      */
-    public function id(): UuidInterface
+    public function traderId(): UuidInterface
     {
-        return $this->id;
+        return $this->traderId;
     }
 }

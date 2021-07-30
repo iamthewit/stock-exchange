@@ -4,12 +4,15 @@ namespace StockExchange\Infrastructure\CLI;
 
 use Kint\Kint;
 use Ramsey\Uuid\Uuid;
+use StockExchange\Application\Command\AllocateShareToTraderCommand;
 use StockExchange\Application\Command\CreateExchangeCommand;
 use StockExchange\Application\Command\CreateShareCommand;
 use StockExchange\Application\Command\CreateTraderCommand;
 use StockExchange\Application\MessageBus\QueryHandlerBus;
+use StockExchange\Application\Query\GetExchangeByIdQuery;
 use StockExchange\Application\Query\GetShareByIdQuery;
 use StockExchange\Application\Query\GetTraderByIdQuery;
+use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\Share;
 use StockExchange\StockExchange\Symbol;
 use StockExchange\StockExchange\Trader;
@@ -67,67 +70,58 @@ class SeedEventStreamDatabaseCommand extends Command
 
         // create the exchange
         $exchangeId = $this->params->get('stock_exchange.default_exchange_id');
-        $this->messageBus->dispatch(new CreateExchangeCommand(Uuid::fromString($exchangeId)));
+        $exchangeId = Uuid::fromString($exchangeId);
+        $this->messageBus->dispatch(new CreateExchangeCommand($exchangeId));
 
-        // create a trader
+        // get the exchange by id
+        /** @var Exchange $exchange */
+        $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchangeId));
 
-        $traderId = Uuid::uuid4();
-        $this->messageBus->dispatch(new CreateTraderCommand($traderId));
+        $traderOne = $this->createTraderWithShares($exchange, Symbol::fromValue('FOO'));
 
-        // get trader by id
-        /** @var Trader $trader */
-        $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId));
+        $traderTwo = $this->createTraderWithShares($exchange, Symbol::fromValue('BAR'));
 
-//        Kint::dump($trader);die;
+//        Kint::dump($traderOne, $traderTwo);
 
-        // create some shares
-        $shareId = Uuid::uuid4();
-        $this->messageBus->dispatch(
-            new CreateShareCommand(
-                $shareId,
-                Symbol::fromValue('FOO')
-            )
-        );
-
-        // for each share
-        /** @var Share $share */
-        $share = $this->queryHandlerBus->query(new GetShareByIdQuery($shareId));
-
-        // transfer ownership to trader
-
-        // create command + handler to do this:
-        $share->transferOwnershipToTrader($trader);
-
-        // dispatch events
-        // TODO: this should be done via the exchange as that is our aggregate root.
-        // We need to add a new method to the exchange specifically for assigning
-        // shares to a trader that have not yet been traded
-
-        // This goes for everything. Currently we are creating traders and shares
-        // directly via command handlers that dispatch events from the Trader and
-        // Share objects. Instead we should be doing everything via the Exchange e.g:
-            // Exchange::createTrader()
-            // Exchange::createShare()
-            // Exchange::assignShareToTrader()
-        foreach ($share->dispatchableEvents() as $event) {
-            $this->messageBus->dispatch($event);
-        }
-
-        // add share to traders share collection
-        $trader->addShare($share);
-        foreach ($trader->dispatchableEvents() as $event) {
-            $this->messageBus->dispatch($event);
-        }
-
-
-        // get trader by id
-        /** @var Trader $trader */
-        $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId));
-
-        Kint::dump($trader);die;
-
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $io->success('Re-seed complete!.');
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param Exchange $exchange
+     * @param Symbol   $symbol
+     *
+     * @return Trader
+     */
+    protected function createTraderWithShares(Exchange $exchange, Symbol $symbol): Trader
+    {
+        // create a trader
+        $traderId = Uuid::uuid4();
+        $this->messageBus->dispatch(new CreateTraderCommand($exchange, $traderId));
+
+        // create some shares
+        for ($i = 0; $i < 10; $i++) {
+            // get trader by id
+            /** @var Trader $trader */
+            $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId));
+
+            $shareId = Uuid::uuid4();
+            $this->messageBus->dispatch(
+                new CreateShareCommand(
+                    $exchange,
+                    $shareId,
+                    $symbol
+                )
+            );
+
+            /** @var Share $share */
+            $share = $this->queryHandlerBus->query(new GetShareByIdQuery($shareId));
+
+            // allocate share to trader
+            $this->messageBus->dispatch(new AllocateShareToTraderCommand($exchange, $share, $trader));
+        }
+
+        return $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId));
     }
 }

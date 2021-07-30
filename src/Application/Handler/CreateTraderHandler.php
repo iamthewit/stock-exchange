@@ -18,10 +18,12 @@ class CreateTraderHandler implements MessageHandlerInterface
 
     public function __invoke(CreateTraderCommand $command): void
     {
-        $trader = Trader::create($command->id());
+        $command->exchange()->createTrader($command->traderId());
 
-        foreach ($trader->dispatchableEvents() as $event) {
+        foreach ($command->exchange()->dispatchableEvents() as $event) {
             $this->messageBus->dispatch($event);
         }
+
+        $command->exchange()->clearDispatchableEvents();
     }
 }

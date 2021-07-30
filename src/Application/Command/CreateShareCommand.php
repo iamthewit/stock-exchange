@@ -3,27 +3,37 @@
 namespace StockExchange\Application\Command;
 
 use Ramsey\Uuid\UuidInterface;
+use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\Symbol;
 
 class CreateShareCommand
 {
-    private UuidInterface $id;
+    private Exchange $exchange;
+    private UuidInterface $shareId;
     private Symbol $symbol;
 
     /**
      * CreateShareCommand constructor.
-     * @param UuidInterface $id
-     * @param Symbol $symbol
+     *
+     * @param Exchange      $exchange
+     * @param UuidInterface $shareId
+     * @param Symbol        $symbol
      */
-    public function __construct(UuidInterface $id, Symbol $symbol)
+    public function __construct(Exchange $exchange, UuidInterface $shareId, Symbol $symbol)
     {
-        $this->id = $id;
-        $this->symbol = $symbol;
+        $this->exchange = $exchange;
+        $this->shareId = $shareId;
+        $this->symbol  = $symbol;
     }
 
-    public function id(): UuidInterface
+    public function exchange(): Exchange
     {
-        return $this->id;
+        return $this->exchange;
+    }
+
+    public function shareId(): UuidInterface
+    {
+        return $this->shareId;
     }
 
     public function symbol(): Symbol

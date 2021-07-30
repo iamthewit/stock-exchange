@@ -2,11 +2,15 @@
 
 namespace StockExchange\Application\Handler;
 
-use StockExchange\Application\Command\CreateBidCommand;
+use StockExchange\Application\Command\AllocateShareToTraderCommand;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class CreateBidHandler implements MessageHandlerInterface
+/**
+ * Class AllocateShareToTraderHandler
+ * @package StockExchange\Application\Handler
+ */
+class AllocateShareToTraderHandler implements MessageHandlerInterface
 {
     private MessageBusInterface $messageBus;
 
@@ -15,14 +19,12 @@ class CreateBidHandler implements MessageHandlerInterface
         $this->messageBus = $messageBus;
     }
 
-    public function __invoke(CreateBidCommand $command): void
+    public function __invoke(AllocateShareToTraderCommand $command): void
     {
         $exchange = $command->exchange();
-        $exchange->bid(
-            $command->id(),
-            $command->trader(),
-            $command->symbol(),
-            $command->price()
+        $exchange->allocateShareToTrader(
+            $command->share(),
+            $command->trader()
         );
 
         // dispatch aggregate events

@@ -281,6 +281,56 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         }
     }
 
+    public function createTrader(UuidInterface $traderId)
+    {
+        // TODO: do we need a trader collection for the exchange... probably?
+
+        $trader = Trader::create($traderId);
+
+        foreach ($trader->dispatchableEvents() as $traderEvent) {
+            $this->addDispatchableEvent($traderEvent);
+        }
+
+        // TODO: should we return the trader...?
+
+        // TODO: do we need a specific exchange event for this? we already have a trader event
+    }
+
+    public function createShare(UuidInterface $shareId, Symbol $symbol)
+    {
+        $share = Share::create($shareId, $symbol);
+
+        foreach ($share->dispatchableEvents() as $shareEvent) {
+            $this->addDispatchableEvent($shareEvent);
+        }
+    }
+
+    /**
+     * This method is used to allocate a share that has not yet been traded
+     * to a trader. This occurs when new shares become available to the exchange.
+     *
+     * @param Share  $share
+     * @param Trader $trader
+     */
+    public function allocateShareToTrader(Share $share, Trader $trader)
+    {
+        // TODO: validate that this share has not been previously traded
+
+        // transfer ownership of the share to the trader
+        $share->transferOwnershipToTrader($trader);
+
+        foreach ($share->dispatchableEvents() as $event) {
+            $this->addDispatchableEvent($event);
+        }
+
+        // add share to traders share collection
+        $trader->addShare($share);
+
+        foreach ($trader->dispatchableEvents() as $event) {
+            $this->addDispatchableEvent($event);
+        }
+    }
+
     /**
      * @return array{
      * id: string,

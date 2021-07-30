@@ -29,5 +29,7 @@ class CreateAskHandler implements MessageHandlerInterface
         foreach ($exchange->dispatchableEvents() as $event) {
             $this->messageBus->dispatch($event);
         }
+
+        $exchange->clearDispatchableEvents();
     }
 }
