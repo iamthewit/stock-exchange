@@ -29,18 +29,20 @@ class GetAllTradersHandler implements MessageHandlerInterface
             ->init(function (): array {
                 return [];
             })
-//            ->fromStream('$ct-' . Trader::class)
             ->fromCategory(Trader::class)
             ->whenAny(function (array $state, Message $event): array {
-                $state[] = $event;
+                $state[$event->metadata()['_aggregate_id']][] = $event;
 
                 return $state;
             })
             ->run()
         ;
 
-        \Kint::dump($getTradersQuery->getState());
+        $traders = [];
+        foreach ($getTradersQuery->getState() as $traderEvents) {
+            $traders[] = Trader::restoreStateFromEvents($traderEvents);
+        }
 
-//        return Trader::restoreStateFromEvents($getTradersQuery->getState());
+        return new TraderCollection($traders);
     }
 }
