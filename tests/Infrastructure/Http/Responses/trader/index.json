@@ -1,0 +1,7 @@
+[
+  {
+    "id": @uuid@,
+    "shares": @array@
+  },
+  @array_previous_repeat@
+]

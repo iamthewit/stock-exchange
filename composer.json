@@ -31,6 +31,7 @@
     },
     "require-dev": {
         "kint-php/kint": "^3.3",
+        "lchrusciel/api-test-case": "^5.1",
         "phpmd/phpmd": "^2.10",
         "phpstan/phpstan": "^0.12.90",
         "phpunit/phpunit": "^9.5",
