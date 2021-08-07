@@ -10,16 +10,12 @@ use StockExchange\Infrastructure\Http\Controller\TradeController;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class TradeControllerTest extends JsonApiTestCase
+class TraderControllerTest extends JsonApiTestCase
 {
     public function testItDoesSomething()
     {
 //        $this->markTestIncomplete();
         
-        // This calls KernelTestCase::bootKernel(), and creates a
-        // "client" that is acting as the browser
-//        $client = static::createClient();
-
         // Request a specific page
         $this->client->request('GET', '/trader');
 
@@ -47,11 +43,9 @@ class TradeControllerTest extends JsonApiTestCase
                 '
         );
 
-//        $this->assertTrue(
-//            $match
-//        );
+        d($this->client->getResponse()->getContent(), $matcher->error());
 
-        d($matcher->error());
+        $this->assertTrue($match);
 
     }
 }
