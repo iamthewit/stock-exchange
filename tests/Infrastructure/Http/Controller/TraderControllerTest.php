@@ -12,40 +12,34 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class TraderControllerTest extends JsonApiTestCase
 {
-    public function testItDoesSomething()
+    public function testTheIndexRouteReturnsAJSONArrayOfTraderUUIDs()
     {
-//        $this->markTestIncomplete();
-        
-        // Request a specific page
         $this->client->request('GET', '/trader');
 
-        // Validate a successful response and some content
-//        $this->assertResponseIsSuccessful();
-//        $this->assertJson($client->getResponse()->getContent());
-
-//        $this->assertResponse(
-//            $this->client->getResponse(),
-//            'trader/index'
-//        );
-
-        $matcher = new PHPMatcher();
-
-        $match = $matcher->match(
-            $this->client->getResponse()->getContent(),
-            '
-                [
-                  {
-                    "id": @uuid@,
-                    "shares": @array@
-                  },
-                  @...@
-                ]
-                '
+        $this->assertResponse(
+            $this->client->getResponse(),
+            'trader/index' // tests/Infrastructure/Http/Responses/trader/index.json
         );
 
-        d($this->client->getResponse()->getContent(), $matcher->error());
+        // The assertResponse method does a few things,
+        // one of which is calling PHPMatcher with something
+        // like this:
+//        $matcher = new PHPMatcher();
+//        $match = $matcher->match(
+//            $this->client->getResponse()->getContent(),
+//            '
+//            [
+//              {
+//                "id": @uuid@
+//              },
+//              @...@
+//            ]
+//            '
+//        );
 
-        $this->assertTrue($match);
+        // useful for debugging:
+//        d($this->client->getResponse()->getContent(), $matcher->error());
 
+//        $this->assertTrue($match);
     }
 }

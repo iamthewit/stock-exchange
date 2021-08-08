@@ -31,13 +31,6 @@ class GetAllTradersHandler implements MessageHandlerInterface
                 return [];
             })
             ->fromCategory(Trader::class)
-            // Use this if we want the trader with all of there event history associated
-//            ->whenAny(function (array $state, Message $event): array {
-//                $state[$event->metadata()['_aggregate_id']][] = $event;
-//
-//                return $state;
-//            })
-            // Use this is we just want a basic list of traders:
             ->when([
                 TraderCreated::class => function (array $state, Message $event): array {
                     $state[$event->metadata()['_aggregate_id']][] = $event;
@@ -45,7 +38,7 @@ class GetAllTradersHandler implements MessageHandlerInterface
                 },
                 // if we had a TraderDeleted event we would wont to account for that here
                 // so that we don't return traders that no longer exist.
-                // OR maybe we should habe a more specific command/handler for returning all
+                // OR maybe we should have a more specific command/handler for returning all
                 // active traders and leave this one to return all traders no matter what...?
             ])
             ->run()
