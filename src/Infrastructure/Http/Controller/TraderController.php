@@ -4,6 +4,8 @@ namespace StockExchange\Infrastructure\Http\Controller;
 
 use StockExchange\Application\MessageBus\QueryHandlerBus;
 use StockExchange\Application\Query\GetAllTradersQuery;
+use StockExchange\Infrastructure\DTO\TraderCollectionDTO;
+use StockExchange\Infrastructure\DTO\TraderWithoutSharesDTO;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,8 +15,13 @@ class TraderController extends AbstractController
     #[Route('/trader', name: 'trader')]
     public function index(QueryHandlerBus $queryHandlerBus): Response
     {
-        $query = $queryHandlerBus->query(new GetAllTradersQuery());
+        $traders = $queryHandlerBus->query(new GetAllTradersQuery());
 
-        return $this->json($query);
+        $traderDTOs = [];
+        foreach ($traders as $trader) {
+            $traderDTOs[] = new TraderWithoutSharesDTO($trader);
+        }
+
+        return $this->json(new TraderCollectionDTO($traderDTOs));
     }
 }
