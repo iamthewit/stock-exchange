@@ -6,8 +6,11 @@ use ApiTestCase\JsonApiTestCase;
 use Coduo\PHPMatcher\Matcher\JsonMatcher;
 use Coduo\PHPMatcher\PHPMatcher;
 use Kint\Kint;
+use Ramsey\Uuid\Uuid;
 use StockExchange\Infrastructure\Http\Controller\TradeController;
 use PHPUnit\Framework\TestCase;
+use StockExchange\StockExchange\Symbol;
+use StockExchange\Tests\Helpers\EventStoreSeeder;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class TraderControllerTest extends JsonApiTestCase
@@ -41,5 +44,25 @@ class TraderControllerTest extends JsonApiTestCase
 //        d($this->client->getResponse()->getContent(), $matcher->error());
 
 //        $this->assertTrue($match);
+    }
+
+    public function testTheResourceRouteReturnsAJSONTraderObject()
+    {
+        /** @var EventStoreSeeder $eventStoreSeeder */
+        $eventStoreSeeder = $this::$container->get(EventStoreSeeder::class);
+
+        $exchange = $eventStoreSeeder->createExchange(
+            Uuid::fromString($this::$container->getParameter('stock_exchange.default_exchange_id'))
+        );
+
+        $traderId = Uuid::uuid4();
+        $trader = $eventStoreSeeder->createTraderWithShares($traderId, $exchange, Symbol::fromValue('FOO'));
+
+        $this->client->request('GET', '/trader/' . $trader->id()->toString());
+
+        $this->assertResponse(
+            $this->client->getResponse(),
+            'trader/resource'
+        );
     }
 }
