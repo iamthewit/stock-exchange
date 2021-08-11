@@ -2,6 +2,7 @@
 
 namespace StockExchange\Tests\Helpers;
 
+use PDO;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\Application\Command\AllocateShareToTraderCommand;
@@ -16,6 +17,7 @@ use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\Share;
 use StockExchange\StockExchange\Symbol;
 use StockExchange\StockExchange\Trader;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
@@ -24,19 +26,51 @@ use Symfony\Component\Messenger\MessageBusInterface;
  */
 class EventStoreSeeder
 {
+    private ParameterBagInterface $params;
     private MessageBusInterface $messageBus;
     private QueryHandlerBus $queryHandlerBus;
 
     /**
      * EventStoreSeeder constructor.
      *
-     * @param MessageBusInterface $messageBus
-     * @param QueryHandlerBus     $queryHandlerBus
+     * @param ParameterBagInterface $params
+     * @param MessageBusInterface   $messageBus
+     * @param QueryHandlerBus       $queryHandlerBus
      */
-    public function __construct(MessageBusInterface $messageBus, QueryHandlerBus $queryHandlerBus)
-    {
+    public function __construct(
+        ParameterBagInterface $params,
+        MessageBusInterface $messageBus,
+        QueryHandlerBus $queryHandlerBus
+    ) {
+        $this->params = $params;
         $this->messageBus = $messageBus;
         $this->queryHandlerBus = $queryHandlerBus;
+    }
+
+    public function dropDatabase()
+    {
+        $pdo = new PDO($this->params->get('stock_exchange.mysql_dsn_no_db_specified'));
+
+        $statement = $pdo->prepare('DROP DATABASE ' . $this->params->get('stock_exchange.db_name'));
+        $statement->execute();
+    }
+
+    public function createDatabase()
+    {
+        $pdo = new PDO($this->params->get('stock_exchange.mysql_dsn_no_db_specified'));
+
+        $statement = $pdo->prepare('CREATE DATABASE ' . $this->params->get('stock_exchange.db_name'));
+        $statement->execute();
+
+        // seed the base tables
+
+        $pdo = new PDO($this->params->get('stock_exchange.mysql_dsn'));
+
+        $statement = $pdo->prepare(file_get_contents(__DIR__ . './../../config/scripts/mysql/01_event_streams_table.sql'));
+        $statement->execute();
+
+        $statement = $pdo->prepare(file_get_contents(__DIR__ . './../../config/scripts/mysql/02_projections_table.sql'));
+        $statement->execute();
     }
 
     public function createExchange(UuidInterface $id): Exchange

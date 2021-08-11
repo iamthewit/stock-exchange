@@ -24,4 +24,11 @@ class TraderController extends AbstractController
 
         return $this->json(new TraderCollectionDTO($traderDTOs));
     }
+
+    // TODO: single action controllers
+    #[Route('/trader/{id}', name: 'trader details')]
+    public function resource(string $id)
+    {
+        d($id);die;
+    }
 }

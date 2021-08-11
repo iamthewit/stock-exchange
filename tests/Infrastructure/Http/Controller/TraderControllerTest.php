@@ -51,6 +51,9 @@ class TraderControllerTest extends JsonApiTestCase
         /** @var EventStoreSeeder $eventStoreSeeder */
         $eventStoreSeeder = $this::$container->get(EventStoreSeeder::class);
 
+        $eventStoreSeeder->dropDatabase();
+        $eventStoreSeeder->createDatabase();
+
         $exchange = $eventStoreSeeder->createExchange(
             Uuid::fromString($this::$container->getParameter('stock_exchange.default_exchange_id'))
         );
@@ -59,7 +62,7 @@ class TraderControllerTest extends JsonApiTestCase
         $trader = $eventStoreSeeder->createTraderWithShares($traderId, $exchange, Symbol::fromValue('FOO'));
 
         $this->client->request('GET', '/trader/' . $trader->id()->toString());
-
+        
         $this->assertResponse(
             $this->client->getResponse(),
             'trader/resource'
