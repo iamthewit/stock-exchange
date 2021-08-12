@@ -1,0 +1,11 @@
+{
+  "id": @uuid@,
+  "shares": [
+      {
+        "id": @uuid@,
+        "symbol": @string@,
+        "owner_id": @uuid@
+      },
+    @...@
+  ]
+}

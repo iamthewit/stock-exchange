@@ -66,10 +66,14 @@ class EventStoreSeeder
 
         $pdo = new PDO($this->params->get('stock_exchange.mysql_dsn'));
 
-        $statement = $pdo->prepare(file_get_contents(__DIR__ . './../../config/scripts/mysql/01_event_streams_table.sql'));
+        $statement = $pdo->prepare(
+            file_get_contents(__DIR__ . './../../config/scripts/mysql/01_event_streams_table.sql')
+        );
         $statement->execute();
 
-        $statement = $pdo->prepare(file_get_contents(__DIR__ . './../../config/scripts/mysql/02_projections_table.sql'));
+        $statement = $pdo->prepare(
+            file_get_contents(__DIR__ . './../../config/scripts/mysql/02_projections_table.sql')
+        );
         $statement->execute();
     }
 
@@ -80,13 +84,17 @@ class EventStoreSeeder
         return $this->queryHandlerBus->query(new GetExchangeByIdQuery($id));
     }
 
-    public function createTraderWithShares(UuidInterface $id, Exchange $exchange, Symbol $symbol): Trader
-    {
+    public function createTraderWithShares(
+        UuidInterface $id,
+        Exchange $exchange,
+        Symbol $symbol,
+        int $shares = 10
+    ): Trader {
         // create a trader
         $this->messageBus->dispatch(new CreateTraderCommand($exchange, $id));
 
         // create some shares
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < $shares; $i++) {
             // get trader by id
             /** @var Trader $trader */
             $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($id));
