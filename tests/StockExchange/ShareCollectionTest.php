@@ -38,4 +38,30 @@ class ShareCollectionTest extends TestCase
 
         $this->assertCount(2, $filteredCollection);
     }
+
+    public function testJSONForm()
+    {
+        $this->markTestIncomplete();
+
+        $collection = new ShareCollection([
+            Share::create(
+                Uuid::uuid4(),
+                Symbol::fromValue('FOO')
+            ),
+            Share::create(
+                Uuid::uuid4(),
+                Symbol::fromValue('FOO')
+            ),
+            Share::create(
+                Uuid::uuid4(),
+                Symbol::fromValue('BAR')
+            ),
+            Share::create(
+                Uuid::uuid4(),
+                Symbol::fromValue('BAR')
+            ),
+        ]);
+
+        d(json_encode($collection));
+    }
 }

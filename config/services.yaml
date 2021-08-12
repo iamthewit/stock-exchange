@@ -5,6 +5,9 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     stock_exchange.default_exchange_id: '%env(EXCHANGE_ID)%'
+    stock_exchange.mysql_dsn: '%env(MYSQL_DSN)%'
+    stock_exchange.mysql_dsn_no_db_specified: '%env(MYSQL_DSN_NO_DB_SPECIFIED)%'
+    stock_exchange.db_name: '%env(DB_NAME)%'
 
 services:
     # default configuration for services in *this* file
@@ -30,3 +33,6 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    StockExchange\Tests\Helpers\:
+        resource: '../tests/Helpers/'
+        public: true
