@@ -5,6 +5,7 @@ namespace StockExchange\Infrastructure\CLI;
 use Kint\Kint;
 use Ramsey\Uuid\Uuid;
 use StockExchange\Application\Command\AllocateShareToTraderCommand;
+use StockExchange\Application\Command\CreateBidCommand;
 use StockExchange\Application\Command\CreateExchangeCommand;
 use StockExchange\Application\Command\CreateShareCommand;
 use StockExchange\Application\Command\CreateTraderCommand;
@@ -13,6 +14,7 @@ use StockExchange\Application\Query\GetExchangeByIdQuery;
 use StockExchange\Application\Query\GetShareByIdQuery;
 use StockExchange\Application\Query\GetTraderByIdQuery;
 use StockExchange\StockExchange\Exchange;
+use StockExchange\StockExchange\Price;
 use StockExchange\StockExchange\Share;
 use StockExchange\StockExchange\Symbol;
 use StockExchange\StockExchange\Trader;
@@ -79,7 +81,34 @@ class SeedEventStreamDatabaseCommand extends Command
 
         $traderOne = $this->createTraderWithShares($exchange, Symbol::fromValue('FOO'));
 
+        // create a bid for trader one
+        $bidOneId = Uuid::uuid4();
+        $this->messageBus->dispatch(
+            new CreateBidCommand(
+                $exchange,
+                $bidOneId,
+                $traderOne,
+                Symbol::fromValue('BAR'),
+                Price::fromValue(100)
+            )
+        );
+
         $traderTwo = $this->createTraderWithShares($exchange, Symbol::fromValue('BAR'));
+
+        d($exchange->dispatchableEvents());
+
+        // create a bid for trader two
+        $this->messageBus->dispatch(
+            new CreateBidCommand(
+                $exchange,
+                Uuid::uuid4(),
+                $traderTwo,
+                Symbol::fromValue('FOO'),
+                Price::fromValue(100)
+            )
+        );
+
+        // TODO: create some asks and trade some shares!
 
 //        Kint::dump($traderOne, $traderTwo);
 
@@ -101,7 +130,7 @@ class SeedEventStreamDatabaseCommand extends Command
         $this->messageBus->dispatch(new CreateTraderCommand($exchange, $traderId));
 
         // create some shares
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             // get trader by id
             /** @var Trader $trader */
             $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId));

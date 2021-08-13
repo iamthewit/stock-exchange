@@ -194,17 +194,21 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // create the bid
         $bid = Bid::create($id, $trader, $symbol, $price);
 
-        // TODO: add event meta data to Bid object
-//        foreach ($bid->dispatchableEvents() as $event) {
-//            $this->addDispatchableEvent($event);
-//        }
+        foreach ($bid->dispatchableEvents() as $event) {
+            $this->addDispatchableEvent($event);
+        }
 
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
 
-        $bidAdded = new BidAddedToExchange($bid);
-        $bidAdded = $bidAdded->withMetadata($this->eventMetaData());
-        $this->addDispatchableEvent($bidAdded);
+        // TODO: figure this out
+        // this is causing some issues with the event store, we get a duplicate key error
+        // when trying to create two bids one after the other, the duplicate key error is
+        // referring to the id of the exchange though. For some reason the BidAddedToExchange
+        // is causing this problem but only when it is called twice in succession...
+//        $bidAdded = new BidAddedToExchange($bid);
+//        $bidAdded = $bidAdded->withMetadata($this->eventMetaData());
+//        $this->addDispatchableEvent($bidAdded);
 
         // TODO: instead of executing trades on the bid/ask method
         // create another method that checks all bid/asks and executes

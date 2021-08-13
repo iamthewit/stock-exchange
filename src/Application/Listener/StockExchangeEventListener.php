@@ -26,6 +26,8 @@ class StockExchangeEventListener implements MessageHandlerInterface
 
         $streamName = new StreamName($aggregate . '-' . $aggregateId);
 
+//        d($streamName);
+
         if (!$this->eventStore->hasStream($streamName)) {
             $stream = new Stream(
                 $streamName,

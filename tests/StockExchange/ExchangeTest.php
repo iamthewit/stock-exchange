@@ -51,11 +51,9 @@ class ExchangeTest extends TestCase
         $this->assertCount(1, $exchange->bids());
 
         // assert that the domain will dispatch the bid events in the correct order
-        $this->assertCount(2, $exchange->dispatchableEvents());
-
-        // TODO: add this back in
-//        $this->assertInstanceOf(BidCreated::class, $exchange->dispatchableEvents()[1]);
-        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->dispatchableEvents()[1]);
+        $this->assertCount(3, $exchange->dispatchableEvents());
+        $this->assertInstanceOf(BidCreated::class, $exchange->dispatchableEvents()[1]);
+        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->dispatchableEvents()[2]);
     }
 
     public function testAnAskCanBeMade()
