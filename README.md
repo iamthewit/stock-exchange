@@ -18,6 +18,8 @@ TODO
 
 `./vendor/bin/phpunit tests`
 
+_Note:_ Some of the tests require a database to be in place. See the [Database](#database) section below for more info. 
+
 ### Run tests with code coverage
 
 `composer phpunit-cc`
@@ -32,13 +34,14 @@ Start the DB container:
 
 `./start-mysql-event-streams.sh`
 
+Seed / Re-seed the DB:
+
+`./seed-mysql-event-streams.sh`
+
+
 Stop the DB container:
 
 `./stop-mysql-event-streams.sh`
-
-Drop and Re-seed the DB:
-
-`./reseed-mysql-event-streams.sh`
 
 ### Migrations
 

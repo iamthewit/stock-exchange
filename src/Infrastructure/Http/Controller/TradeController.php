@@ -3,7 +3,6 @@
 namespace StockExchange\Infrastructure\Http\Controller;
 
 use Ramsey\Uuid\Uuid;
-use StockExchange\Application\Handler\GetExchangeByIdHandler;
 use StockExchange\Application\MessageBus\QueryHandlerBus;
 use StockExchange\Application\Query\GetExchangeByIdQuery;
 use StockExchange\Application\Query\GetTradesQuery;
