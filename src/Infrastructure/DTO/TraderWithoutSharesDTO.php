@@ -8,7 +8,7 @@ namespace StockExchange\Infrastructure\DTO;
  */
 class TraderWithoutSharesDTO extends AbstractTraderDTO
 {
-    public function asArray(): array
+    public function jsonSerialize(): array
     {
         return [
             'id' => $this->getTrader()->id()->toString()

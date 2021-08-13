@@ -3,6 +3,7 @@
 namespace StockExchange\Infrastructure\DTO;
 
 use Exception;
+use StockExchange\StockExchange\Exception\TraderCollectionCreationException;
 
 /**
  * Class TraderWithoutSharesCollectionDTO
@@ -23,7 +24,9 @@ class TraderCollectionDTO implements \JsonSerializable
     {
         foreach ($traders as $trader) {
             if (!is_a($trader, AbstractTraderDTO::class)) {
-                throw new Exception('You fool! What have you done!'); // TODO: sort this out
+                throw new TraderCollectionCreationException(
+                    'Can only create a TraderCollectionDTO from an array of objects that each extend AbstractTraderDTO.'
+                );
             }
         }
 
