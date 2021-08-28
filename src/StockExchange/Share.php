@@ -9,9 +9,8 @@ use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\EventInterface;
-use StockExchange\StockExchange\Event\ShareCreatedFromSymbol;
-use StockExchange\StockExchange\Event\ShareOwnershipTransferred;
-use StockExchange\StockExchange\Event\TraderCreated;
+use StockExchange\StockExchange\Event\Share\ShareCreatedFromSymbol;
+use StockExchange\StockExchange\Event\Share\ShareOwnershipTransferred;
 use StockExchange\StockExchange\Exception\StateRestorationException;
 
 class Share implements JsonSerializable, ArrayableInterface

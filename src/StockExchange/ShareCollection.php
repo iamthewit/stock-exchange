@@ -6,6 +6,8 @@ use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use JsonSerializable;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Exception\ShareCollectionCreationException;
 
 /**
@@ -86,5 +88,13 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
                 return $share->symbol()->value() === $symbol->value();
             })
         );
+    }
+
+    public function removeShare(UuidInterface $id): ShareCollection
+    {
+        $shares = $this->shares;
+        unset($shares[$id->toString()]);
+
+        return new self($shares);
     }
 }

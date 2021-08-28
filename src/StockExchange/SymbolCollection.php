@@ -43,6 +43,11 @@ class SymbolCollection implements IteratorAggregate, Countable, JsonSerializable
         }
     }
 
+    public function toArray(): array
+    {
+        return $this->symbols;
+    }
+
     /**
      * @return ArrayIterator<int, Symbol>
      */

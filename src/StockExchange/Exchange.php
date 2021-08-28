@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
-use Iterator;
 use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
-use StockExchange\StockExchange\Event\AskAddedToExchange;
-use StockExchange\StockExchange\Event\BidAddedToExchange;
+use StockExchange\StockExchange\Event\Exchange\AskAddedToExchange;
+use StockExchange\StockExchange\Event\Exchange\BidAddedToExchange;
 use StockExchange\StockExchange\Event\EventInterface;
-use StockExchange\StockExchange\Event\ExchangeCreated;
-use StockExchange\StockExchange\Event\AskRemovedFromExchange;
-use StockExchange\StockExchange\Event\BidRemovedFromExchange;
-use StockExchange\StockExchange\Event\TradeExecuted;
+use StockExchange\StockExchange\Event\Exchange\ExchangeCreated;
+use StockExchange\StockExchange\Event\Exchange\AskRemovedFromExchange;
+use StockExchange\StockExchange\Event\Exchange\BidRemovedFromExchange;
+use StockExchange\StockExchange\Event\Exchange\ShareAllocatedToTrader;
+use StockExchange\StockExchange\Event\Exchange\ShareAddedToExchange;
+use StockExchange\StockExchange\Event\Exchange\TradeExecuted;
+use StockExchange\StockExchange\Event\Exchange\TraderAddedToExchange;
 use StockExchange\StockExchange\Exception\AskCollectionCreationException;
 use StockExchange\StockExchange\Exception\BidCollectionCreationException;
 use StockExchange\StockExchange\Exception\ShareCollectionCreationException;
@@ -30,6 +32,8 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private BidCollection $bids; // TODO: move this to an orderbook class
     private AskCollection $asks;  // TODO: move this to an orderbook class
     private TradeCollection $trades;
+    private TraderCollection $traders;
+    private ShareCollection $shares;
     /**
      * @var EventInterface[]
      */
@@ -50,7 +54,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      * @param BidCollection $bids
      * @param AskCollection $asks
      * @param TradeCollection $trades
-     *
+     * @param TraderCollection $traders
      * @return Exchange
      */
     public static function create(
@@ -58,14 +62,23 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         SymbolCollection $symbols,
         BidCollection $bids,
         AskCollection $asks,
-        TradeCollection $trades
+        TradeCollection $trades,
+        TraderCollection $traders,
+        ShareCollection $shares,
     ): self {
         $exchange = new self();
         $exchange->id = $id;
+
+        // TODO: initialise all of these with empty collections.
+        // when an exchange is created nothing exists.
+        // each of these will be added via other state
+        // changes (events) after exchange creation
         $exchange->symbols = $symbols;
         $exchange->bids = $bids;
         $exchange->asks = $asks;
         $exchange->trades = $trades;
+        $exchange->traders = $traders;
+        $exchange->shares = $shares;
 
         $exchangeCreated = new ExchangeCreated($exchange);
         $exchangeCreated = $exchangeCreated->withMetadata($exchange->eventMetaData());
@@ -118,6 +131,28 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
                 case is_a($event, TradeExecuted::class):
                     $exchange->applyTradeExecuted($event);
                     break;
+
+                case is_a($event, TraderAddedToExchange::class):
+                    $exchange->applyTraderAddedToExchange($event);
+                    break;
+
+                case is_a($event, ShareAddedToExchange::class):
+                    $exchange->applyShareAddedToExchange($event);
+                    break;
+
+                case is_a($event, ShareAllocatedToTrader::class):
+                    $exchange->applyShareAllocatedToTrader($event);
+                    break;
+
+                // TODO:
+
+                // the event name we used here is already in use.
+                // - think of another name?
+                // - use the same event in two different entities?
+
+//                case is_a($event, ShareOwnershipTransferred::class):
+//                    $exchange->applyTraderAddedToExchange($event);
+//                    break;
             }
         }
 
@@ -165,6 +200,22 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     }
 
     /**
+     * @return TraderCollection
+     */
+    public function traders(): TraderCollection
+    {
+        return $this->traders;
+    }
+
+    /**
+     * @return ShareCollection
+     */
+    public function shares(): ShareCollection
+    {
+        return $this->shares;
+    }
+
+    /**
      * @return EventInterface[]
      */
     public function appliedEvents(): array
@@ -197,6 +248,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         foreach ($bid->dispatchableEvents() as $event) {
             $this->addDispatchableEvent($event);
         }
+        $bid->clearDispatchableEvents(); // TODO: can probably remove this...
 
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
@@ -206,9 +258,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // when trying to create two bids one after the other, the duplicate key error is
         // referring to the id of the exchange though. For some reason the BidAddedToExchange
         // is causing this problem but only when it is called twice in succession...
-//        $bidAdded = new BidAddedToExchange($bid);
-//        $bidAdded = $bidAdded->withMetadata($this->eventMetaData());
-//        $this->addDispatchableEvent($bidAdded);
+        $bidAdded = new BidAddedToExchange($bid);
+        $bidAdded = $bidAdded->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($bidAdded);
 
         // TODO: instead of executing trades on the bid/ask method
         // create another method that checks all bid/asks and executes
@@ -287,33 +339,39 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
     public function createTrader(UuidInterface $traderId)
     {
-        // TODO: do we need a trader collection for the exchange... probably?
-
         $trader = Trader::create($traderId);
 
         foreach ($trader->dispatchableEvents() as $traderEvent) {
             $this->addDispatchableEvent($traderEvent);
         }
 
-        // TODO: should we return the trader...?
+        $this->traders = new TraderCollection($this->traders()->toArray() + [$trader]);
 
-        // TODO: do we need a specific exchange event for this? we already have a trader event
+        $traderAdded = new TraderAddedToExchange($trader);
+        $traderAdded = $traderAdded->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($traderAdded);
     }
 
     public function createShare(UuidInterface $shareId, Symbol $symbol)
     {
         $share = Share::create($shareId, $symbol);
 
+        $this->shares = new ShareCollection($this->shares()->toArray() + [$share]);
+
         foreach ($share->dispatchableEvents() as $shareEvent) {
             $this->addDispatchableEvent($shareEvent);
         }
+
+        $shareAdded = new ShareAddedToExchange($share);
+        $shareAdded = $shareAdded->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($shareAdded);
     }
 
     /**
      * This method is used to allocate a share that has not yet been traded
      * to a trader. This occurs when new shares become available to the exchange.
      *
-     * @param Share  $share
+     * @param Share $share
      * @param Trader $trader
      */
     public function allocateShareToTrader(Share $share, Trader $trader)
@@ -327,12 +385,24 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
             $this->addDispatchableEvent($event);
         }
 
+        // update share in share collection
+        $this->shares()->removeShare($share->id());
+        $this->shares = new ShareCollection($this->shares()->toArray() + [$share]);
+
         // add share to traders share collection
         $trader->addShare($share);
 
         foreach ($trader->dispatchableEvents() as $event) {
             $this->addDispatchableEvent($event);
         }
+
+        // update trader in trader collection
+        $this->traders()->removeTrader($trader->id());
+        $this->traders = new TraderCollection($this->traders()->toArray() + [$trader]);
+
+        $shareAllocated = new ShareAllocatedToTrader($share, $trader);
+        $shareAllocated = $shareAllocated->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($shareAllocated);
     }
 
     /**
@@ -362,11 +432,44 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     {
         return [
             'id' => $this->id()->toString(),
-            'symbols' => $this->symbols(),
-            'bids' => $this->bids(),
-            'asks' => $this->asks(),
-            'trades' => $this->trades(),
+            'symbols' => $this->symbols()->toArray(),
+            'bids' => $this->bids()->toArray(),
+            'asks' => $this->asks()->toArray(),
+            'trades' => $this->trades()->toArray(),
         ];
+    }
+
+    /**
+     * @return array{
+     * _aggregate_id: string,
+     * _aggregate_version: int,
+     * _aggregate_type: string
+     * }
+     */
+    protected function eventMetaData(): array
+    {
+        return [
+            '_aggregate_id' => $this->id()->toString(),
+            '_aggregate_version' => $this->nextAggregateVersion(),
+            '_aggregate_type' => static::class
+        ];
+    }
+
+    private function aggregateVersion(): int
+    {
+        if (count($this->appliedEvents)) {
+            /** @var DomainEvent $lastEvent */
+            $lastEvent = end($this->appliedEvents);
+
+            return $lastEvent->metadata()['_aggregate_version'];
+        }
+
+        return 0;
+    }
+
+    private function nextAggregateVersion(): int
+    {
+        return $this->aggregateVersion() + 1;
     }
 
     /**
@@ -475,17 +578,12 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private function applyExchangeCreated(ExchangeCreated $event): void
     {
         $this->id = Uuid::fromString($event->payload()['id']);
-
-        // TODO: rebuild collections
-//        $this->symbols = new SymbolCollection($event->payload()['symbols']);
-//        $this->bids = new BidCollection($event->payload()['bids']);
-//        $this->asks = new AskCollection($event->payload()['asks']);
-//        $this->trades = new TradeCollection($event->payload()['trades']);
-
         $this->symbols = new SymbolCollection([]);
         $this->bids = new BidCollection([]);
         $this->asks = new AskCollection([]);
         $this->trades = new TradeCollection([]);
+        $this->shares = new ShareCollection([]);
+        $this->traders = new TraderCollection([]);
 
         $this->addAppliedEvent($event);
     }
@@ -497,7 +595,19 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     private function applyBidAddedToExchange(BidAddedToExchange $event): void
     {
-        $this->bids = new BidCollection($this->bids()->toArray() + [$event->bid()]);
+//        dump($event);die;
+        $this->bids = new BidCollection(
+            $this->bids()->toArray() + [
+                Bid::restoreFromValues(
+                    Uuid::fromString($event->payload()['id']),
+                    // using the trader that already exists in the exchanges collection
+                    // TODO: this idea could be reused all over the place!
+                    $this->traders()->toArray()[$event->payload()['trader']['id']],
+                    Symbol::fromValue($event->payload()['symbol']['value']),
+                    Price::fromValue($event->payload()['price']['value'])
+                )
+            ]
+        );
 
         $this->addAppliedEvent($event);
     }
@@ -556,36 +666,57 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         $this->addAppliedEvent($event);
     }
 
-    private function aggregateVersion(): int
+    private function applyTraderAddedToExchange(TraderAddedToExchange $event): void
     {
-        if (count($this->appliedEvents)) {
-            /** @var DomainEvent $lastEvent */
-            $lastEvent = end($this->appliedEvents);
+        $this->traders = new TraderCollection(
+            $this->traders()->toArray() + [
+                Trader::restoreFromValues(
+                    Uuid::fromString($event->payload()['id']),
+                    new ShareCollection([])
+                )
+            ]
+        );
 
-            return $lastEvent->metadata()['_aggregate_version'];
-        }
-
-        return 0;
+        $this->addAppliedEvent($event);
     }
 
-    private function nextAggregateVersion(): int
+    private function applyShareAddedToExchange(ShareAddedToExchange $event)
     {
-        return $this->aggregateVersion() + 1;
+        $this->shares = new ShareCollection(
+            $this->shares()->toArray() + [
+                Share::fromValues(
+                    Uuid::fromString($event->payload()['id']),
+                    Symbol::fromValue($event->payload()['symbol']),
+                    !is_null($event->payload()['owner_id']) ? Uuid::fromString($event->payload()['owner_id']) : null,
+                )
+            ]
+        );
+
+        $this->addAppliedEvent($event);
     }
 
-    /**
-     * @return array{
-     * _aggregate_id: string,
-     * _aggregate_version: int,
-     * _aggregate_type: string
-     * }
-     */
-    protected function eventMetaData(): array
+    private function applyShareAllocatedToTrader(ShareAllocatedToTrader $event)
     {
-        return [
-            '_aggregate_id' => $this->id()->toString(),
-            '_aggregate_version' => $this->nextAggregateVersion(),
-            '_aggregate_type' => static::class
-        ];
+        $this->shares = new ShareCollection(
+            $this->shares()->toArray() + [
+                Share::fromValues(
+                    Uuid::fromString($event->payload()['share']['id']),
+                    Symbol::fromValue($event->payload()['share']['symbol']),
+                    !is_null($event->payload()['share']['owner_id']) ? Uuid::fromString($event->payload()['share']['owner_id']) : null,
+                )
+            ]
+        );
+
+        // TODO: might not need to do this...?
+//        $this->traders = new TraderCollection(
+//            $this->traders()->toArray() + [
+//                Trader::restoreFromValues(
+//                    Uuid::fromString($event->payload()['trader']['id']),
+//                    new ShareCollection([])
+//                )
+//            ]
+//        );
+
+        $this->addAppliedEvent($event);
     }
 }

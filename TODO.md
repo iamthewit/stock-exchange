@@ -1,5 +1,8 @@
 # TODO
 
+- In any 'apply' methods that require other related domain objects - check the collections that already exist on the exchange
+  - i.e applyBidAddedToExchange uses a trader that already exists in the TraderCollection
+- Create consistency between toArray and asArray methods
 - Add tests for all the new handlers
 - Read Models
 - Rebuild exchange collections in applyExchangeCreated

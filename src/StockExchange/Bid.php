@@ -7,7 +7,7 @@ namespace StockExchange\StockExchange;
 use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
-use StockExchange\StockExchange\Event\BidCreated;
+use StockExchange\StockExchange\Event\Bid\BidCreated;
 use StockExchange\StockExchange\Event\EventInterface;
 use StockExchange\StockExchange\Exception\StateRestorationException;
 
@@ -85,6 +85,21 @@ class Bid implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
         return $bid;
     }
 
+    public static function restoreFromValues(
+        UuidInterface $id,
+        Trader $trader,
+        Symbol $symbol,
+        Price $price
+    ): Bid {
+        $bid = new self();
+        $bid->id = $id;
+        $bid->trader = $trader;
+        $bid->symbol = $symbol;
+        $bid->price = $price;
+
+        return $bid;
+    }
+
     /**
      * @return UuidInterface
      */
@@ -140,9 +155,9 @@ class Bid implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
     {
         return [
             'id' => $this->id()->toString(),
-            'trader' => $this->trader(),
-            'symbol' => $this->symbol(),
-            'price' => $this->price(),
+            'trader' => $this->trader()->asArray(),
+            'symbol' => $this->symbol()->asArray(),
+            'price' => $this->price()->asArray(),
         ];
     }
 

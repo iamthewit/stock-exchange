@@ -12,11 +12,13 @@ use StockExchange\StockExchange\Bid;
 use StockExchange\StockExchange\BidCollection;
 use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\Price;
+use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\Symbol;
 use StockExchange\StockExchange\SymbolCollection;
 use StockExchange\StockExchange\Trade;
 use StockExchange\StockExchange\TradeCollection;
 use StockExchange\StockExchange\Trader;
+use StockExchange\StockExchange\TraderCollection;
 
 class GetTradesHandlerTest extends TestCase
 {
@@ -44,7 +46,9 @@ class GetTradesHandlerTest extends TestCase
                             Price::fromValue(100)
                         )
                     )
-                ])
+                ]),
+                new TraderCollection([]),
+                new ShareCollection([])
             )
         );
 

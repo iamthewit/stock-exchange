@@ -1,18 +1,20 @@
 <?php
 
-namespace StockExchange\StockExchange\Event;
+namespace StockExchange\StockExchange\Event\Ask;
 
 use Prooph\Common\Messaging\DomainEvent;
 use StockExchange\StockExchange\Ask;
+use StockExchange\StockExchange\Event\EventInterface;
+use StockExchange\StockExchange\Event\HasEventPayloadTrait;
 
-class AskAddedToExchange extends DomainEvent implements EventInterface
+class AskCreated extends DomainEvent implements EventInterface
 {
     use HasEventPayloadTrait;
 
     private Ask $ask;
 
     /**
-     * AskAdded constructor.
+     * AskCreated constructor.
      * @param Ask $ask
      */
     public function __construct(Ask $ask)
@@ -20,13 +22,5 @@ class AskAddedToExchange extends DomainEvent implements EventInterface
         $this->init();
         $this->setPayload($ask->asArray());
         $this->ask = $ask;
-    }
-
-    /**
-     * @return Ask
-     */
-    public function ask(): Ask
-    {
-        return $this->ask;
     }
 }

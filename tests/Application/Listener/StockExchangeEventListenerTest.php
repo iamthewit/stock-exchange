@@ -10,8 +10,6 @@ use StockExchange\Application\Handler\CreateBidHandler;
 use StockExchange\Application\Handler\CreateExchangeHandler;
 use StockExchange\Application\Handler\GetExchangeByIdHandler;
 use StockExchange\Application\Query\GetExchangeByIdQuery;
-use StockExchange\StockExchange\Bid;
-use StockExchange\StockExchange\Event\BidAddedToExchange;
 use StockExchange\StockExchange\Price;
 use StockExchange\StockExchange\Symbol;
 use StockExchange\StockExchange\Trader;

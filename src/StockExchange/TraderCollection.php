@@ -6,6 +6,7 @@ use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use JsonSerializable;
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Exception\TraderCollectionCreationException;
 
 /**
@@ -33,7 +34,7 @@ class TraderCollection implements IteratorAggregate, Countable, JsonSerializable
                 );
             }
 
-            $this->traders[] = $trader;
+            $this->traders[$trader->id()->toString()] = $trader;
         }
     }
 
@@ -67,5 +68,13 @@ class TraderCollection implements IteratorAggregate, Countable, JsonSerializable
     public function jsonSerialize(): array
     {
         return $this->toArray();
+    }
+
+    public function removeTrader(UuidInterface $id): TraderCollection
+    {
+        $traders = $this->traders;
+        unset($traders[$id->toString()]);
+
+        return new self($traders);
     }
 }

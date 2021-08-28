@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace StockExchange\StockExchange;
 
 use Ramsey\Uuid\UuidInterface;
-use StockExchange\StockExchange\Event\AskCreated;
+use StockExchange\StockExchange\Event\Ask\AskCreated;
 
 class Ask implements DispatchableEventsInterface, \JsonSerializable, ArrayableInterface
 {
@@ -84,9 +84,9 @@ class Ask implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
     {
         return [
             'id' => $this->id()->toString(),
-            'trader' => $this->trader(),
-            'symbol' => $this->symbol(),
-            'price' => $this->price()
+            'trader' => $this->trader()->asArray(),
+            'symbol' => $this->symbol()->asArray(),
+            'price' => $this->price()->asArray()
         ];
     }
 

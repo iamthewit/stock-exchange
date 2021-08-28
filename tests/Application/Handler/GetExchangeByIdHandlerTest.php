@@ -10,10 +10,12 @@ use PHPUnit\Framework\TestCase;
 use StockExchange\Application\Query\GetExchangeByIdQuery;
 use StockExchange\StockExchange\AskCollection;
 use StockExchange\StockExchange\BidCollection;
-use StockExchange\StockExchange\Event\ExchangeCreated;
+use StockExchange\StockExchange\Event\Exchange\ExchangeCreated;
 use StockExchange\StockExchange\Exchange;
+use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\SymbolCollection;
 use StockExchange\StockExchange\TradeCollection;
+use StockExchange\StockExchange\TraderCollection;
 
 class GetExchangeByIdHandlerTest extends TestCase
 {
@@ -25,7 +27,9 @@ class GetExchangeByIdHandlerTest extends TestCase
             new SymbolCollection([]),
             new BidCollection([]),
             new AskCollection([]),
-            new TradeCollection([])
+            new TradeCollection([]),
+            new TraderCollection([]),
+            new ShareCollection([])
         );
 
         $projectionQuery = $this->createMock(Query::class);
