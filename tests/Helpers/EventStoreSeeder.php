@@ -81,7 +81,7 @@ class EventStoreSeeder
     {
         $this->messageBus->dispatch(new CreateExchangeCommand($id));
 
-        return $this->queryHandlerBus->query(new GetExchangeByIdQuery($id));
+        return $this->getExchangeById($id);
     }
 
     public function createTraderWithShares(
@@ -98,6 +98,7 @@ class EventStoreSeeder
             // get trader by id
             /** @var Trader $trader */
             $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($id));
+            $exchange = $this->getExchangeById($exchange->id());
 
             $shareId = Uuid::uuid4();
             $this->messageBus->dispatch(
@@ -112,9 +113,19 @@ class EventStoreSeeder
             $share = $this->queryHandlerBus->query(new GetShareByIdQuery($shareId));
 
             // allocate share to trader
+            $exchange = $this->getExchangeById($exchange->id());
             $this->messageBus->dispatch(new AllocateShareToTraderCommand($exchange, $share, $trader));
         }
 
         return $this->queryHandlerBus->query(new GetTraderByIdQuery($id));
+    }
+
+    /**
+     * @param UuidInterface $id
+     * @return Exchange
+     */
+    public function getExchangeById(UuidInterface $id): Exchange
+    {
+        return $this->queryHandlerBus->query(new GetExchangeByIdQuery($id));
     }
 }

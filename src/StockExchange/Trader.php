@@ -2,13 +2,12 @@
 
 namespace StockExchange\StockExchange;
 
-use Kint\Kint;
 use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\EventInterface;
-use StockExchange\StockExchange\Event\TraderAddedShare;
-use StockExchange\StockExchange\Event\TraderCreated;
+use StockExchange\StockExchange\Event\Trader\TraderAddedShare;
+use StockExchange\StockExchange\Event\Trader\TraderCreated;
 use StockExchange\StockExchange\Exception\StateRestorationException;
 
 /**
@@ -87,6 +86,20 @@ class Trader implements \JsonSerializable, ArrayableInterface
     }
 
     /**
+     * @param UuidInterface $id
+     * @param ShareCollection $shares
+     * @return Trader
+     */
+    public static function restoreFromValues(UuidInterface $id, ShareCollection $shares): Trader
+    {
+        $trader = new self();
+        $trader->id = $id;
+        $trader->shares = $shares;
+
+        return $trader;
+    }
+
+    /**
      * @return UuidInterface
      */
     public function id(): UuidInterface
@@ -146,7 +159,7 @@ class Trader implements \JsonSerializable, ArrayableInterface
     {
         return [
             'id' => $this->id()->toString(),
-            'shares' => $this->shares()
+            'shares' => $this->shares()->toArray()
         ];
     }
 

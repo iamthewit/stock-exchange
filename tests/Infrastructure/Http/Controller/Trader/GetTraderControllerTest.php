@@ -3,12 +3,15 @@
 namespace StockExchange\Tests\Infrastructure\Http\Controller\Trader;
 
 use ApiTestCase\JsonApiTestCase;
+use Coduo\PHPMatcher\PHPUnit\PHPMatcherAssertions;
 use Ramsey\Uuid\Uuid;
 use StockExchange\StockExchange\Symbol;
 use StockExchange\Tests\Helpers\EventStoreSeeder;
 
 class GetTraderControllerTest extends JsonApiTestCase
 {
+    use PHPMatcherAssertions;
+
     public function testTheResourceRouteReturnsAJSONTraderObject()
     {
         /** @var EventStoreSeeder $eventStoreSeeder */
@@ -31,9 +34,20 @@ class GetTraderControllerTest extends JsonApiTestCase
 
         $this->client->request('GET', '/trader/' . $trader->id()->toString());
 
-        $this->assertResponse(
-            $this->client->getResponse(),
-            'trader/resource'
-        );
+        $expectedShares = [];
+        foreach ($trader->shares() as $share) {
+            $expectedShares[$share->id()->toString()] = [
+                "id" => "@uuid@",
+                "symbol" => "@string@",
+                "owner_id" => "@uuid@"
+            ];
+        }
+
+        $expected = json_encode([
+            "id" => "@uuid@",
+            "shares" => $expectedShares
+        ]);
+
+        $this->assertMatchesPattern($expected, $this->client->getResponse()->getContent());
     }
 }

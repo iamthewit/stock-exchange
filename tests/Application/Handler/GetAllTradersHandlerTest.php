@@ -7,4 +7,8 @@ use PHPUnit\Framework\TestCase;
 
 class GetAllTradersHandlerTest extends TestCase
 {
+    public function testAThing()
+    {
+        $this->markTestIncomplete();
+    }
 }

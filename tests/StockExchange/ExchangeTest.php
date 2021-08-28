@@ -4,18 +4,23 @@ namespace StockExchange\Tests\StockExchange;
 
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Ask;
 use StockExchange\StockExchange\AskCollection;
 use StockExchange\StockExchange\Bid;
 use StockExchange\StockExchange\BidCollection;
-use StockExchange\StockExchange\Event\AskAddedToExchange;
-use StockExchange\StockExchange\Event\AskCreated;
-use StockExchange\StockExchange\Event\AskRemovedFromExchange;
-use StockExchange\StockExchange\Event\BidAddedToExchange;
-use StockExchange\StockExchange\Event\BidCreated;
-use StockExchange\StockExchange\Event\ExchangeCreated;
-use StockExchange\StockExchange\Event\BidRemovedFromExchange;
-use StockExchange\StockExchange\Event\TradeExecuted;
+use StockExchange\StockExchange\Event\Exchange\AskAddedToExchange;
+use StockExchange\StockExchange\Event\Ask\AskCreated;
+use StockExchange\StockExchange\Event\Exchange\AskRemovedFromExchange;
+use StockExchange\StockExchange\Event\Exchange\BidAddedToExchange;
+use StockExchange\StockExchange\Event\Bid\BidCreated;
+use StockExchange\StockExchange\Event\Exchange\ExchangeCreated;
+use StockExchange\StockExchange\Event\Exchange\BidRemovedFromExchange;
+use StockExchange\StockExchange\Event\Exchange\ShareAddedToExchange;
+use StockExchange\StockExchange\Event\Exchange\ShareAllocatedToTrader;
+use StockExchange\StockExchange\Event\Exchange\TradeExecuted;
+use StockExchange\StockExchange\Event\Exchange\TraderAddedToExchange;
+use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\Trader;
 use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\Price;
@@ -24,6 +29,7 @@ use StockExchange\StockExchange\Symbol;
 use StockExchange\StockExchange\SymbolCollection;
 use StockExchange\StockExchange\Trade;
 use StockExchange\StockExchange\TradeCollection;
+use StockExchange\StockExchange\TraderCollection;
 
 class ExchangeTest extends TestCase
 {
@@ -35,7 +41,9 @@ class ExchangeTest extends TestCase
             new SymbolCollection([$symbol]),
             new BidCollection([]),
             new AskCollection([]),
-            new TradeCollection([])
+            new TradeCollection([]),
+            new TraderCollection([]),
+            new ShareCollection([])
         );
 
         $seller = Trader::create(Uuid::uuid4());
@@ -51,11 +59,9 @@ class ExchangeTest extends TestCase
         $this->assertCount(1, $exchange->bids());
 
         // assert that the domain will dispatch the bid events in the correct order
-        $this->assertCount(2, $exchange->dispatchableEvents());
-
-        // TODO: add this back in
-//        $this->assertInstanceOf(BidCreated::class, $exchange->dispatchableEvents()[1]);
-        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->dispatchableEvents()[1]);
+        $this->assertCount(3, $exchange->dispatchableEvents());
+        $this->assertInstanceOf(BidCreated::class, $exchange->dispatchableEvents()[1]);
+        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->dispatchableEvents()[2]);
     }
 
     public function testAnAskCanBeMade()
@@ -66,7 +72,9 @@ class ExchangeTest extends TestCase
             new SymbolCollection([$symbol]),
             new BidCollection([]),
             new AskCollection([]),
-            new TradeCollection([])
+            new TradeCollection([]),
+            new TraderCollection([]),
+            new ShareCollection([])
         );
 
         $exchange->ask(
@@ -92,7 +100,9 @@ class ExchangeTest extends TestCase
             new SymbolCollection([$symbol]),
             new BidCollection([]),
             new AskCollection([]),
-            new TradeCollection([])
+            new TradeCollection([]),
+            new TraderCollection([]),
+            new ShareCollection([])
         );
 
         $buyer = Trader::create(Uuid::uuid4());
@@ -144,7 +154,9 @@ class ExchangeTest extends TestCase
             new SymbolCollection([$symbol]),
             new BidCollection([]),
             new AskCollection([]),
-            new TradeCollection([])
+            new TradeCollection([]),
+            new TraderCollection([]),
+            new ShareCollection([])
         );
 
         $buyer = Trader::create(Uuid::uuid4());
@@ -190,22 +202,25 @@ class ExchangeTest extends TestCase
 
     public function testStateCanBeRestoredFromEvents()
     {
+        $traderOne = Trader::create(Uuid::uuid4());
+        $traderTwo = Trader::create(Uuid::uuid4());
+
+        $shareFoo = Share::create(Uuid::uuid4(), Symbol::fromValue('FOO'));
+        $shareBar = Share::create(Uuid::uuid4(), Symbol::fromValue('FOO'));
+
         $bid = Bid::create(
             Uuid::uuid4(),
-            Trader::create(
-                Uuid::uuid4()
-            ),
+            $traderOne,
             Symbol::fromValue('FOO'),
             Price::fromValue(100)
         );
         $ask = Ask::create(
             Uuid::uuid4(),
-            Trader::create(
-                Uuid::uuid4()
-            ),
+            $traderTwo,
             Symbol::fromValue('FOO'),
             Price::fromValue(100)
         );
+
         $events = [
             new ExchangeCreated(
                 Exchange::create(
@@ -213,9 +228,27 @@ class ExchangeTest extends TestCase
                     new SymbolCollection([]),
                     new BidCollection([]),
                     new AskCollection([]),
-                    new TradeCollection([])
+                    new TradeCollection([]),
+                    new TraderCollection([]),
+                    new ShareCollection([])
                 )
             ),
+
+            // TODO: there are missing events in this chain now that more have been added
+            // fill them in!
+
+            // traders
+            new TraderAddedToExchange($traderOne),
+            new TraderAddedToExchange($traderTwo),
+
+            // shares
+            new ShareAddedToExchange($shareFoo),
+            new ShareAddedToExchange($shareBar),
+
+            // allocate shares to traders
+            new ShareAllocatedToTrader($shareFoo, $traderOne),
+            new ShareAllocatedToTrader($shareBar, $traderTwo),
+
             new BidAddedToExchange($bid),
             new AskAddedToExchange($ask),
             new BidRemovedFromExchange($bid),
@@ -226,13 +259,19 @@ class ExchangeTest extends TestCase
         $exchange = Exchange::restoreStateFromEvents($events);
 
         $this->assertInstanceOf(Exchange::class, $exchange);
-        $this->assertCount(6, $exchange->appliedEvents());
+        $this->assertCount(12, $exchange->appliedEvents());
         $this->assertInstanceOf(ExchangeCreated::class, $exchange->appliedEvents()[0]);
-        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->appliedEvents()[1]);
-        $this->assertInstanceOf(AskAddedToExchange::class, $exchange->appliedEvents()[2]);
-        $this->assertInstanceOf(BidRemovedFromExchange::class, $exchange->appliedEvents()[3]);
-        $this->assertInstanceOf(AskRemovedFromExchange::class, $exchange->appliedEvents()[4]);
-        $this->assertInstanceOf(TradeExecuted::class, $exchange->appliedEvents()[5]);
+        $this->assertInstanceOf(TraderAddedToExchange::class, $exchange->appliedEvents()[1]);
+        $this->assertInstanceOf(TraderAddedToExchange::class, $exchange->appliedEvents()[2]);
+        $this->assertInstanceOf(ShareAddedToExchange::class, $exchange->appliedEvents()[3]);
+        $this->assertInstanceOf(ShareAddedToExchange::class, $exchange->appliedEvents()[4]);
+        $this->assertInstanceOf(ShareAllocatedToTrader::class, $exchange->appliedEvents()[5]);
+        $this->assertInstanceOf(ShareAllocatedToTrader::class, $exchange->appliedEvents()[5]);
+        $this->assertInstanceOf(BidAddedToExchange::class, $exchange->appliedEvents()[7]);
+        $this->assertInstanceOf(AskAddedToExchange::class, $exchange->appliedEvents()[8]);
+        $this->assertInstanceOf(BidRemovedFromExchange::class, $exchange->appliedEvents()[9]);
+        $this->assertInstanceOf(AskRemovedFromExchange::class, $exchange->appliedEvents()[10]);
+        $this->assertInstanceOf(TradeExecuted::class, $exchange->appliedEvents()[11]);
 
         $this->assertCount(0, $exchange->bids());
         $this->assertCount(0, $exchange->asks());

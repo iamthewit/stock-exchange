@@ -1,8 +1,10 @@
 <?php
 
-namespace StockExchange\StockExchange\Event;
+namespace StockExchange\StockExchange\Event\Exchange;
 
 use Prooph\Common\Messaging\DomainEvent;
+use StockExchange\StockExchange\Event\EventInterface;
+use StockExchange\StockExchange\Event\HasEventPayloadTrait;
 use StockExchange\StockExchange\Trade;
 
 class TradeExecuted extends DomainEvent implements EventInterface

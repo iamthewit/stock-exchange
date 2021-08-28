@@ -1,8 +1,10 @@
 <?php
 
-namespace StockExchange\StockExchange\Event;
+namespace StockExchange\StockExchange\Event\Share;
 
 use Prooph\Common\Messaging\DomainEvent;
+use StockExchange\StockExchange\Event\EventInterface;
+use StockExchange\StockExchange\Event\HasEventPayloadTrait;
 use StockExchange\StockExchange\Trader;
 
 class ShareOwnershipTransferred extends DomainEvent implements EventInterface
