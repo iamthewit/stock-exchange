@@ -5,7 +5,7 @@ namespace StockExchange\Application\Handler;
 use Prooph\Common\Messaging\Message;
 use Prooph\EventStore\Projection\ProjectionManager;
 use StockExchange\Application\Query\GetAllTradersQuery;
-use StockExchange\StockExchange\Event\Exchange\Exchange\TraderCreated;
+use StockExchange\StockExchange\Event\Trader\TraderCreated;
 use StockExchange\StockExchange\Trader;
 use StockExchange\StockExchange\TraderCollection;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;

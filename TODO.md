@@ -20,3 +20,6 @@ Maybe the traders should not have a share collection that they can manipulate, i
 A trader can then get their share collection from the exchange.
 This would mean that the exchange needs a collection of all shares at all times (which makes sense) but would also become massively inefficient - maybe we need a domain service to deal with this rather than the exchange...?
 
+---
+
+Instead of having to query for the exchange after every state change again (to make sure you have the updated state) maybe we could return the exchange after every state change?...

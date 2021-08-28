@@ -72,7 +72,7 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return array_values($this->toArray()); // TODO: make this change to the other collections
+        return $this->toArray();
     }
 
     /**

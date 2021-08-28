@@ -28,6 +28,8 @@ class ListTradersControllerTest extends JsonApiTestCase
         );
 
         $eventStoreSeeder->createTraderWithShares(Uuid::uuid4(), $exchange, Symbol::fromValue('FOO'), 1);
+
+        $exchange = $eventStoreSeeder->getExchangeById($exchange->id());
         $eventStoreSeeder->createTraderWithShares(Uuid::uuid4(), $exchange, Symbol::fromValue('FOO'), 1);
 
         $this->client->request('GET', '/trader');
