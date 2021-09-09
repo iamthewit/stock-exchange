@@ -83,12 +83,12 @@ class TraderCollection implements IteratorAggregate, Countable, JsonSerializable
         return $this->toArray()[$id->toString()];
     }
 
-    public function match(Share $share): bool
+    public function match(Trader $trader): bool
     {
-        if (!array_key_exists($share->id()->toString(), $this->toArray())) {
-            return false;
+        if (array_key_exists($trader->id()->toString(), $this->toArray())) {
+            return true;
         }
 
-        return $share == $this->toArray()[$share->id()->toString()];
+        return false;
     }
 }

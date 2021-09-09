@@ -109,10 +109,10 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
 
     public function match(Share $share): bool
     {
-        if (!array_key_exists($share->id()->toString(), $this->toArray())) {
-            return false;
+        if (array_key_exists($share->id()->toString(), $this->toArray())) {
+            return true;
         }
 
-        return $share == $this->toArray()[$share->id()->toString()];
+        return false;
     }
 }

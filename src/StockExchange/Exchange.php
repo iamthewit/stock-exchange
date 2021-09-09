@@ -389,6 +389,8 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
         // TODO: validate that the share and trader match ones known to the exchange
 
+//        dd($this->shares, $share);
+
         if(!$this->shares()->match($share)) {
             throw new Exception('shiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit');
         }
@@ -488,7 +490,16 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
     private function nextAggregateVersion(): int
     {
-        return $this->aggregateVersion() + 1;
+        // TODO: make this change to all other nextAggregateVersion methods
+        // also find a nice way to count this
+        $unDispatchedCount = 0;
+        foreach ($this->dispatchableEvents() as $de) {
+            if (str_contains(get_class($de), 'StockExchange\StockExchange\Event\Exchange')) {
+                $unDispatchedCount++;
+            }
+        }
+
+        return $this->aggregateVersion() + $unDispatchedCount + 1;
     }
 
     /**
@@ -516,14 +527,15 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
         // find one of the sellers shares, update the ownership of the share to the buyer
         /** @var Share $share */
+//        dd($ask->trader()->shares(), $ask->symbol());
         $share = current(
-            $bid->trader()->shares()->filterBySymbol($bid->symbol())->toArray()
+            $ask->trader()->shares()->filterBySymbol($ask->symbol())->toArray()
         ); // TODO: some proper error checking
 
 //        $share = current($askerShares->toArray()); // TODO: some proper error checking
 
 
-        $this->transferShare($share, $bid->trader(), $ask->trader());
+        $this->transferShare($share, $ask->trader(), $bid->trader());
 
 //        d($bid->trader(), $bidTrader, $this->traders());die;
 
