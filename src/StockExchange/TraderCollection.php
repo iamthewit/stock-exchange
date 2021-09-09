@@ -77,4 +77,18 @@ class TraderCollection implements IteratorAggregate, Countable, JsonSerializable
 
         return new self($traders);
     }
+
+    public function findById(UuidInterface $id): Trader
+    {
+        return $this->toArray()[$id->toString()];
+    }
+
+    public function match(Share $share): bool
+    {
+        if (!array_key_exists($share->id()->toString(), $this->toArray())) {
+            return false;
+        }
+
+        return $share == $this->toArray()[$share->id()->toString()];
+    }
 }

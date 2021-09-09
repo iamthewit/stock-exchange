@@ -25,6 +25,8 @@ class CreateAskHandler implements MessageHandlerInterface
             $command->price()
         );
 
+//        d($exchange->dispatchableEvents());die;
+
         // dispatch aggregate events
         foreach ($exchange->dispatchableEvents() as $event) {
             $this->messageBus->dispatch($event);

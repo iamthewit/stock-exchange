@@ -5,6 +5,7 @@ namespace StockExchange\Infrastructure\CLI;
 use Kint\Kint;
 use Ramsey\Uuid\Uuid;
 use StockExchange\Application\Command\AllocateShareToTraderCommand;
+use StockExchange\Application\Command\CreateAskCommand;
 use StockExchange\Application\Command\CreateBidCommand;
 use StockExchange\Application\Command\CreateExchangeCommand;
 use StockExchange\Application\Command\CreateShareCommand;
@@ -99,11 +100,28 @@ class SeedEventStreamDatabaseCommand extends Command
 
         $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchangeId));
         // create a bid for trader two
+        // $traderTwo is BIDDING 100 for FOO (buyer)
         $this->messageBus->dispatch(
             new CreateBidCommand(
                 $exchange,
                 Uuid::uuid4(),
                 $traderTwo,
+                Symbol::fromValue('FOO'),
+                Price::fromValue(100)
+            )
+        );
+
+        $traderOne = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderOne->id()));
+//        d($traderOne);die;
+        $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchangeId));
+        d($exchange);die;
+
+        // $traderOne is ASKING 100 for FOO (seller)
+        $this->messageBus->dispatch(
+            new CreateAskCommand(
+                $exchange,
+                Uuid::uuid4(),
+                $traderOne,
                 Symbol::fromValue('FOO'),
                 Price::fromValue(100)
             )

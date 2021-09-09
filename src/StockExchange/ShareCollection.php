@@ -90,11 +90,29 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
         );
     }
 
+    public function filterByOwnerId(UuidInterface $ownerId): ShareCollection
+    {
+        return new self(
+            array_filter($this->shares, function (Share $share) use ($ownerId) {
+                return $share->ownerId()->equals($ownerId);
+            })
+        );
+    }
+
     public function removeShare(UuidInterface $id): ShareCollection
     {
         $shares = $this->shares;
         unset($shares[$id->toString()]);
 
         return new self($shares);
+    }
+
+    public function match(Share $share): bool
+    {
+        if (!array_key_exists($share->id()->toString(), $this->toArray())) {
+            return false;
+        }
+
+        return $share == $this->toArray()[$share->id()->toString()];
     }
 }

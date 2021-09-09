@@ -20,6 +20,7 @@ use StockExchange\StockExchange\Event\Exchange\ShareAddedToExchange;
 use StockExchange\StockExchange\Event\Exchange\ShareAllocatedToTrader;
 use StockExchange\StockExchange\Event\Exchange\TradeExecuted;
 use StockExchange\StockExchange\Event\Exchange\TraderAddedToExchange;
+use StockExchange\StockExchange\Event\Trader\TraderAddedShare;
 use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\Trader;
 use StockExchange\StockExchange\Exchange;
@@ -108,6 +109,8 @@ class ExchangeTest extends TestCase
         $buyer = Trader::create(Uuid::uuid4());
         $price = Price::fromValue(100);
 
+//        $exchange->createTrader()
+
         $exchange->ask(
             Uuid::uuid4(),
             $buyer,
@@ -124,7 +127,9 @@ class ExchangeTest extends TestCase
             $symbol,
             $price
         );
-        
+
+//        d($exchange);die;
+
         // 1 trade occurred
         $this->assertCount(1, $exchange->trades());
 
@@ -234,9 +239,6 @@ class ExchangeTest extends TestCase
                 )
             ),
 
-            // TODO: there are missing events in this chain now that more have been added
-            // fill them in!
-
             // traders
             new TraderAddedToExchange($traderOne),
             new TraderAddedToExchange($traderTwo),
@@ -258,6 +260,8 @@ class ExchangeTest extends TestCase
 
         $exchange = Exchange::restoreStateFromEvents($events);
 
+//        d($exchange);
+
         $this->assertInstanceOf(Exchange::class, $exchange);
         $this->assertCount(12, $exchange->appliedEvents());
         $this->assertInstanceOf(ExchangeCreated::class, $exchange->appliedEvents()[0]);
@@ -276,5 +280,68 @@ class ExchangeTest extends TestCase
         $this->assertCount(0, $exchange->bids());
         $this->assertCount(0, $exchange->asks());
         $this->assertCount(1, $exchange->trades());
+    }
+
+    public function testExchangeStateAndTraderStateAndShareStateAreRestored()
+    {
+        $events = [];
+
+        // Exchange was created
+        $events[] = new ExchangeCreated(
+            Exchange::create(
+                Uuid::uuid4(),
+                new SymbolCollection([]),
+                new BidCollection([]),
+                new AskCollection([]),
+                new TradeCollection([]),
+                new TraderCollection([]),
+                new ShareCollection([])
+            )
+        );
+
+        $shareFoo = Share::create(Uuid::uuid4(), Symbol::fromValue('FOO'));
+        $traderBill = Trader::create(Uuid::uuid4());
+
+        // share was created
+        $events[] = new ShareAddedToExchange($shareFoo);
+        // trader was created
+        $events[] = new TraderAddedToExchange($traderBill);
+        // share was allocated to trader
+        $events[] = new ShareAllocatedToTrader($shareFoo, $traderBill);
+
+
+        $shareBar = Share::create(Uuid::uuid4(), Symbol::fromValue('BAR'));
+        $traderBen = Trader::create(Uuid::uuid4());
+
+        // share was created
+        $events[] = new ShareAddedToExchange($shareBar);
+        // trader was created
+        $events[] = new TraderAddedToExchange($traderBen);
+        // share was allocated to trader
+        $events[] = new ShareAllocatedToTrader($shareBar, $traderBen);
+
+        $bidForFoo = Bid::create(
+            Uuid::uuid4(),
+            $traderBen,
+            Symbol::fromValue('FOO'),
+            Price::fromValue(100)
+        );
+
+        // bid for share FOO was created
+        $events[] = new BidAddedToExchange($bidForFoo);
+
+        $askForFoo = Ask::create(
+            Uuid::uuid4(),
+            $traderBill,
+            Symbol::fromValue('FOO'),
+            Price::fromValue(100)
+        );
+
+        // ask for share FOO was created
+        $events[] = new AskAddedToExchange($askForFoo);
+
+        $exchange = Exchange::restoreStateFromEvents($events);
+
+        d($exchange);
     }
 }

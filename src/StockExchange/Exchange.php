@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange;
 
+use Exception;
 use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -55,6 +56,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      * @param AskCollection $asks
      * @param TradeCollection $trades
      * @param TraderCollection $traders
+     * @param ShareCollection $shares
      * @return Exchange
      */
     public static function create(
@@ -242,6 +244,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     ): void {
         // TODO: check symbol exists in symbol collection
 
+        // ensure we have the current state of the trader on the exchange
+        $trader = $this->traders()->findById($trader->id());
+
         // create the bid
         $bid = Bid::create($id, $trader, $symbol, $price);
 
@@ -276,7 +281,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
             if ($chosenAsk === false) {
                 // TODO: sort this out properly
-                throw new \Exception('ruh roh');
+                throw new Exception('ruh roh');
             }
 
             // if match found execute a trade
@@ -303,12 +308,16 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     ): void {
         // TODO: check symbol exists in symbol collection
 
+        // ensure we have the current state of the trader on the exchange
+        $trader = $this->traders()->findById($trader->id());
+
         //create the ask
         $ask = Ask::create($id, $trader, $symbol, $price);
 
         foreach ($ask->dispatchableEvents() as $event) {
             $this->addDispatchableEvent($event);
         }
+        $ask->clearDispatchableEvents();
 
         // add ask to collection
         $this->asks = new AskCollection($this->asks()->toArray() + [$ask]);
@@ -330,7 +339,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
             if ($chosenBid === false) {
                 // TODO: sort this out properly
-                throw new \Exception('ruh roh');
+                throw new Exception('ruh roh');
             }
 
             $this->trade($chosenBid, $ask);
@@ -377,6 +386,16 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     public function allocateShareToTrader(Share $share, Trader $trader)
     {
         // TODO: validate that this share has not been previously traded
+
+        // TODO: validate that the share and trader match ones known to the exchange
+
+        if(!$this->shares()->match($share)) {
+            throw new Exception('shiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit');
+        }
+
+        if(!$this->traders()->match($trader)) {
+            throw new Exception('shiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit');
+        }
 
         // transfer ownership of the share to the trader
         $share->transferOwnershipToTrader($trader);
@@ -483,7 +502,17 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     private function trade(Bid $bid, Ask $ask): void
     {
+//        d($bid, $ask);
+//        $bidTrader = $this->traders()->toArray()[$bid->trader()->id()->toString()];
+//        $askTrader = $this->traders()->toArray()[$ask->trader()->id()->toString()];
+//        d($bidTrader, $askTrader);
         // execute the trade between the buyer and the seller
+
+        // filter the share collection based on owner id and symbol
+//        $askerShares = $this->shares()->filterByOwnerId($ask->trader()->id())->filterBySymbol($ask->symbol());
+//        d($askerShares);
+//        die;
+
 
         // find one of the sellers shares, update the ownership of the share to the buyer
         /** @var Share $share */
@@ -491,7 +520,12 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
             $bid->trader()->shares()->filterBySymbol($bid->symbol())->toArray()
         ); // TODO: some proper error checking
 
+//        $share = current($askerShares->toArray()); // TODO: some proper error checking
+
+
         $this->transferShare($share, $bid->trader(), $ask->trader());
+
+//        d($bid->trader(), $bidTrader, $this->traders());die;
 
         // remove bid from collection
         $this->removeBid($bid);
@@ -506,8 +540,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
             $this->trades()->toArray() + [$trade]
         );
 
-        $event = new TradeExecuted($trade);
-        $this->addDispatchableEvent($event);
+        $tradeExecuted = new TradeExecuted($trade);
+        $tradeExecuted = $tradeExecuted->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($tradeExecuted);
     }
 
     /**
@@ -519,17 +554,29 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     private function transferShare(Share $share, Trader $seller, Trader $buyer): void
     {
-        // remove share from sellers share collection
-        $seller->removeShare($share);
-        // TODO: dispatch seller events
-
         // add share to buyers share collection
         $buyer->addShare($share);
-        // TODO: dispatch buyer events
+        foreach ($buyer->dispatchableEvents() as $event) {
+            $this->addDispatchableEvent($event);
+        }
+        $buyer->clearDispatchableEvents();
+        d($buyer);
+
+        // remove share from sellers share collection
+        $seller->removeShare($share);
+        foreach ($seller->dispatchableEvents() as $event) {
+            $this->addDispatchableEvent($event);
+        }
+        $seller->clearDispatchableEvents();
+        d($seller);
+//        die;
 
         // update the shares owner id
         $share->transferOwnershipToTrader($buyer);
-        // TODO: dispatch share events
+        foreach ($share->dispatchableEvents() as $event) {
+            $this->addDispatchableEvent($event);
+        }
+        $share->clearDispatchableEvents();
     }
 
     /**
@@ -544,8 +591,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
         $this->bids = new BidCollection($bids);
 
-        $event = new BidRemovedFromExchange($bid);
-        $this->addDispatchableEvent($event);
+        $bidRemovedFromExchange = new BidRemovedFromExchange($bid);
+        $bidRemovedFromExchange = $bidRemovedFromExchange->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($bidRemovedFromExchange);
     }
 
     /**
@@ -560,8 +608,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
         $this->asks = new AskCollection($asks);
 
-        $event = new AskRemovedFromExchange($ask);
-        $this->addDispatchableEvent($event);
+        $askRemovedFromExchange = new AskRemovedFromExchange($ask);
+        $askRemovedFromExchange = $askRemovedFromExchange->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($askRemovedFromExchange);
     }
 
     /**
@@ -595,19 +644,18 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     private function applyBidAddedToExchange(BidAddedToExchange $event): void
     {
-//        dump($event);die;
-        $this->bids = new BidCollection(
-            $this->bids()->toArray() + [
-                Bid::restoreFromValues(
-                    Uuid::fromString($event->payload()['id']),
-                    // using the trader that already exists in the exchanges collection
-                    // TODO: this idea could be reused all over the place!
-                    $this->traders()->toArray()[$event->payload()['trader']['id']],
-                    Symbol::fromValue($event->payload()['symbol']['value']),
-                    Price::fromValue($event->payload()['price']['value'])
-                )
-            ]
+        // ensure we have the current state of the trader on the exchange
+        // create the bid
+        $bid = Bid::create(
+            Uuid::fromString($event->payload()['id']),
+            $this->traders()->toArray()[$event->payload()['trader']['id']],
+            Symbol::fromValue($event->payload()['symbol']['value']),
+            Price::fromValue($event->payload()['price']['value'])
         );
+        $bid->applyDispatchableEvents();
+
+        // add bid to collection
+        $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
 
         $this->addAppliedEvent($event);
     }
@@ -633,7 +681,22 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     private function applyAskAddedToExchange(AskAddedToExchange $event): void
     {
-        $this->asks = new AskCollection($this->asks()->toArray() + [$event->ask()]);
+//        $this->asks = new AskCollection($this->asks()->toArray() + [$event->ask()]);
+
+
+        $this->asks = new AskCollection(
+            $this->asks()->toArray() + [
+                Ask::restoreFromValues(
+                    Uuid::fromString($event->payload()['id']),
+                    // using the trader that already exists in the exchanges collection
+                    // TODO: this idea could be reused all over the place!
+                    $this->traders()->toArray()[$event->payload()['trader']['id']],
+                    Symbol::fromValue($event->payload()['symbol']['value']),
+                    Price::fromValue($event->payload()['price']['value'])
+                )
+            ]
+        );
+
 
         $this->addAppliedEvent($event);
     }
@@ -668,54 +731,52 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
     private function applyTraderAddedToExchange(TraderAddedToExchange $event): void
     {
-        $this->traders = new TraderCollection(
-            $this->traders()->toArray() + [
-                Trader::restoreFromValues(
-                    Uuid::fromString($event->payload()['id']),
-                    new ShareCollection([])
-                )
-            ]
-        );
+        $trader = Trader::create(Uuid::fromString($event->payload()['id']));
+        $trader = Trader::restoreStateFromEvents($trader->dispatchableEvents());
+
+        $this->traders = new TraderCollection($this->traders()->toArray() + [$trader]);
 
         $this->addAppliedEvent($event);
     }
 
     private function applyShareAddedToExchange(ShareAddedToExchange $event)
     {
-        $this->shares = new ShareCollection(
-            $this->shares()->toArray() + [
-                Share::fromValues(
-                    Uuid::fromString($event->payload()['id']),
-                    Symbol::fromValue($event->payload()['symbol']),
-                    !is_null($event->payload()['owner_id']) ? Uuid::fromString($event->payload()['owner_id']) : null,
-                )
-            ]
+        // create the share again
+        $share = Share::create(
+            Uuid::fromString($event->payload()['id']),
+            Symbol::fromValue($event->payload()['symbol'])
         );
+
+        // TODO: this is a hack for now...
+        $share = Share::restoreStateFromEvents($share->dispatchableEvents());
+
+        // add it to the collection
+        $this->shares = new ShareCollection($this->shares()->toArray() + [$share]);
 
         $this->addAppliedEvent($event);
     }
 
     private function applyShareAllocatedToTrader(ShareAllocatedToTrader $event)
     {
-        $this->shares = new ShareCollection(
-            $this->shares()->toArray() + [
-                Share::fromValues(
-                    Uuid::fromString($event->payload()['share']['id']),
-                    Symbol::fromValue($event->payload()['share']['symbol']),
-                    !is_null($event->payload()['share']['owner_id']) ? Uuid::fromString($event->payload()['share']['owner_id']) : null,
-                )
-            ]
-        );
+        $share = $this->shares()->toArray()[$event->payload()['share']['id']];
+        $trader = $this->traders()->toArray()[$event->payload()['trader']['id']];
 
-        // TODO: might not need to do this...?
-//        $this->traders = new TraderCollection(
-//            $this->traders()->toArray() + [
-//                Trader::restoreFromValues(
-//                    Uuid::fromString($event->payload()['trader']['id']),
-//                    new ShareCollection([])
-//                )
-//            ]
-//        );
+        // transfer ownership of the share to the trader
+        $share->transferOwnershipToTrader($trader);
+        $share->applyDispatchableEvents();
+
+        // update share in share collection
+        $this->shares()->removeShare($share->id());
+        $this->shares = new ShareCollection($this->shares()->toArray() + [$share]);
+
+        // add share to traders share collection
+        $trader->addShare($share);
+        $trader->applyDispatchableEvents();
+
+
+        // update trader in trader collection
+        $this->traders()->removeTrader($trader->id());
+        $this->traders = new TraderCollection($this->traders()->toArray() + [$trader]);
 
         $this->addAppliedEvent($event);
     }
