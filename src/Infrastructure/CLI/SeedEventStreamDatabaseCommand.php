@@ -32,9 +32,9 @@ use Symfony\Component\Messenger\MessageBusInterface;
 class SeedEventStreamDatabaseCommand extends Command
 {
     protected static $defaultName = 'seed:event-stream-db';
-    protected static $defaultDescription = 'Add a short description for your command';
+    protected static string $defaultDescription = 'Add a short description for your command';
 
-    private $params;
+    private ParameterBagInterface $params;
     private MessageBusInterface $messageBus;
     private QueryHandlerBus $queryHandlerBus;
 
@@ -114,7 +114,7 @@ class SeedEventStreamDatabaseCommand extends Command
         $traderOne = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderOne->id()));
 //        d($traderOne);die;
         $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchangeId));
-        d($exchange);die;
+//        d($exchange);die;
 
         // $traderOne is ASKING 100 for FOO (seller)
         $this->messageBus->dispatch(
