@@ -8,6 +8,7 @@ use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\EventInterface;
 use StockExchange\StockExchange\Event\Trader\TraderAddedShare;
 use StockExchange\StockExchange\Event\Trader\TraderCreated;
+use StockExchange\StockExchange\Event\Trader\TraderRemovedShare;
 use StockExchange\StockExchange\Exception\StateRestorationException;
 
 /**
@@ -63,6 +64,8 @@ class Trader implements \JsonSerializable, ArrayableInterface
     {
         $trader = new self();
 
+        d($events);
+
         foreach ($events as $event) {
             if (!is_a($event, EventInterface::class)) {
                 // TODO: create a proper exception for this:
@@ -78,6 +81,10 @@ class Trader implements \JsonSerializable, ArrayableInterface
 
                 case is_a($event, TraderAddedShare::class):
                     $trader->applyTraderAddedShare($event);
+                    break;
+
+                case is_a($event, TraderRemovedShare::class):
+                    $trader->applyTraderRemovedShare($event);
                     break;
             }
         }
@@ -149,7 +156,10 @@ class Trader implements \JsonSerializable, ArrayableInterface
 
         $this->shares = new ShareCollection($shares);
 
-        // TODO: emit share removed event
+        $traderRemovedShare = new TraderRemovedShare($share);
+//        d($this->eventMetaData());die;
+        $traderRemovedShare = $traderRemovedShare->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($traderRemovedShare);
     }
 
     /**
@@ -166,6 +176,39 @@ class Trader implements \JsonSerializable, ArrayableInterface
     public function jsonSerialize()
     {
         return $this->asArray();
+    }
+
+    /**
+     * @return array{
+     * _aggregate_id: string,
+     * _aggregate_version: int,
+     * _aggregate_type: string
+     * }
+     */
+    protected function eventMetaData(): array
+    {
+        return [
+            '_aggregate_id' => $this->id()->toString(),
+            '_aggregate_version' => $this->nextAggregateVersion(),
+            '_aggregate_type' => static::class
+        ];
+    }
+
+    private function aggregateVersion(): int
+    {
+        if (count($this->appliedEvents)) {
+            /** @var DomainEvent $lastEvent */
+            $lastEvent = end($this->appliedEvents);
+
+            return $lastEvent->metadata()['_aggregate_version'];
+        }
+
+        return 0;
+    }
+
+    private function nextAggregateVersion(): int
+    {
+        return $this->aggregateVersion() + 1;
     }
 
     /**
@@ -198,36 +241,12 @@ class Trader implements \JsonSerializable, ArrayableInterface
         $this->addAppliedEvent($event);
     }
 
-    private function aggregateVersion(): int
+    private function applyTraderRemovedShare(TraderRemovedShare $event)
     {
-        if (count($this->appliedEvents)) {
-            /** @var DomainEvent $lastEvent */
-            $lastEvent = end($this->appliedEvents);
+        $shares = $this->shares()->toArray();
+        unset($shares[$event['id']]);
+        $this->shares = new ShareCollection($shares);
 
-            return $lastEvent->metadata()['_aggregate_version'];
-        }
-
-        return 0;
-    }
-
-    private function nextAggregateVersion(): int
-    {
-        return $this->aggregateVersion() + 1;
-    }
-
-    /**
-     * @return array{
-     * _aggregate_id: string,
-     * _aggregate_version: int,
-     * _aggregate_type: string
-     * }
-     */
-    protected function eventMetaData(): array
-    {
-        return [
-            '_aggregate_id' => $this->id()->toString(),
-            '_aggregate_version' => $this->nextAggregateVersion(),
-            '_aggregate_type' => static::class
-        ];
+        $this->addAppliedEvent($event);
     }
 }

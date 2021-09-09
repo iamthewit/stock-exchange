@@ -11,7 +11,9 @@
     </description>
 
     <!--  Clean Code  -->
-    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/cleancode.xml" />
+    <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/cleancode.xml">
+        <exclude name="StaticAccess" />
+    </rule>
 
     <!--  Code Size  -->
     <rule ref="vendor/phpmd/phpmd/src/main/resources/rulesets/codesize.xml" />
