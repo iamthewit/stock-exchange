@@ -27,3 +27,9 @@ Instead of having to query for the exchange after every state change again (to m
 ---
 
 Recently I went through and started to make sure that the exchanges entire state and state of all objects it knows about had all of their own events in their respective `appliedEvents` array (I'm not sure if i totally finished this, need to write some tests!). I also modified the `nextAggregateVersion` method to take into account un-applied (dispatahcable) events within the same namespace - maybe this would have solved my original problem as it was surfacing as the event store complaining that events were being added with the same no. (aggregate version) - needs more testing, i'm too tired to think about it now.
+
+---
+
+If exchange is the aggregate root it should be the only entity that has a version...
+There should be no need to store the other entities in any other stream other than the exchanges stream...
+NEed to do some more reading....
