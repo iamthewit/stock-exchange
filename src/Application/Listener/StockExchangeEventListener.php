@@ -20,14 +20,11 @@ class StockExchangeEventListener implements MessageHandlerInterface
 
     public function __invoke(DomainEvent $event): void
     {
-//        d($event);
         // store the command in our event store
         $aggregate = $event->metadata()['_aggregate_type'];
         $aggregateId = $event->metadata()['_aggregate_id'];
 
         $streamName = new StreamName($aggregate . '-' . $aggregateId);
-
-//        d($streamName);
 
         if (!$this->eventStore->hasStream($streamName)) {
             $stream = new Stream(

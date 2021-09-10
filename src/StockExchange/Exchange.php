@@ -308,6 +308,11 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     ): void {
         // TODO: check symbol exists in symbol collection
 
+        // TODO: check the trader actually has shares of the given symbol to trade
+
+        // TODO: ensure a trader can not create more asks than shares they have available tp trae
+        // e.g 10 FOO's = 10 max asks for FOO for that trader
+
         // ensure we have the current state of the trader on the exchange
         $trader = $this->traders()->findById($trader->id());
 
@@ -513,31 +518,23 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     private function trade(Bid $bid, Ask $ask): void
     {
-//        d($bid, $ask);
 //        $bidTrader = $this->traders()->toArray()[$bid->trader()->id()->toString()];
 //        $askTrader = $this->traders()->toArray()[$ask->trader()->id()->toString()];
-//        d($bidTrader, $askTrader);
         // execute the trade between the buyer and the seller
 
         // filter the share collection based on owner id and symbol
 //        $askerShares = $this->shares()->filterByOwnerId($ask->trader()->id())->filterBySymbol($ask->symbol());
-//        d($askerShares);
-//        die;
 
 
         // find one of the sellers shares, update the ownership of the share to the buyer
         /** @var Share $share */
-//        dd($ask->trader()->shares(), $ask->symbol());
         $share = current(
             $ask->trader()->shares()->filterBySymbol($ask->symbol())->toArray()
         ); // TODO: some proper error checking
 
 //        $share = current($askerShares->toArray()); // TODO: some proper error checking
 
-
         $this->transferShare($share, $ask->trader(), $bid->trader());
-
-//        d($bid->trader(), $bidTrader, $this->traders());die;
 
         // remove bid from collection
         $this->removeBid($bid);
@@ -572,7 +569,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
             $this->addDispatchableEvent($event);
         }
         $buyer->clearDispatchableEvents();
-        d($buyer);
 
         // remove share from sellers share collection
         $seller->removeShare($share);
@@ -580,8 +576,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
             $this->addDispatchableEvent($event);
         }
         $seller->clearDispatchableEvents();
-        d($seller);
-//        die;
 
         // update the shares owner id
         $share->transferOwnershipToTrader($buyer);
@@ -694,7 +688,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private function applyAskAddedToExchange(AskAddedToExchange $event): void
     {
 //        $this->asks = new AskCollection($this->asks()->toArray() + [$event->ask()]);
-
 
         $this->asks = new AskCollection(
             $this->asks()->toArray() + [
