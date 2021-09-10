@@ -64,8 +64,6 @@ class Trader implements \JsonSerializable, ArrayableInterface
     {
         $trader = new self();
 
-        d($events);
-
         foreach ($events as $event) {
             if (!is_a($event, EventInterface::class)) {
                 // TODO: create a proper exception for this:
@@ -157,7 +155,6 @@ class Trader implements \JsonSerializable, ArrayableInterface
         $this->shares = new ShareCollection($shares);
 
         $traderRemovedShare = new TraderRemovedShare($share);
-//        d($this->eventMetaData());die;
         $traderRemovedShare = $traderRemovedShare->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($traderRemovedShare);
     }
