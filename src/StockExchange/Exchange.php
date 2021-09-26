@@ -736,6 +736,19 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
     private function applyTraderAddedToExchange(TraderAddedToExchange $event): void
     {
+        // TODO: why am I doing this?
+        // create a new trader entity from the id in the payload
+        // then restore that same entity from the entities dispatchable events????
+        // it doesn't mak any sense!
+        // either add a Trader::restoreFromValues method and pass in the payload values
+        // or somehow get the traders events from storage and restore the state from the events
+        // the first option is the best one (and only one really).
+        // we might be better off dropping all events for all entities that are not teh aggregate root
+        // (which I think is the way it should be anyway) it is going to cause a lot of problems if we
+        // keep them. for instance you would not be able to change the state of a non-root entity after
+        // it had originally been created because you would loose the aggregate version number
+        // ---
+        // see the method below - using restoreStateFromEvents in this fashion is a hack for now...
         $trader = Trader::create(Uuid::fromString($event->payload()['id']));
         $trader = Trader::restoreStateFromEvents($trader->dispatchableEvents());
 
