@@ -1,15 +1,18 @@
 # TODO
 
+- Write repo implementations for the event store
+  - add the repo interface to the domain layer so that they can be depended upon by the domain and application layers
+  - currently, the application layer is directly accessing the event store (which is effectively the infra layer)
+- Read Models / Read Repos
 - In any 'apply' methods that require other related domain objects - check the collections that already exist on the exchange
   - i.e applyBidAddedToExchange uses a trader that already exists in the TraderCollection
 - Create consistency between toArray and asArray methods
 - Add tests for all the new handlers
-- Read Models
 - Rebuild exchange collections in applyExchangeCreated
 - Add event meta data to all domain objects
 - Exchange Simulation
 - Event Loop
-- Docker container
+- Docker container 
 
 
 ## Thoughts / Ideas / Refactors
