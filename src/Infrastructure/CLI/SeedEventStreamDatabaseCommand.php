@@ -112,9 +112,7 @@ class SeedEventStreamDatabaseCommand extends Command
         );
 
         $traderOne = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderOne->id()));
-//        d($traderOne);die;
         $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchangeId));
-//        d($exchange);die;
 
         // $traderOne is ASKING 100 for FOO (seller)
         $this->messageBus->dispatch(
@@ -126,10 +124,6 @@ class SeedEventStreamDatabaseCommand extends Command
                 Price::fromValue(100)
             )
         );
-
-        // TODO: create some asks and trade some shares!
-
-//        Kint::dump($traderOne, $traderTwo);
 
         $io->success('Re-seed complete!.');
 

@@ -51,23 +51,10 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      * Open the exchange so that shares can be traded.
      *
      * @param UuidInterface $id
-     * @param SymbolCollection $symbols
-     * @param BidCollection $bids
-     * @param AskCollection $asks
-     * @param TradeCollection $trades
-     * @param TraderCollection $traders
-     * @param ShareCollection $shares
+
      * @return Exchange
      */
-    public static function create(
-        UuidInterface $id,
-        SymbolCollection $symbols,
-        BidCollection $bids,
-        AskCollection $asks,
-        TradeCollection $trades,
-        TraderCollection $traders,
-        ShareCollection $shares,
-    ): self {
+    public static function create(UuidInterface $id): self {
         $exchange = new self();
         $exchange->id = $id;
 
@@ -75,12 +62,12 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // when an exchange is created nothing exists.
         // each of these will be added via other state
         // changes (events) after exchange creation
-        $exchange->symbols = $symbols;
-        $exchange->bids = $bids;
-        $exchange->asks = $asks;
-        $exchange->trades = $trades;
-        $exchange->traders = $traders;
-        $exchange->shares = $shares;
+        $exchange->symbols = new SymbolCollection([]);
+        $exchange->bids = new BidCollection([]);
+        $exchange->asks = new AskCollection([]);
+        $exchange->trades = new TradeCollection([]);
+        $exchange->traders = new TraderCollection([]);
+        $exchange->shares = new ShareCollection([]);
 
         $exchangeCreated = new ExchangeCreated($exchange);
         $exchangeCreated = $exchangeCreated->withMetadata($exchange->eventMetaData());
@@ -258,11 +245,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
 
-        // TODO: figure this out
-        // this is causing some issues with the event store, we get a duplicate key error
-        // when trying to create two bids one after the other, the duplicate key error is
-        // referring to the id of the exchange though. For some reason the BidAddedToExchange
-        // is causing this problem but only when it is called twice in succession...
         $bidAdded = new BidAddedToExchange($bid);
         $bidAdded = $bidAdded->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($bidAdded);

@@ -126,6 +126,7 @@ class Share implements JsonSerializable, ArrayableInterface
         $shareOwnershipTransferred = new ShareOwnershipTransferred($trader);
         $shareOwnershipTransferred = $shareOwnershipTransferred->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($shareOwnershipTransferred);
+        dump($this);
     }
 
     /**
@@ -185,7 +186,18 @@ class Share implements JsonSerializable, ArrayableInterface
 
     private function nextAggregateVersion(): int
     {
-        return $this->aggregateVersion() + 1;
+        $unDispatchedCount = 0;
+        foreach ($this->dispatchableEvents() as $de) {
+            if (str_contains(get_class($de), 'StockExchange\StockExchange\Event\Share')) {
+                $unDispatchedCount++;
+            }
+        }
+
+        dump(count($this->dispatchableEvents()));
+
+        dump($unDispatchedCount);
+
+        return $this->aggregateVersion() + $unDispatchedCount + 1;
     }
 
     /**
