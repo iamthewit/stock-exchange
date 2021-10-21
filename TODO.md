@@ -4,6 +4,7 @@
   - add the repo interface to the domain layer so that they can be depended upon by the domain and application layers
   - currently, the application layer is directly accessing the event store (which is effectively the infra layer)
 - Read Models / Read Repos
+- Stop every entity besides the aggregate root from emitting events
 - In any 'apply' methods that require other related domain objects - check the collections that already exist on the exchange
   - i.e applyBidAddedToExchange uses a trader that already exists in the TraderCollection
 - Create consistency between toArray and asArray methods
