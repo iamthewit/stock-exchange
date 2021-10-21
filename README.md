@@ -38,7 +38,7 @@ Imagine three concentric circles with the Domain in the middle surrounded by the
 - The Infrastructure layer depends on the Application and Domain layers
 
 - The Domain layer contains all of our business logic. It should not have any dependencies on any third party libraries (if possible).
-- The Application later contains out "use-cases" or what our application does.
+- The Application layer contains our "use-cases" or what our application does.
 - The Infrastructure layer is responsible for interaction with 3rd parties e.g end users via HTTP or CLI, database repositories, 3rd party APIs
 
 Hexagonal architecture is called a such because there are multiple interfaces on the outside edges of a hexagon that can interact with 3rd parties (it doesn't mean there are only and always 6 interfaces). Another name for hexagonal architecture is Ports and Adaptors - the interfaces are the ports for which adaptors can be written.
