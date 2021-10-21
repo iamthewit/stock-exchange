@@ -8,6 +8,9 @@
   - i.e applyBidAddedToExchange uses a trader that already exists in the TraderCollection
 - Create consistency between toArray and asArray methods
 - Add tests for all the new handlers
+- Read Models
+  - Mongo
+  - MySQL / Postgres
 - Rebuild exchange collections in applyExchangeCreated
 - Add event meta data to all domain objects
 - Exchange Simulation
