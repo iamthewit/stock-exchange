@@ -2,14 +2,8 @@
 
 namespace StockExchange\StockExchange;
 
-use Prooph\Common\Messaging\DomainEvent;
-use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\EventInterface;
-use StockExchange\StockExchange\Event\Trader\TraderAddedShare;
-use StockExchange\StockExchange\Event\Trader\TraderCreated;
-use StockExchange\StockExchange\Event\Trader\TraderRemovedShare;
-use StockExchange\StockExchange\Exception\StateRestorationException;
 
 /**
  * Class Trader

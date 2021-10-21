@@ -110,14 +110,14 @@ class EventStoreSeeder
             );
 
             /** @var Share $share */
-            $share = $this->queryHandlerBus->query(new GetShareByIdQuery($shareId));
+            $share = $this->queryHandlerBus->query(new GetShareByIdQuery($shareId, $exchange->id()));
 
             // allocate share to trader
             $exchange = $this->getExchangeById($exchange->id());
             $this->messageBus->dispatch(new AllocateShareToTraderCommand($exchange, $share, $trader));
         }
 
-        return $this->queryHandlerBus->query(new GetTraderByIdQuery($id));
+        return $this->queryHandlerBus->query(new GetTraderByIdQuery($id, $exchange->id()));
     }
 
     /**
