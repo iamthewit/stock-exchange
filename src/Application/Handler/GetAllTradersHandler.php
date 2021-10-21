@@ -6,6 +6,7 @@ use Prooph\Common\Messaging\Message;
 use Prooph\EventStore\Projection\ProjectionManager;
 use StockExchange\Application\Query\GetAllTradersQuery;
 use StockExchange\StockExchange\Event\Trader\TraderCreated;
+use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\Trader;
 use StockExchange\StockExchange\TraderCollection;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
@@ -25,30 +26,23 @@ class GetAllTradersHandler implements MessageHandlerInterface
 
     public function __invoke(GetAllTradersQuery $query): TraderCollection
     {
-        $getTradersQuery = $this->projectionManager->createQuery();
-        $getTradersQuery
+        // rebuild the state of the exchange
+        $getExchangeQuery = $this->projectionManager->createQuery();
+        $getExchangeQuery
             ->init(function (): array {
                 return [];
             })
-            ->fromCategory(Trader::class)
-            ->when([
-                TraderCreated::class => function (array $state, Message $event): array {
-                    $state[$event->metadata()['_aggregate_id']][] = $event;
-                    return $state;
-                },
-                // if we had a TraderDeleted event we would wont to account for that here
-                // so that we don't return traders that no longer exist.
-                // OR maybe we should have a more specific command/handler for returning all
-                // active traders and leave this one to return all traders no matter what...?
-            ])
+            ->fromStream(Exchange::class . '-' . $query->exchangeId())
+            ->whenAny(function (array $state, Message $event): array {
+                $state[] = $event;
+
+                return $state;
+            })
             ->run()
         ;
 
-        $traders = [];
-        foreach ($getTradersQuery->getState() as $traderEvents) {
-            $traders[] = Trader::restoreStateFromEvents($traderEvents);
-        }
+        $exchange = Exchange::restoreStateFromEvents($getExchangeQuery->getState());
 
-        return new TraderCollection($traders);
+        return $exchange->traders();
     }
 }
