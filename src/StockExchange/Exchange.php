@@ -237,11 +237,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // create the bid
         $bid = Bid::create($id, $trader, $symbol, $price);
 
-        foreach ($bid->dispatchableEvents() as $event) {
-            $this->addDispatchableEvent($event);
-        }
-        $bid->clearDispatchableEvents(); // TODO: can probably remove this...
-
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
 
@@ -301,11 +296,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         //create the ask
         $ask = Ask::create($id, $trader, $symbol, $price);
 
-        foreach ($ask->dispatchableEvents() as $event) {
-            $this->addDispatchableEvent($event);
-        }
-        $ask->clearDispatchableEvents();
-
         // add ask to collection
         $this->asks = new AskCollection($this->asks()->toArray() + [$ask]);
 
@@ -337,10 +327,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     {
         $trader = Trader::create($traderId);
 
-        foreach ($trader->dispatchableEvents() as $traderEvent) {
-            $this->addDispatchableEvent($traderEvent);
-        }
-
         $this->traders = new TraderCollection($this->traders()->toArray() + [$trader]);
 
         $traderAdded = new TraderAddedToExchange($trader);
@@ -353,10 +339,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         $share = Share::create($shareId, $symbol);
 
         $this->shares = new ShareCollection($this->shares()->toArray() + [$share]);
-
-        foreach ($share->dispatchableEvents() as $shareEvent) {
-            $this->addDispatchableEvent($shareEvent);
-        }
 
         $shareAdded = new ShareAddedToExchange($share);
         $shareAdded = $shareAdded->withMetadata($this->eventMetaData());
@@ -389,20 +371,12 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // transfer ownership of the share to the trader
         $share->transferOwnershipToTrader($trader);
 
-        foreach ($share->dispatchableEvents() as $event) {
-            $this->addDispatchableEvent($event);
-        }
-
         // update share in share collection
         $this->shares()->removeShare($share->id());
         $this->shares = new ShareCollection($this->shares()->toArray() + [$share]);
 
         // add share to traders share collection
         $trader->addShare($share);
-
-        foreach ($trader->dispatchableEvents() as $event) {
-            $this->addDispatchableEvent($event);
-        }
 
         // update trader in trader collection
         $this->traders()->removeTrader($trader->id());
@@ -547,24 +521,12 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     {
         // add share to buyers share collection
         $buyer->addShare($share);
-        foreach ($buyer->dispatchableEvents() as $event) {
-            $this->addDispatchableEvent($event);
-        }
-        $buyer->clearDispatchableEvents();
 
         // remove share from sellers share collection
         $seller->removeShare($share);
-        foreach ($seller->dispatchableEvents() as $event) {
-            $this->addDispatchableEvent($event);
-        }
-        $seller->clearDispatchableEvents();
 
         // update the shares owner id
         $share->transferOwnershipToTrader($buyer);
-        foreach ($share->dispatchableEvents() as $event) {
-            $this->addDispatchableEvent($event);
-        }
-        $share->clearDispatchableEvents();
     }
 
     /**
@@ -640,7 +602,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
             Symbol::fromValue($event->payload()['symbol']['value']),
             Price::fromValue($event->payload()['price']['value'])
         );
-        $bid->applyDispatchableEvents();
 
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
@@ -732,7 +693,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // ---
         // see the method below - using restoreStateFromEvents in this fashion is a hack for now...
         $trader = Trader::create(Uuid::fromString($event->payload()['id']));
-        $trader = Trader::restoreStateFromEvents($trader->dispatchableEvents());
 
         $this->traders = new TraderCollection($this->traders()->toArray() + [$trader]);
 
@@ -747,9 +707,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
             Symbol::fromValue($event->payload()['symbol'])
         );
 
-        // TODO: this is a hack for now...
-        $share = Share::restoreStateFromEvents($share->dispatchableEvents());
-
         // add it to the collection
         $this->shares = new ShareCollection($this->shares()->toArray() + [$share]);
 
@@ -763,7 +720,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
         // transfer ownership of the share to the trader
         $share->transferOwnershipToTrader($trader);
-        $share->applyDispatchableEvents();
 
         // update share in share collection
         $this->shares()->removeShare($share->id());
@@ -771,7 +727,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
         // add share to traders share collection
         $trader->addShare($share);
-        $trader->applyDispatchableEvents();
 
 
         // update trader in trader collection

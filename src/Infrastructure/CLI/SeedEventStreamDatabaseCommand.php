@@ -111,7 +111,7 @@ class SeedEventStreamDatabaseCommand extends Command
             )
         );
 
-        $traderOne = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderOne->id()));
+        $traderOne = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderOne->id(), $exchangeId));
         $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchangeId));
 
         // $traderOne is ASKING 100 for FOO (seller)
@@ -146,7 +146,7 @@ class SeedEventStreamDatabaseCommand extends Command
         for ($i = 0; $i < 1; $i++) {
             // get trader by id
             /** @var Trader $trader */
-            $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId));
+            $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId, $exchange->id()));
 
             $shareId = Uuid::uuid4();
 
@@ -160,13 +160,13 @@ class SeedEventStreamDatabaseCommand extends Command
             );
 
             /** @var Share $share */
-            $share = $this->queryHandlerBus->query(new GetShareByIdQuery($shareId));
+            $share = $this->queryHandlerBus->query(new GetShareByIdQuery($shareId, $exchange->id()));
 
             $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchange->id()));
             // allocate share to trader
             $this->messageBus->dispatch(new AllocateShareToTraderCommand($exchange, $share, $trader));
         }
 
-        return $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId));
+        return $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId, $exchange->id()));
     }
 }

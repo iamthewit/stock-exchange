@@ -36,11 +36,6 @@ class Trade implements \JsonSerializable, ArrayableInterface
         return $trade;
     }
 
-    // TODO: requires all of the other entity goodness
-    // - events
-    // - restore state from events
-    // - aggregate version
-
     /**
      * @return UuidInterface
      */
