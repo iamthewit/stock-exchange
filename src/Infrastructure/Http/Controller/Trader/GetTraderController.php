@@ -14,7 +14,11 @@ class GetTraderController extends AbstractController
     #[Route('/trader/{id}', name: 'trader details')]
     public function resource(string $id, QueryHandlerBus $queryHandlerBus): JsonResponse
     {
-        $trader = $queryHandlerBus->query(new GetTraderByIdQuery(Uuid::fromString($id)));
+        $exchangeId = $this->container->get('stock_exchange.default_exchange_id'); // TODO: test this...
+        $trader = $queryHandlerBus->query(new GetTraderByIdQuery(
+            Uuid::fromString($id),
+            Uuid::fromString($exchangeId)
+        ));
 
         return $this->json($trader);
     }

@@ -97,7 +97,7 @@ class EventStoreSeeder
         for ($i = 0; $i < $shares; $i++) {
             // get trader by id
             /** @var Trader $trader */
-            $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($id));
+            $trader = $this->queryHandlerBus->query(new GetTraderByIdQuery($id, $exchange->id()));
             $exchange = $this->getExchangeById($exchange->id());
 
             $shareId = Uuid::uuid4();

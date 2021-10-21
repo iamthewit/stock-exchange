@@ -5,6 +5,7 @@ namespace StockExchange\Application\Handler;
 use Prooph\Common\Messaging\Message;
 use Prooph\EventStore\Projection\ProjectionManager;
 use StockExchange\Application\Query\GetTraderByIdQuery;
+use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\Trader;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
@@ -20,12 +21,12 @@ class GetTraderByIdHandler implements MessageHandlerInterface
     public function __invoke(GetTraderByIdQuery $query): Trader
     {
         // rebuild the state of the trader
-        $getTraderQuery = $this->projectionManager->createQuery();
-        $getTraderQuery
+        $getExchangeQuery = $this->projectionManager->createQuery();
+        $getExchangeQuery
             ->init(function (): array {
                 return [];
             })
-            ->fromStream(Trader::class . '-' . $query->id())
+            ->fromStream(Exchange::class . '-' . $query->exchangeId())
             ->whenAny(function (array $state, Message $event): array {
                 $state[] = $event;
 
@@ -34,6 +35,8 @@ class GetTraderByIdHandler implements MessageHandlerInterface
             ->run()
         ;
 
-        return Trader::restoreStateFromEvents($getTraderQuery->getState());
+        $exchange =  Exchange::restoreStateFromEvents($getExchangeQuery->getState());
+
+        return $exchange->traders()->findById($query->id());
     }
 }
