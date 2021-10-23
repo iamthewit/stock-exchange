@@ -31,7 +31,9 @@ If you want to Trade a Share you must do so via placing Bids and Asks on the Exc
 
 Hexagonal Architecture is a layered architecture comprising three layers: Domain, Application, Infrastructure.
 
-Imagine three concentric circles with the Domain in the middle surrounded by the Application which is then surrounded by the Infrastructure. This layering gives us our separation of concerns but also our dependency structure.
+Imagine three concentric circles with the Domain in the middle surrounded by the Application which is then surrounded by the Infrastructure. 
+This layering gives us our separation of concerns but also our dependency structure. 
+The dependencies point inwards.
 
 - The Domain layer depends on nothing
 - The Application layer depends on the Domain layer
@@ -41,11 +43,19 @@ Imagine three concentric circles with the Domain in the middle surrounded by the
 - The Application layer contains our "use-cases" or what our application does.
 - The Infrastructure layer is responsible for interaction with 3rd parties e.g end users via HTTP or CLI, database repositories, 3rd party APIs
 
-Hexagonal architecture is called as such because there are multiple interfaces on the outside edges of a hexagon that can interact with 3rd parties (it doesn't mean there are only and always 6 interfaces). Another name for hexagonal architecture is Ports and Adaptors - the interfaces are the ports for which adaptors can be written.
+Hexagonal architecture is also referred to as Ports and Adapters. Each side of the hexagon represent a port (an interface). 
+The area outside a port is where you write add your adapters (concrete implementations). 
+Just because a hexagon has six sides does not mean you are restricted to siz ports.
+
+See here for a more detailed explanation of hexagonal architecture: https://blog.octo.com/en/hexagonal-architecture-three-principles-and-an-implementation-example/
 
 ### CQRS (Command Query Responsibility Separation)
 
+TODO
+
 ### Event Sourcing
+
+TODO
 
 ## Docker Container
 
@@ -59,7 +69,7 @@ TODO
 
 `./vendor/bin/phpunit tests`
 
-_Note:_ Some of the tests require a database to be in place. See the [Database](#database) section below for more info. 
+_Note:_ Some tests require a database to be in place. See the [Database](#database) section below for more info. 
 
 ### Run tests with code coverage
 
