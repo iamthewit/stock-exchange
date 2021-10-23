@@ -2,26 +2,26 @@
 
 namespace StockExchange\Application\Query;
 
-use StockExchange\StockExchange\Exchange;
+use Ramsey\Uuid\UuidInterface;
 
 class GetTradesQuery
 {
-    private Exchange $exchange;
+    private UuidInterface $exchangeId;
 
     /**
      * GetTradesQuery constructor.
-     * @param Exchange $exchange
+     * @param UuidInterface $exchangeId
      */
-    public function __construct(Exchange $exchange)
+    public function __construct(UuidInterface $exchangeId)
     {
-        $this->exchange = $exchange;
+        $this->exchangeId = $exchangeId;
     }
 
     /**
-     * @return Exchange
+     * @return UuidInterface
      */
-    public function exchange(): Exchange
+    public function exchangeId(): UuidInterface
     {
-        return $this->exchange;
+        return $this->exchangeId;
     }
 }

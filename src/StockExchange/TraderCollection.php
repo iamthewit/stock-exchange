@@ -78,8 +78,14 @@ class TraderCollection implements IteratorAggregate, Countable, JsonSerializable
         return new self($traders);
     }
 
+    /**
+     * @param UuidInterface $id
+     *
+     * @return Trader
+     */
     public function findById(UuidInterface $id): Trader
     {
+        // TODO: throw exception if the array key does not exist
         return $this->toArray()[$id->toString()];
     }
 

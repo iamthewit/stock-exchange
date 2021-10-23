@@ -2,38 +2,32 @@
 
 namespace StockExchange\Application\Handler;
 
-use Prooph\Common\Messaging\Message;
-use Prooph\EventStore\Projection\ProjectionManager;
 use StockExchange\Application\Query\GetExchangeByIdQuery;
+use StockExchange\StockExchange\Exception\ExchangeNotFoundException;
 use StockExchange\StockExchange\Exchange;
+use StockExchange\StockExchange\ExchangeReadRepositoryInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class GetExchangeByIdHandler implements MessageHandlerInterface
 {
-    private ProjectionManager $projectionManager;
+    private ExchangeReadRepositoryInterface $exchangeReadRepository;
 
-    public function __construct(ProjectionManager $projectionManager)
+    /**
+     * @param ExchangeReadRepositoryInterface $exchangeReadRepository
+     */
+    public function __construct(ExchangeReadRepositoryInterface $exchangeReadRepository)
     {
-        $this->projectionManager = $projectionManager;
+        $this->exchangeReadRepository = $exchangeReadRepository;
     }
 
+    /**
+     * @param GetExchangeByIdQuery $query
+     *
+     * @return Exchange
+     * @throws ExchangeNotFoundException
+     */
     public function __invoke(GetExchangeByIdQuery $query): Exchange
     {
-        // rebuild the state of the exchange
-        $getExchangeQuery = $this->projectionManager->createQuery();
-        $getExchangeQuery
-            ->init(function (): array {
-                return [];
-            })
-            ->fromStream(Exchange::class . '-' . $query->id())
-            ->whenAny(function (array $state, Message $event): array {
-                $state[] = $event;
-
-                return $state;
-            })
-            ->run()
-        ;
-
-        return Exchange::restoreStateFromEvents($getExchangeQuery->getState());
+        return $this->exchangeReadRepository->findById($query->id()->toString());
     }
 }
