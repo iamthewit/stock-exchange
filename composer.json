@@ -18,6 +18,7 @@
         "ext-json": "*",
         "ext-pdo": "*",
         "doctrine/annotations": "^1.13",
+        "mongodb/mongodb": "^1.9",
         "prooph/pdo-event-store": "^1.13",
         "ramsey/uuid": "^4.1",
         "symfony/browser-kit": "^5.2",

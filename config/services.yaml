@@ -8,6 +8,7 @@ parameters:
     stock_exchange.mysql_dsn: '%env(MYSQL_DSN)%'
     stock_exchange.mysql_dsn_no_db_specified: '%env(MYSQL_DSN_NO_DB_SPECIFIED)%'
     stock_exchange.db_name: '%env(DB_NAME)%'
+    stock_exchange.mongo_uri: '%env(MONGO_URI)%'
 
 services:
     # default configuration for services in *this* file
@@ -36,3 +37,7 @@ services:
     StockExchange\Tests\Helpers\:
         resource: '../tests/Helpers/'
         public: true
+
+    MongoDB\Client:
+        factory: ['StockExchange\Infrastructure\Persistence\MongoClientFactory', 'createClient']
+        arguments: ['%stock_exchange.mongo_uri%']
