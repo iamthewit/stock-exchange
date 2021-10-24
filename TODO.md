@@ -17,6 +17,7 @@
 - Read Models
   - Mongo
   - MySQL / Postgres
+- Create specific entity id classes that extend uuid interface
 - Exchange Simulation
 - Event Loop
 - Docker container 

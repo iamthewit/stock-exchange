@@ -2,9 +2,7 @@
 
 namespace StockExchange\Application\Command;
 
-use StockExchange\StockExchange\Exchange;
-use StockExchange\StockExchange\Share;
-use StockExchange\StockExchange\Trader;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class AllocateShareToTraderCommand
@@ -12,42 +10,45 @@ use StockExchange\StockExchange\Trader;
  */
 class AllocateShareToTraderCommand
 {
-    private Exchange $exchange;
-    private Share $share;
-    private Trader $trader;
+    private UuidInterface $exchangeId;
+    private UuidInterface $shareId;
+    private UuidInterface $traderId;
 
     /**
      * AllocateShareToTraderCommand constructor.
      *
-     * @param Exchange $exchange
-     * @param Share    $share
-     * @param Trader   $trader
+     * @param UuidInterface $exchangeId
+     * @param UuidInterface $shareId
+     * @param UuidInterface $traderId
      */
-    public function __construct(Exchange $exchange, Share $share, Trader $trader)
+    public function __construct(UuidInterface $exchangeId, UuidInterface $shareId, UuidInterface $traderId)
     {
-        $this->exchange = $exchange;
-        $this->share  = $share;
-        $this->trader = $trader;
-    }
-
-    public function exchange(): Exchange
-    {
-        return $this->exchange;
+        $this->exchangeId = $exchangeId;
+        $this->shareId  = $shareId;
+        $this->traderId = $traderId;
     }
 
     /**
-     * @return Share
+     * @return UuidInterface
      */
-    public function share(): Share
+    public function exchangeId(): UuidInterface
     {
-        return $this->share;
+        return $this->exchangeId;
     }
 
     /**
-     * @return Trader
+     * @return UuidInterface
      */
-    public function trader(): Trader
+    public function shareId(): UuidInterface
     {
-        return $this->trader;
+        return $this->shareId;
+    }
+
+    /**
+     * @return UuidInterface
+     */
+    public function traderId(): UuidInterface
+    {
+        return $this->traderId;
     }
 }

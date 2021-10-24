@@ -10,35 +10,41 @@ use StockExchange\StockExchange\Trader;
 
 class CreateAskCommand
 {
-    private Exchange $exchange;
+    private UuidInterface $exchangeId;
     private UuidInterface $id;
-    private Trader $trader;
+    private UuidInterface $traderId;
     private Symbol $symbol;
     private Price $price;
 
     /**
      * CreateAskCommand constructor.
-     * @param Exchange $exchange
+     *
+     * @param UuidInterface $exchangeId
      * @param UuidInterface $id
-     * @param Trader $trader
-     * @param Symbol $symbol
-     * @param Price $price
+     * @param UuidInterface $traderId
+     * @param Symbol        $symbol
+     * @param Price         $price
      */
-    public function __construct(Exchange $exchange, UuidInterface $id, Trader $trader, Symbol $symbol, Price $price)
-    {
-        $this->exchange = $exchange;
+    public function __construct(
+        UuidInterface $exchangeId,
+        UuidInterface $id,
+        UuidInterface $traderId,
+        Symbol $symbol,
+        Price $price
+    ) {
+        $this->exchangeId = $exchangeId;
         $this->id = $id;
-        $this->trader = $trader;
+        $this->traderId = $traderId;
         $this->symbol = $symbol;
         $this->price = $price;
     }
 
     /**
-     * @return Exchange
+     * @return UuidInterface
      */
-    public function exchange(): Exchange
+    public function exchangeId(): UuidInterface
     {
-        return $this->exchange;
+        return $this->exchangeId;
     }
 
     /**
@@ -50,11 +56,11 @@ class CreateAskCommand
     }
 
     /**
-     * @return Trader
+     * @return UuidInterface
      */
-    public function trader(): Trader
+    public function traderId(): UuidInterface
     {
-        return $this->trader;
+        return $this->traderId;
     }
 
     /**

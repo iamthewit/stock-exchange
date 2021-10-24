@@ -82,14 +82,13 @@ class SeedEventStreamDatabaseCommand extends Command
         // create a trader and some shares
         $traderOne = $this->createTraderWithShares($exchange, Symbol::fromValue('FOO'));
 
-        $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchangeId));
         // create a bid for trader one
         $bidOneId = Uuid::uuid4();
         $this->messageBus->dispatch(
             new CreateBidCommand(
-                $exchange,
+                $exchangeId,
                 $bidOneId,
-                $traderOne,
+                $traderOne->id(),
                 Symbol::fromValue('BAR'),
                 Price::fromValue(100)
             )
@@ -103,23 +102,22 @@ class SeedEventStreamDatabaseCommand extends Command
         // $traderTwo is BIDDING 100 for FOO (buyer)
         $this->messageBus->dispatch(
             new CreateBidCommand(
-                $exchange,
+                $exchange->id(),
                 Uuid::uuid4(),
-                $traderTwo,
+                $traderTwo->id(),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(100)
             )
         );
 
-        $traderOne = $this->queryHandlerBus->query(new GetTraderByIdQuery($traderOne->id(), $exchangeId));
         $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchangeId));
 
         // $traderOne is ASKING 100 for FOO (seller)
         $this->messageBus->dispatch(
             new CreateAskCommand(
-                $exchange,
+                $exchange->id(),
                 Uuid::uuid4(),
-                $traderOne,
+                $traderOne->id(),
                 Symbol::fromValue('FOO'),
                 Price::fromValue(100)
             )
@@ -140,7 +138,7 @@ class SeedEventStreamDatabaseCommand extends Command
     {
         // create a trader
         $traderId = Uuid::uuid4();
-        $this->messageBus->dispatch(new CreateTraderCommand($exchange, $traderId));
+        $this->messageBus->dispatch(new CreateTraderCommand($exchange->id(), $traderId));
 
         // create some shares
         for ($i = 0; $i < 1; $i++) {
@@ -153,7 +151,7 @@ class SeedEventStreamDatabaseCommand extends Command
             $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchange->id()));
             $this->messageBus->dispatch(
                 new CreateShareCommand(
-                    $exchange,
+                    $exchange->id(),
                     $shareId,
                     $symbol
                 )
@@ -164,7 +162,7 @@ class SeedEventStreamDatabaseCommand extends Command
 
             $exchange = $this->queryHandlerBus->query(new GetExchangeByIdQuery($exchange->id()));
             // allocate share to trader
-            $this->messageBus->dispatch(new AllocateShareToTraderCommand($exchange, $share, $trader));
+            $this->messageBus->dispatch(new AllocateShareToTraderCommand($exchange->id(), $share->id(), $trader->id()));
         }
 
         return $this->queryHandlerBus->query(new GetTraderByIdQuery($traderId, $exchange->id()));

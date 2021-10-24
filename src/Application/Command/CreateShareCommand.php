@@ -8,27 +8,27 @@ use StockExchange\StockExchange\Symbol;
 
 class CreateShareCommand
 {
-    private Exchange $exchange;
+    private UuidInterface $exchangeId;
     private UuidInterface $shareId;
     private Symbol $symbol;
 
     /**
      * CreateShareCommand constructor.
      *
-     * @param Exchange      $exchange
+     * @param UuidInterface $exchangeId
      * @param UuidInterface $shareId
      * @param Symbol        $symbol
      */
-    public function __construct(Exchange $exchange, UuidInterface $shareId, Symbol $symbol)
+    public function __construct(UuidInterface $exchangeId, UuidInterface $shareId, Symbol $symbol)
     {
-        $this->exchange = $exchange;
+        $this->exchangeId = $exchangeId;
         $this->shareId = $shareId;
         $this->symbol  = $symbol;
     }
 
-    public function exchange(): Exchange
+    public function exchangeId(): UuidInterface
     {
-        return $this->exchange;
+        return $this->exchangeId;
     }
 
     public function shareId(): UuidInterface

@@ -7,23 +7,22 @@ use StockExchange\StockExchange\Exchange;
 
 class CreateTraderCommand
 {
-    private Exchange $exchange;
+    private UuidInterface $exchangeId;
     private UuidInterface $traderId;
 
     /**
-     * CreateTraderCommand constructor.
-     *
-     * @param Exchange $exchange * @param UuidInterface $id
+     * @param UuidInterface $exchangeId
+     * @param UuidInterface $traderId
      */
-    public function __construct(Exchange $exchange, UuidInterface $traderId)
+    public function __construct(UuidInterface $exchangeId, UuidInterface $traderId)
     {
-        $this->exchange = $exchange;
+        $this->exchangeId = $exchangeId;
         $this->traderId = $traderId;
     }
 
-    public function exchange(): Exchange
+    public function exchangeId(): UuidInterface
     {
-        return $this->exchange;
+        return $this->exchangeId;
     }
 
     /**
