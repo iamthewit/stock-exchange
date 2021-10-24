@@ -20,7 +20,7 @@ class BidRemovedFromExchange extends DomainEvent implements EventInterface
     public function __construct(Bid $bid)
     {
         $this->init();
-        $this->setPayload($bid->asArray());
+        $this->setPayload($bid->toArray());
         $this->bid = $bid;
     }
 

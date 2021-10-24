@@ -4,5 +4,5 @@ namespace StockExchange\StockExchange;
 
 interface ArrayableInterface
 {
-    public function asArray(): array;
+    public function toArray(): array;
 }

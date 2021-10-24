@@ -37,7 +37,7 @@ class Price implements \JsonSerializable, ArrayableInterface
     /**
      * @return array{value: int}
      */
-    public function asArray(): array
+    public function toArray(): array
     {
         return [
             'value' => $this->value()
@@ -49,6 +49,6 @@ class Price implements \JsonSerializable, ArrayableInterface
      */
     public function jsonSerialize(): array
     {
-        return $this->asArray();
+        return $this->toArray();
     }
 }

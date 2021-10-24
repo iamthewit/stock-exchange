@@ -90,18 +90,18 @@ class Ask implements \JsonSerializable, ArrayableInterface
     /**
      * @return array{id: string, trader: Trader, symbol: Symbol, price: Price}
      */
-    public function asArray(): array
+    public function toArray(): array
     {
         return [
             'id' => $this->id()->toString(),
-            'trader' => $this->trader()->asArray(),
-            'symbol' => $this->symbol()->asArray(),
-            'price' => $this->price()->asArray()
+            'trader' => $this->trader()->toArray(),
+            'symbol' => $this->symbol()->toArray(),
+            'price' => $this->price()->toArray()
         ];
     }
 
     public function jsonSerialize()
     {
-        return $this->asArray();
+        return $this->toArray();
     }
 }

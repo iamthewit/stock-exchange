@@ -20,7 +20,7 @@ class ExchangeCreated extends DomainEvent implements EventInterface
     public function __construct(Exchange $exchange)
     {
         $this->init();
-        $this->setPayload($exchange->asArray());
+        $this->setPayload($exchange->toArray());
         $this->exchange = $exchange;
     }
 

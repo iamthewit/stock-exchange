@@ -20,7 +20,7 @@ class TradeExecuted extends DomainEvent implements EventInterface
     public function __construct(Trade $trade)
     {
         $this->init();
-        $this->setPayload($trade->asArray());
+        $this->setPayload($trade->toArray());
         $this->trade = $trade;
     }
 

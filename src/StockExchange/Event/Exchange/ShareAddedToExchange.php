@@ -21,7 +21,7 @@ class ShareAddedToExchange extends DomainEvent implements EventInterface
     public function __construct(Share $share)
     {
         $this->init();
-        $this->setPayload($share->asArray());
+        $this->setPayload($share->toArray());
         $this->share = $share;
     }
 

@@ -99,7 +99,7 @@ class Trader implements \JsonSerializable, ArrayableInterface
     /**
      * @return array<string, ShareCollection|string>
      */
-    public function asArray(): array
+    public function toArray(): array
     {
         return [
             'id' => $this->id()->toString(),
@@ -109,6 +109,6 @@ class Trader implements \JsonSerializable, ArrayableInterface
 
     public function jsonSerialize()
     {
-        return $this->asArray();
+        return $this->toArray();
     }
 }

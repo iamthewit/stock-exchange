@@ -18,7 +18,7 @@ class TraderAddedToExchange extends DomainEvent implements EventInterface
     public function __construct(Trader $trader)
     {
         $this->init();
-        $this->setPayload($trader->asArray());
+        $this->setPayload($trader->toArray());
         $this->trader = $trader;
     }
 

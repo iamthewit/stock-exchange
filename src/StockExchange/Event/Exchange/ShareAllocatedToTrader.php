@@ -24,7 +24,7 @@ class ShareAllocatedToTrader extends DomainEvent implements EventInterface
     public function __construct(Share $share, Trader $trader)
     {
         $this->init();
-        $this->setPayload(['share' => $share->asArray(), 'trader' => $trader->asArray()]);
+        $this->setPayload(['share' => $share->toArray(), 'trader' => $trader->toArray()]);
         $this->share = $share;
         $this->trader = $trader;
     }

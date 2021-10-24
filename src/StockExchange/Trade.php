@@ -63,17 +63,17 @@ class Trade implements \JsonSerializable, ArrayableInterface
     /**
      * @return array{id: string, bid: Bid, ask: Ask}
      */
-    public function asArray(): array
+    public function toArray(): array
     {
         return [
             'id' => $this->id()->toString(),
-            'bid' => $this->bid()->asArray(),
-            'ask' => $this->ask()->asArray()
+            'bid' => $this->bid()->toArray(),
+            'ask' => $this->ask()->toArray()
         ];
     }
 
     public function jsonSerialize()
     {
-        return $this->asArray();
+        return $this->toArray();
     }
 }

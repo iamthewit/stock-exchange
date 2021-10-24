@@ -386,7 +386,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     public function jsonSerialize(): array
     {
-        return $this->asArray();
+        return $this->toArray();
     }
 
     /**
@@ -398,7 +398,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      * trades: TradeCollection
      * }
      */
-    public function asArray(): array
+    public function toArray(): array
     {
         return [
             'id' => $this->id()->toString(),

@@ -28,7 +28,7 @@ abstract class AbstractTraderDTO implements \JsonSerializable
 
     public function asArray(): array
     {
-        return $this->trader->asArray();
+        return $this->trader->toArray();
     }
 
     abstract public function jsonSerialize(): array;

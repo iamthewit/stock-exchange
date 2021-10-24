@@ -20,7 +20,7 @@ class AskRemovedFromExchange extends DomainEvent implements EventInterface
     public function __construct(Ask $ask)
     {
         $this->init();
-        $this->setPayload($ask->asArray());
+        $this->setPayload($ask->toArray());
         $this->ask = $ask;
     }
 

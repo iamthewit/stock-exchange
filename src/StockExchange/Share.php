@@ -81,7 +81,7 @@ class Share implements JsonSerializable, ArrayableInterface
     /**
      * @return array{id: string, symbol: string, owner_id: string|null}
      */
-    public function asArray(): array
+    public function toArray(): array
     {
         return [
             'id' => $this->id()->toString(),
@@ -95,6 +95,6 @@ class Share implements JsonSerializable, ArrayableInterface
      */
     public function jsonSerialize(): array
     {
-        return $this->asArray();
+        return $this->toArray();
     }
 }
