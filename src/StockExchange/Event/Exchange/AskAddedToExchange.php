@@ -2,15 +2,11 @@
 
 namespace StockExchange\StockExchange\Event\Exchange;
 
-use Prooph\Common\Messaging\DomainEvent;
 use StockExchange\StockExchange\Ask;
-use StockExchange\StockExchange\Event\EventInterface;
-use StockExchange\StockExchange\Event\HasEventPayloadTrait;
+use StockExchange\StockExchange\Event\Event;
 
-class AskAddedToExchange extends DomainEvent implements EventInterface
+class AskAddedToExchange extends Event
 {
-    use HasEventPayloadTrait;
-
     private Ask $ask;
 
     /**

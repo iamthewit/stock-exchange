@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange\Event\Exchange;
 
-use Prooph\Common\Messaging\DomainEvent;
-use StockExchange\StockExchange\Event\EventInterface;
-use StockExchange\StockExchange\Event\HasEventPayloadTrait;
+use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\Share;
 
-class ShareAddedToExchange extends DomainEvent implements EventInterface
+class ShareAddedToExchange extends Event
 {
-    use HasEventPayloadTrait;
-
     private Share $share;
 
     /**

@@ -2,7 +2,9 @@
 
 namespace StockExchange\StockExchange\Event;
 
-trait HasEventPayloadTrait
+use Prooph\Common\Messaging\DomainEvent;
+
+class Event extends DomainEvent
 {
     protected array $payload;
 

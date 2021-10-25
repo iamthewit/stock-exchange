@@ -2,15 +2,11 @@
 
 namespace StockExchange\StockExchange\Event\Exchange;
 
-use Prooph\Common\Messaging\DomainEvent;
 use StockExchange\StockExchange\Bid;
-use StockExchange\StockExchange\Event\EventInterface;
-use StockExchange\StockExchange\Event\HasEventPayloadTrait;
+use StockExchange\StockExchange\Event\Event;
 
-class BidAddedToExchange extends DomainEvent implements EventInterface
+class BidAddedToExchange extends Event
 {
-    use HasEventPayloadTrait;
-
     private Bid $bid;
 
     /**

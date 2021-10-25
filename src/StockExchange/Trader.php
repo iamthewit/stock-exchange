@@ -3,7 +3,6 @@
 namespace StockExchange\StockExchange;
 
 use Ramsey\Uuid\UuidInterface;
-use StockExchange\StockExchange\Event\EventInterface;
 
 /**
  * Class Trader
@@ -18,11 +17,6 @@ class Trader implements \JsonSerializable, ArrayableInterface
     // at the moment only one exchange exists, though the exchange has an ID
     // and it is not impossible to imagine that multiple exchanges might
     // exist in the future
-
-    /**
-     * @var EventInterface[]
-     */
-    private array $appliedEvents = [];
 
     private function __construct()
     {

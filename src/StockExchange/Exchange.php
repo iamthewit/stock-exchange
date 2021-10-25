@@ -8,9 +8,9 @@ use Exception;
 use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\Event\Exchange\AskAddedToExchange;
 use StockExchange\StockExchange\Event\Exchange\BidAddedToExchange;
-use StockExchange\StockExchange\Event\EventInterface;
 use StockExchange\StockExchange\Event\Exchange\ExchangeCreated;
 use StockExchange\StockExchange\Event\Exchange\AskRemovedFromExchange;
 use StockExchange\StockExchange\Event\Exchange\BidRemovedFromExchange;
@@ -36,9 +36,10 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private TraderCollection $traders;
     private ShareCollection $shares;
     /**
-     * @var EventInterface[]
+     * @var Event[]
      */
     private array $appliedEvents = [];
+    private Event $lastAppliedEvent;
 
     /**
      * Exchange constructor.
@@ -57,11 +58,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     public static function create(UuidInterface $id): self {
         $exchange = new self();
         $exchange->id = $id;
-
-        // TODO: initialise all of these with empty collections.
-        // when an exchange is created nothing exists.
-        // each of these will be added via other state
-        // changes (events) after exchange creation
         $exchange->symbols = new SymbolCollection([]);
         $exchange->bids = new BidCollection([]);
         $exchange->asks = new AskCollection([]);
@@ -77,7 +73,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     }
 
     /**
-     * @param EventInterface[] $events
+     * @param Event[] $events
      * @return Exchange
      * @throws AskCollectionCreationException
      * @throws BidCollectionCreationException
@@ -89,10 +85,10 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         $exchange = new self();
 
         foreach ($events as $event) {
-            if (!is_a($event, EventInterface::class)) {
+            if (!is_a($event, Event::class)) {
                 // TODO: create a proper exception for this:
                 throw new StateRestorationException(
-                    'Can only restore state from objects that implement EventInterface.'
+                    'Can only restore state from objects that extend the Event class.'
                 );
             }
 
@@ -134,6 +130,87 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
                     break;
             }
         }
+
+        return $exchange;
+    }
+
+    public static function restoreFromValues(array $result): Exchange
+    {
+        $exchange = new self();
+        $exchange->id = Uuid::fromString($result['id']);
+
+        $traders = [];
+        foreach ($result['traders'] as $trader) {
+            $shares = [];
+            foreach ($trader['shares'] as $share) {
+                $shares[] = Share::fromValues(
+                    Uuid::fromString($share['id']),
+                    Symbol::fromValue(
+                        $share['symbol']
+                    ),
+                    Uuid::fromString($share['owner_id'])
+                );
+            }
+            $traders[] = Trader::restoreFromValues(
+                Uuid::fromString($trader['id']),
+                new ShareCollection($shares)
+            );
+        }
+        $exchange->traders = new TraderCollection($traders);
+
+        $shares = [];
+        foreach ($result['shares'] as $share) {
+            $shares[] = Share::fromValues(
+                Uuid::fromString($share['id']),
+                Symbol::fromValue(
+                    $share['symbol']
+                ),
+                $share['owner_id'] ? Uuid::fromString($share['owner_id']) : null
+            );
+        }
+        $exchange->shares = new ShareCollection($shares);
+
+        $asks = [];
+        foreach ($result['asks'] as $ask) {
+            $asks[] = Ask::restoreFromValues(
+                Uuid::fromString($ask['id']),
+                $exchange->traders()->findById(Uuid::fromString($ask['trader']['id'])),
+                Symbol::fromValue(
+                    $ask['symbol']
+                ),
+                Price::fromValue($ask['price'])
+            );
+        }
+        $exchange->asks = new AskCollection($asks);
+
+        $bids = [];
+        foreach ($result['bids'] as $bid) {
+            $bids[] = Bid::restoreFromValues(
+                Uuid::fromString($bid['id']),
+                $exchange->traders()->findById(Uuid::fromString($bid['trader']['id'])),
+                Symbol::fromValue(
+                    $bid['symbol']['value']
+                ),
+                Price::fromValue($bid['price']['value'])
+            );
+        }
+        $exchange->bids = new BidCollection($bids);
+
+        $trades = [];
+        foreach ($result['trades'] as $trade) {
+            $trades[] = Trade::fromBidAndAsk(
+                Uuid::fromString($trade['id']),
+                $exchange->bids()->findById(Uuid::fromString($trade['bid_id'])),
+                $exchange->asks()->findById(Uuid::fromString($trade['ask_id']))
+            );
+        }
+        $exchange->trades = new TradeCollection($trades);
+        $exchange->symbols = new SymbolCollection([]); // TODO: at some point, maybe
+
+        // TODO: find a nicer way to deal with this
+        $result['last_applied_event']['created_at'] = new \DateTimeImmutable($result['last_applied_event']['created_at']);
+
+        $exchange->lastAppliedEvent = Event::fromArray($result['last_applied_event']);
 
         return $exchange;
     }
@@ -195,11 +272,16 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     }
 
     /**
-     * @return EventInterface[]
+     * @return Event[]
      */
     public function appliedEvents(): array
     {
         return $this->appliedEvents;
+    }
+
+    public function lastAppliedEvent(): DomainEvent
+    {
+        return $this->lastAppliedEvent;
     }
 
     /**
@@ -406,6 +488,8 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
             'bids' => $this->bids()->toArray(),
             'asks' => $this->asks()->toArray(),
             'trades' => $this->trades()->toArray(),
+            'traders' => $this->traders()->toArray(),
+            'shares' => $this->shares()->toArray(),
         ];
     }
 
@@ -427,7 +511,10 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
     private function aggregateVersion(): int
     {
-        if (count($this->appliedEvents)) {
+        // TODO: make this nicer
+        if (isset($this->lastAppliedEvent)) { // used for mongo read restore
+            return $this->lastAppliedEvent->metadata()['_aggregate_version'];
+        } elseif (count($this->appliedEvents())) { // used for mysql event store restore
             /** @var DomainEvent $lastEvent */
             $lastEvent = end($this->appliedEvents);
 
@@ -439,7 +526,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
     private function nextAggregateVersion(): int
     {
-        return $this->aggregateVersion() + count($this->dispatchableEvents()) + 1;
+        return $this->aggregateVersion() + 1;
     }
 
     /**
@@ -533,9 +620,9 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     }
 
     /**
-     * @param EventInterface $event
+     * @param Event $event
      */
-    private function addAppliedEvent(EventInterface $event): void
+    private function addAppliedEvent(Event $event): void
     {
         $this->appliedEvents[] = $event;
     }

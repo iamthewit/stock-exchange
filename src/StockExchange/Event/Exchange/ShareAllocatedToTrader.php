@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange\Event\Exchange;
 
-use Prooph\Common\Messaging\DomainEvent;
-use StockExchange\StockExchange\Event\EventInterface;
-use StockExchange\StockExchange\Event\HasEventPayloadTrait;
+use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\Share;
 use StockExchange\StockExchange\Trader;
 
-class ShareAllocatedToTrader extends DomainEvent implements EventInterface
+class ShareAllocatedToTrader extends Event
 {
-    use HasEventPayloadTrait;
-
     private Share $share;
     private Trader $trader;
 

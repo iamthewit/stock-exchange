@@ -2,6 +2,7 @@
 
 namespace StockExchange\Infrastructure\Persistence;
 
+use DateTime;
 use MongoDB\Client;
 use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\ExchangeWriteRepositoryInterface;
@@ -22,9 +23,19 @@ class ExchangeMongoWriteRepository implements ExchangeWriteRepositoryInterface
     {
         $collection = $this->client->stock_exchange->exchanges;
 
+        // TODO: clean this up
         $collection->updateOne(
             ['_id' => $exchange->id()->toString()],
-            ['$set' => ['_id' => $exchange->id()->toString()] + json_decode(json_encode($exchange), true)],
+            ['$set' =>
+                ['_id' => $exchange->id()->toString()] +
+                json_decode(json_encode($exchange), true) +
+                [
+                    'last_applied_event' => array_merge(
+                        $exchange->lastAppliedEvent()->toArray(),
+                        ['created_at' => $exchange->lastAppliedEvent()->createdAt()->format(DateTime::ISO8601)]
+                    )
+                ]
+            ],
             ['upsert' => true]
         );
     }

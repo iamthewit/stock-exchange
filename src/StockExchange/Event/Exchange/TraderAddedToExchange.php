@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange\Event\Exchange;
 
-use Prooph\Common\Messaging\DomainEvent;
-use StockExchange\StockExchange\Event\EventInterface;
-use StockExchange\StockExchange\Event\HasEventPayloadTrait;
+use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\Trader;
 
-class TraderAddedToExchange extends DomainEvent implements EventInterface
+class TraderAddedToExchange extends Event
 {
-    use HasEventPayloadTrait;
-
     private Trader $trader;
 
     public function __construct(Trader $trader)

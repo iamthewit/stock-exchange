@@ -8,6 +8,7 @@ use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use JsonSerializable;
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Exception\AskCollectionCreationException;
 
 /**
@@ -90,5 +91,10 @@ class AskCollection implements IteratorAggregate, Countable, JsonSerializable
                         && $ask->price()->value() === $price->value();
             })
         );
+    }
+
+    public function findById(UuidInterface $id): Ask
+    {
+        return $this->toArray()[$id->toString()];
     }
 }

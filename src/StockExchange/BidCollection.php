@@ -8,6 +8,7 @@ use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use JsonSerializable;
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Exception\BidCollectionCreationException;
 
 /**
@@ -90,5 +91,10 @@ class BidCollection implements IteratorAggregate, Countable, JsonSerializable
                     && $bid->price()->value() === $price->value();
             })
         );
+    }
+
+    public function findById(UuidInterface $id): Bid
+    {
+        return $this->toArray()[$id->toString()];
     }
 }

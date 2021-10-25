@@ -2,17 +2,18 @@
 
 namespace StockExchange\StockExchange;
 
-use StockExchange\StockExchange\Event\EventInterface;
+use StockExchange\StockExchange\Event\Event;
 
+// TODO: this is only used in the Exchange class now so the trait can be removed
 trait HasDispatchableEventsTrait
 {
     /**
-     * @var EventInterface[]
+     * @var Event[]
      */
     private array $dispatchableEvents = [];
 
     /**
-     * @return EventInterface[]
+     * @return Event[]
      */
     public function dispatchableEvents(): array
     {
@@ -44,8 +45,9 @@ trait HasDispatchableEventsTrait
         $this->clearDispatchableEvents();
     }
 
-    private function addDispatchableEvent(EventInterface $event): void
+    private function addDispatchableEvent(Event $event): void
     {
         $this->dispatchableEvents[] = $event;
+        $this->lastAppliedEvent = $event;
     }
 }

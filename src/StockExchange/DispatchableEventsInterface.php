@@ -2,12 +2,12 @@
 
 namespace StockExchange\StockExchange;
 
-use StockExchange\StockExchange\Event\EventInterface;
+use StockExchange\StockExchange\Event\Event;
 
 interface DispatchableEventsInterface
 {
     /**
-     * @return EventInterface[]
+     * @return Event[]
      */
     public function dispatchableEvents(): array;
 }
