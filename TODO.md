@@ -1,12 +1,10 @@
 # TODO
 
-- Create Mongo Data Store Write Repository
-- Create Mongo Data Store Read Repository
 - In any 'apply' methods that require other related domain objects - check the collections that already exist on the exchange
   - i.e applyBidAddedToExchange uses a trader that already exists in the TraderCollection
 - Add tests for all the new handlers
 - Create specific entity id classes that extend uuid interface
-- Create CollectionInterface
+- Create AbstractCollection
 - Exchange Simulation
 - Event Loop
 - Docker container 

@@ -23,20 +23,34 @@ class ExchangeMongoWriteRepository implements ExchangeWriteRepositoryInterface
     {
         $collection = $this->client->stock_exchange->exchanges;
 
-        // TODO: clean this up
         $collection->updateOne(
             ['_id' => $exchange->id()->toString()],
-            ['$set' =>
-                ['_id' => $exchange->id()->toString()] +
-                json_decode(json_encode($exchange), true) +
-                [
-                    'last_applied_event' => array_merge(
-                        $exchange->lastAppliedEvent()->toArray(),
-                        ['created_at' => $exchange->lastAppliedEvent()->createdAt()->format(DateTime::ISO8601)]
-                    )
-                ]
-            ],
+            ['$set' => $this->createExchangeArray($exchange)],
             ['upsert' => true]
+        );
+    }
+
+    /**
+     * @param Exchange $exchange
+     *
+     * @return array
+     */
+    protected function createExchangeArray(Exchange $exchange): mixed
+    {
+        return array_merge(
+            ['_id' => $exchange->id()->toString()],
+            json_decode(json_encode($exchange), true),
+            [
+                'last_applied_event' => array_merge(
+                    $exchange->lastAppliedEvent()->toArray(),
+                    [
+                        'created_at' => $exchange
+                            ->lastAppliedEvent()
+                            ->createdAt()
+                            ->format(DateTime::ISO8601)
+                    ]
+                )
+            ]
         );
     }
 }

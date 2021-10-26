@@ -51,6 +51,6 @@ services:
         class: StockExchange\Infrastructure\Persistence\ExchangeMongoReadRepository
 
     # Set the implementation you want to use:
-    StockExchange\StockExchange\ExchangeReadRepositoryInterface: '@stock_exchange.exchange_read_repo.mysql_event_store'
-#    StockExchange\StockExchange\ExchangeReadRepositoryInterface: '@stock_exchange.exchange_read_repo.mongo'
+#    StockExchange\StockExchange\ExchangeReadRepositoryInterface: '@stock_exchange.exchange_read_repo.mysql_event_store'
+    StockExchange\StockExchange\ExchangeReadRepositoryInterface: '@stock_exchange.exchange_read_repo.mongo'
 
