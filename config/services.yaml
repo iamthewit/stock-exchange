@@ -42,7 +42,6 @@ services:
         factory: ['StockExchange\Infrastructure\Persistence\MongoClientFactory', 'createClient']
         arguments: ['%stock_exchange.mongo_uri%']
 
-
     # Two Exchange Read Repo Implementations:
     stock_exchange.exchange_read_repo.mysql_event_store:
         class: StockExchange\Infrastructure\Persistence\ExchangeMySqlEventStoreReadRepository
@@ -51,6 +50,9 @@ services:
         class: StockExchange\Infrastructure\Persistence\ExchangeMongoReadRepository
 
     # Set the implementation you want to use:
-#    StockExchange\StockExchange\ExchangeReadRepositoryInterface: '@stock_exchange.exchange_read_repo.mysql_event_store'
-    StockExchange\StockExchange\ExchangeReadRepositoryInterface: '@stock_exchange.exchange_read_repo.mongo'
+    # Use this if you want to restore the Exchange state from events:
+    StockExchange\StockExchange\ExchangeReadRepositoryInterface: '@stock_exchange.exchange_read_repo.mysql_event_store'
+
+    # Use this if you want to restore the Exchange state from the Mongo Collection:
+#    StockExchange\StockExchange\ExchangeReadRepositoryInterface: '@stock_exchange.exchange_read_repo.mongo'
 
