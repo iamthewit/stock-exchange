@@ -1,3 +1,7 @@
+# Work In Progress
+Sending messages to RabbitMQ
+Currently sending all domain events (in the future change this to application level events ? what makes the most sense?)
+
 # TODO
 
 - In any 'apply' methods that require other related domain objects - check the collections that already exist on the exchange
