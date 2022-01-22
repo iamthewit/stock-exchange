@@ -29,7 +29,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 class SeedEventStreamDatabaseCommand extends Command
 {
     protected static $defaultName = 'seed:event-stream-db';
-    protected static string $defaultDescription = 'Add a short description for your command';
+    protected static $defaultDescription = 'Add a short description for your command';
 
     private ParameterBagInterface $params;
     private MessageBusInterface $messageBus;

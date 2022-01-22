@@ -18,6 +18,8 @@ code-coverage/
 
 ###> symfony/phpunit-bridge ###
 bin/.phpunit
+.phpunit.result.cache
+/phpunit.xml
 ###< symfony/phpunit-bridge ###
 
 ###> qossmic/deptrac-shim ###
