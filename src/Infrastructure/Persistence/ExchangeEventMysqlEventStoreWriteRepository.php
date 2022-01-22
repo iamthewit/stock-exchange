@@ -26,7 +26,18 @@ class ExchangeEventMysqlEventStoreWriteRepository implements ExchangeEventWriteR
 
         $streamName = new StreamName($aggregate . '-' . $aggregateId);
 
-        if (!$this->eventStore->hasStream($streamName)) {
+        // TODO: PHP 8.1 has broken the comparison made by the prooph library when
+        // checking hasStream(), so I've added a hacky work around for now...
+        $streamExists = false;
+        foreach ($this->eventStore->fetchStreamNames(null, null) as $fetchedStreamName) {
+            if ($fetchedStreamName->toString() === $streamName->toString()) {
+                $streamExists = true;
+                break;
+            }
+        }
+
+//        if (!$this->eventStore->hasStream($streamName)) {
+        if (!$streamExists) {
             $stream = new Stream(
                 $streamName,
                 new ArrayIterator(),

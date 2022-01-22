@@ -31,6 +31,7 @@
         "symfony/messenger": "5.4.*",
         "symfony/phpunit-bridge": "^5.4",
         "symfony/property-access": "5.4.*",
+        "symfony/runtime": "5.4.*",
         "symfony/serializer": "5.4.*",
         "symfony/yaml": "5.4.*"
     },
@@ -54,7 +55,8 @@
         "allow-plugins": {
             "composer/package-versions-deprecated": true,
             "ramsey/composer-repl": true,
-            "symfony/flex": true
+            "symfony/flex": true,
+            "symfony/runtime": true
         }
     },
     "autoload": {

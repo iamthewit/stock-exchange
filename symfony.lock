@@ -509,6 +509,9 @@
             "config/routes.yaml"
         ]
     },
+    "symfony/runtime": {
+        "version": "v5.4.1"
+    },
     "symfony/serializer": {
         "version": "v5.2.12"
     },
