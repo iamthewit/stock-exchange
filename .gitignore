@@ -25,3 +25,6 @@ bin/.phpunit
 ###> qossmic/deptrac-shim ###
 /.deptrac.cache
 ###< qossmic/deptrac-shim ###
+
+docker/mongo-database/data
+docker/mysql-database/data

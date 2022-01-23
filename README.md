@@ -103,25 +103,8 @@ _Note:_ Some tests require a database to be in place. See the [Database](#databa
 
 ## Database
 
-Start the DB container:
-
-`./start-mysql-event-streams.sh`
-
-Seed / Re-seed the DB:
-
-`./seed-mysql-event-streams.sh`
-
-
-Stop the DB container:
-
-`./stop-mysql-event-streams.sh`
-
 ### Migrations
 
 #### Event Store
 
-The script (above) that starts the DB container will run the event sotre migrations for you.
-
 #### Read Models
-
-TODO
