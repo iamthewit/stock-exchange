@@ -673,7 +673,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private function applyBidRemovedFromExchange(BidRemovedFromExchange $event): void
     {
         $bids = $this->bids()->toArray();
-        unset($bids[$event->bid()->id()->toString()]);
+        unset($bids[$event->payload()['id']]);
 
         $this->bids = new BidCollection($bids);
 
@@ -708,7 +708,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private function applyAskRemovedFromExchange(AskRemovedFromExchange $event): void
     {
         $asks = $this->asks()->toArray();
-        unset($asks[$event->ask()->id()->toString()]);
+        unset($asks[$event->payload()['id']]);
 
         $this->asks = new AskCollection($asks);
 
@@ -721,8 +721,23 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     private function applyTradeExecuted(TradeExecuted $event): void
     {
+        $trade = Trade::fromBidAndAsk(
+            Uuid::fromString($event->payload()['id']),
+            Bid::restoreFromValues(
+                Uuid::fromString($event->payload()['bid']['id']),
+                $this->traders()->findById(Uuid::fromString($event->payload()['bid']['trader']['id'])),
+                Symbol::fromValue($event->payload()['bid']['symbol']['value']),
+                Price::fromValue($event->payload()['bid']['price']['value'])
+            ),
+            Ask::restoreFromValues(
+                Uuid::fromString($event->payload()['ask']['id']),
+                $this->traders()->findById(Uuid::fromString($event->payload()['ask']['trader']['id'])),
+                Symbol::fromValue($event->payload()['ask']['symbol']['value']),
+                Price::fromValue($event->payload()['ask']['price']['value'])
+            ),
+        );
         $this->trades = new TradeCollection(
-            $this->trades()->toArray() + [$event->trade()]
+            $this->trades()->toArray() + [$trade]
         );
 
         $this->addAppliedEvent($event);
