@@ -33,14 +33,6 @@ class Share implements JsonSerializable, ArrayableInterface
         return $share;
     }
 
-    /**
-     * @return UuidInterface
-     */
-    public function id(): UuidInterface
-    {
-        return $this->id;
-    }
-
     public static function fromValues(
         UuidInterface $id,
         Symbol $symbol,
@@ -52,6 +44,14 @@ class Share implements JsonSerializable, ArrayableInterface
         $share->ownerId = $ownerId;
 
         return $share;
+    }
+
+    /**
+     * @return UuidInterface
+     */
+    public function id(): UuidInterface
+    {
+        return $this->id;
     }
 
     /**

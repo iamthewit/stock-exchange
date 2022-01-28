@@ -116,8 +116,12 @@ class ShareCollection implements IteratorAggregate, Countable, JsonSerializable
         return false;
     }
 
-    public function findById(UuidInterface $id): Share
+    public function findById(UuidInterface $id): ?Share
     {
+        if (!array_key_exists($id->toString(), $this->toArray())) {
+            return null;
+        }
+
         return $this->toArray()[$id->toString()];
     }
 }

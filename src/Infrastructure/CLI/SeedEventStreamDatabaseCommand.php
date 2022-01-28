@@ -7,6 +7,7 @@ use Ramsey\Uuid\UuidInterface;
 use StockExchange\Application\Command\AllocateShareToTraderCommand;
 use StockExchange\Application\Command\CreateAskCommand;
 use StockExchange\Application\Command\CreateBidCommand;
+use StockExchange\Application\Command\CreateExchangeCommand;
 use StockExchange\Application\Command\CreateShareCommand;
 use StockExchange\Application\Command\CreateTraderCommand;
 use StockExchange\Application\MessageBus\QueryHandlerBus;
@@ -43,8 +44,7 @@ class SeedEventStreamDatabaseCommand extends Command
         ParameterBagInterface $params,
         MessageBusInterface $messageBus,
         QueryHandlerBus $queryHandlerBus
-    )
-    {
+    ) {
         $this->params = $params;
         $this->messageBus = $messageBus;
         $this->queryHandlerBus = $queryHandlerBus;

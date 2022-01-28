@@ -13,8 +13,6 @@ Currently sending all domain events (in the future change this to application le
 - Create AbstractCollection
 - Exchange Simulation
 - Event Loop
-- Docker container 
-- Add another bounded context / service
 
 
 ## Thoughts / Ideas / Refactors
@@ -27,6 +25,24 @@ This would mean that the exchange needs a collection of all shares at all times 
 
 ---
 
-We could add another bounded context (or perhaps even a new service) to deal with share history
-Everytime an event is emitted from the StockExchange context another service/context could listen for share traded events
-This context could record the prices / no of trades and provide share stats over time 
+## Additional Aggregates / Bounded Contexts
+
+### Trader Context
+
+Responsibilities:
+- Trader registration
+- Trader data (shares owned, share history, bid and ask history)
+
+
+### Share Context
+
+Responsibilities:
+- Share history 
+  - who owned what share at what point in time
+  - what price was paid for the share at a given time
+  
+
+### Symbol Context
+
+Responsibilities:
+- Track current and historical price of symbols (stocks / securities) 
