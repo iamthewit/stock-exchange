@@ -101,7 +101,7 @@ class Trader implements \JsonSerializable, ArrayableInterface
         ];
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

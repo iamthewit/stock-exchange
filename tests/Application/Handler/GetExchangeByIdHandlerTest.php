@@ -12,6 +12,7 @@ use StockExchange\StockExchange\AskCollection;
 use StockExchange\StockExchange\BidCollection;
 use StockExchange\StockExchange\Event\Exchange\ExchangeCreated;
 use StockExchange\StockExchange\Exchange;
+use StockExchange\StockExchange\ExchangeReadRepositoryInterface;
 use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\SymbolCollection;
 use StockExchange\StockExchange\TradeCollection;
@@ -22,42 +23,15 @@ class GetExchangeByIdHandlerTest extends TestCase
     public function testItGetsExchangeById()
     {
         $exchangeId = Uuid::uuid4();
-        $exchange = Exchange::create(
-            $exchangeId,
-            new SymbolCollection([]),
-            new BidCollection([]),
-            new AskCollection([]),
-            new TradeCollection([]),
-            new TraderCollection([]),
-            new ShareCollection([])
-        );
+        $exchange = Exchange::create($exchangeId);
 
-        $projectionQuery = $this->createMock(Query::class);
-        $projectionQuery->expects($this->once())->method('init')->willReturn($projectionQuery);
-        $projectionQuery
-            ->expects($this->once())
-            ->method('fromStream')
-            ->with(Exchange::class . '-' . $exchangeId)
-            ->willReturn($projectionQuery);
-        $projectionQuery->expects($this->once())->method('whenAny')->willReturn($projectionQuery);
-        $projectionQuery
-            ->expects($this->once())
-            ->method('run');
-        $projectionQuery
-            ->expects($this->once())
-            ->method('getState')
-        ->willReturn([
-            new ExchangeCreated($exchange)
-        ]);
-
-        $projectionManager = $this->createMock(ProjectionManager::class);
-        $projectionManager
-            ->expects($this->once())
-            ->method('createQuery')
-            ->willReturn($projectionQuery);
+        $exchangeReadRepository = $this->createMock(ExchangeReadRepositoryInterface::class);
+        $exchangeReadRepository
+            ->method('findById')
+            ->willReturn($exchange);
 
         $getExchangeByIdQuery = new GetExchangeByIdQuery($exchangeId);
-        $getExchangeByIdHandler = new GetExchangeByIdHandler($projectionManager);
+        $getExchangeByIdHandler = new GetExchangeByIdHandler($exchangeReadRepository);
         $retrievedExchange = $getExchangeByIdHandler($getExchangeByIdQuery);
 
         $this->assertInstanceOf(Exchange::class, $retrievedExchange);

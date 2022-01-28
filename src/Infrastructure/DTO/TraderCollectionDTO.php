@@ -33,7 +33,7 @@ class TraderCollectionDTO implements \JsonSerializable
         $this->traders = $traders;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->traders;
     }

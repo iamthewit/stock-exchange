@@ -11,6 +11,7 @@ use StockExchange\StockExchange\AskCollection;
 use StockExchange\StockExchange\Bid;
 use StockExchange\StockExchange\BidCollection;
 use StockExchange\StockExchange\Exchange;
+use StockExchange\StockExchange\ExchangeReadRepositoryInterface;
 use StockExchange\StockExchange\Price;
 use StockExchange\StockExchange\ShareCollection;
 use StockExchange\StockExchange\Symbol;
@@ -24,36 +25,43 @@ class GetTradesHandlerTest extends TestCase
 {
     public function testItReturnsATradeCollection()
     {
-        $query = new GetTradesQuery(
-            Exchange::create(
-                Uuid::uuid4(),
-                new SymbolCollection([]),
-                new BidCollection([]),
-                new AskCollection([]),
-                new TradeCollection([
-                    Trade::fromBidAndAsk(
-                        Uuid::uuid4(),
-                        Bid::create(
-                            Uuid::uuid4(),
-                            Trader::create(Uuid::uuid4()),
-                            Symbol::fromValue('FOO'),
-                            Price::fromValue(100)
-                        ),
-                        Ask::create(
-                            Uuid::uuid4(),
-                            Trader::create(Uuid::uuid4()),
-                            Symbol::fromValue('BAR'),
-                            Price::fromValue(100)
-                        )
-                    )
-                ]),
-                new TraderCollection([]),
-                new ShareCollection([])
-            )
+        $exchange = Exchange::create(Uuid::uuid4());
+        $traderJohnId = Uuid::uuid4();
+        $exchange->createTrader($traderJohnId);
+        $traderJohn = $exchange->traders()->findById($traderJohnId);
+
+        $traderDaveId = Uuid::uuid4();
+        $exchange->createTrader($traderDaveId);
+        $traderDave = $exchange->traders()->findById($traderDaveId);
+
+        $shareFoo1Id = Uuid::uuid4();
+        $exchange->createShare($shareFoo1Id, Symbol::fromValue('FOO'));
+        $exchange->allocateShareToTrader(
+            $exchange->shares()->findById($shareFoo1Id),
+            $traderJohn
         );
 
-        $handler = new GetTradesHandler();
-        $trades = $handler($query);
+        $exchange->ask(
+            Uuid::uuid4(),
+            $traderJohn,
+            Symbol::fromValue('FOO'),
+            Price::fromValue(100)
+        );
+
+        $exchange->bid(
+            Uuid::uuid4(),
+            $traderDave,
+            Symbol::fromValue('FOO'),
+            Price::fromValue(100)
+        );
+
+        $exchangeReadRepository = $this->createMock(ExchangeReadRepositoryInterface::class);
+        $exchangeReadRepository
+            ->method('findById')
+            ->willReturn($exchange);
+
+        $handler = new GetTradesHandler($exchangeReadRepository);
+        $trades = $handler(new GetTradesQuery($exchange->id()));
 
         $this->assertInstanceOf(TradeCollection::class, $trades);
     }
