@@ -16,8 +16,6 @@ Refactor towards smaller aggregates
 The Exchange aggregate knows too much, it should only care about exchanging shares between traders.
 It doesn't need to know about all the shares a trader owns in order to execute a trade.
 
-
-
 ## Additional Aggregates / Bounded Contexts
 
 ### Trader Context

@@ -8,6 +8,9 @@ framework:
             async:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 serializer: messenger.transport.symfony_serializer
+#                does this work?
+#                option:
+#                    persistent: true
             # failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
 
