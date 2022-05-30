@@ -18,22 +18,10 @@ It doesn't need to know about all the shares a trader owns in order to execute a
 
 ## Additional Aggregates / Bounded Contexts
 
-### Trader Context
+Started work on smaller aggregates:
+- Exchange
+- BidAsk
+- Trader
+- Share
 
-Responsibilities:
-- Trader registration
-- Trader data (shares owned, share history, bid and ask history)
-
-
-### Share Context
-
-Responsibilities:
-- Share history 
-  - who owned what share at what point in time
-  - what price was paid for the share at a given time
-  
-
-### Symbol Context
-
-Responsibilities:
-- Track current and historical price of symbols (stocks / securities) 
+Currently, moving logic from original exchange aggregate to the new one
