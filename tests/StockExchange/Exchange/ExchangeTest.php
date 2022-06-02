@@ -31,4 +31,9 @@ class ExchangeTest extends TestCase
     {
 
     }
+
+    public function testTradeIsExecuted()
+    {
+
+    }
 }
