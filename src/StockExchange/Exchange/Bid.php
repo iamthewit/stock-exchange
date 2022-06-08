@@ -12,7 +12,7 @@ use StockExchange\StockExchange\Symbol;
 class Bid implements \JsonSerializable, ArrayableInterface
 {
     private UuidInterface $id;
-    private UuidInterface $traderId;
+    private UuidInterface $bidId;
     private Symbol $symbol;
     private Price $price;
 
@@ -24,7 +24,7 @@ class Bid implements \JsonSerializable, ArrayableInterface
      * TODO: is issue a better name? are bids issued rather than created?
      *
      * @param UuidInterface $id
-     * @param UuidInterface $traderId
+     * @param UuidInterface $bidId
      * @param Symbol        $symbol
      * @param Price         $price
      *
@@ -32,13 +32,13 @@ class Bid implements \JsonSerializable, ArrayableInterface
      */
     public static function create(
         UuidInterface $id,
-        UuidInterface $traderId,
+        UuidInterface $bidId,
         Symbol $symbol,
         Price $price
     ): self {
         $bid = new self();
         $bid->id = $id;
-        $bid->traderId = $traderId;
+        $bid->bidId = $bidId;
         $bid->symbol = $symbol;
         $bid->price = $price;
 
@@ -53,7 +53,7 @@ class Bid implements \JsonSerializable, ArrayableInterface
     ): Bid {
         $bid = new self();
         $bid->id = $id;
-        $bid->traderId = $traderId;
+        $bid->bidId = $traderId;
         $bid->symbol = $symbol;
         $bid->price = $price;
 
@@ -71,9 +71,9 @@ class Bid implements \JsonSerializable, ArrayableInterface
     /**
      * @return UuidInterface
      */
-    public function traderId(): UuidInterface
+    public function bidId(): UuidInterface
     {
-        return $this->traderId;
+        return $this->bidId;
     }
 
     /**
@@ -99,7 +99,7 @@ class Bid implements \JsonSerializable, ArrayableInterface
     {
         return [
             'id' => $this->id()->toString(),
-            'traderId' => $this->traderId()->toString(),
+            'bidId' => $this->bidId()->toString(),
             'symbol' => $this->symbol()->toArray(),
             'price' => $this->price()->toArray(),
         ];

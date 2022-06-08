@@ -10,9 +10,9 @@ use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\ArrayableInterface;
 use StockExchange\StockExchange\DispatchableEventsInterface;
 use StockExchange\StockExchange\Event\Event;
-use StockExchange\StockExchange\Exchange\Event\AskAdded;
+use StockExchange\StockExchange\Exchange\Event\AskAddedToExchange;
 use StockExchange\StockExchange\Exchange\Event\AskRemovedFromExchange;
-use StockExchange\StockExchange\Exchange\Event\BidAdded;
+use StockExchange\StockExchange\Exchange\Event\BidAddedToExchange;
 use StockExchange\StockExchange\Exchange\Event\BidRemovedFromExchange;
 use StockExchange\StockExchange\Exchange\Event\ExchangeCreated;
 use StockExchange\StockExchange\Exchange\Event\TradeExecuted;
@@ -141,7 +141,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // add bid to collection
         $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
 
-        $bidAdded = new BidAdded($bid);
+        $bidAdded = new BidAddedToExchange($bid);
         $bidAdded = $bidAdded->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($bidAdded);
 
@@ -189,7 +189,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // add ask to collection
         $this->asks = new AskCollection($this->asks()->toArray() + [$ask]);
 
-        $askAdded = new AskAdded($ask);
+        $askAdded = new AskAddedToExchange($ask);
         $askAdded = $askAdded->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($askAdded);
 

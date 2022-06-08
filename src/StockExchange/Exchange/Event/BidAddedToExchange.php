@@ -5,7 +5,7 @@ namespace StockExchange\StockExchange\Exchange\Event;
 use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\Exchange\Bid;
 
-class BidAdded extends Event
+class BidAddedToExchange extends Event
 {
     private Bid $bid;
 

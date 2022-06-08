@@ -12,7 +12,7 @@ use StockExchange\StockExchange\Symbol;
 class Ask implements \JsonSerializable, ArrayableInterface
 {
     private UuidInterface $id;
-    private UuidInterface $traderId;
+    private UuidInterface $askId;
     private Symbol $symbol;
     private Price $price;
 
@@ -22,7 +22,7 @@ class Ask implements \JsonSerializable, ArrayableInterface
 
     /**
      * @param UuidInterface $id
-     * @param UuidInterface $traderId
+     * @param UuidInterface $askId
      * @param Symbol        $symbol
      * @param Price         $price
      *
@@ -30,13 +30,13 @@ class Ask implements \JsonSerializable, ArrayableInterface
      */
     public static function create(
         UuidInterface $id,
-        UuidInterface $traderId,
+        UuidInterface $askId,
         Symbol $symbol,
         Price $price
     ): Ask {
         $ask = new self();
         $ask->id = $id;
-        $ask->traderId = $traderId;
+        $ask->askId = $askId;
         $ask->symbol = $symbol;
         $ask->price = $price;
 
@@ -45,13 +45,13 @@ class Ask implements \JsonSerializable, ArrayableInterface
 
     public static function restoreFromValues(
         UuidInterface $id,
-        UuidInterface $trader,
+        UuidInterface $askId,
         Symbol $symbol,
         Price $price
     ): Ask {
         $ask = new self();
         $ask->id = $id;
-        $ask->traderId = $trader;
+        $ask->askId = $askId;
         $ask->symbol = $symbol;
         $ask->price = $price;
 
@@ -69,9 +69,9 @@ class Ask implements \JsonSerializable, ArrayableInterface
     /**
      * @return UuidInterface
      */
-    public function traderId(): UuidInterface
+    public function askId(): UuidInterface
     {
-        return $this->traderId;
+        return $this->askId;
     }
 
     /**
@@ -97,7 +97,7 @@ class Ask implements \JsonSerializable, ArrayableInterface
     {
         return [
             'id' => $this->id()->toString(),
-            'traderId' => $this->traderId()->toString(),
+            'askId' => $this->askId()->toString(),
             'symbol' => $this->symbol()->toArray(),
             'price' => $this->price()->toArray()
         ];
