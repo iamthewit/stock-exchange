@@ -2,6 +2,7 @@
 
 namespace StockExchange\StockExchange\Trader;
 
+use JsonSerializable;
 use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\ArrayableInterface;
@@ -10,7 +11,7 @@ use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\HasDispatchableEventsTrait;
 use StockExchange\StockExchange\Trader\Event\TraderAddedToExchange;
 
-class Trader implements DispatchableEventsInterface, \JsonSerializable, ArrayableInterface
+class Trader implements DispatchableEventsInterface, JsonSerializable, ArrayableInterface
 {
     use HasDispatchableEventsTrait;
 
@@ -55,6 +56,19 @@ class Trader implements DispatchableEventsInterface, \JsonSerializable, Arrayabl
     public function id(): UuidInterface
     {
         return $this->id;
+    }
+
+    /**
+     * @return Event[]
+     */
+    public function appliedEvents(): array
+    {
+        return $this->appliedEvents;
+    }
+
+    public function lastAppliedEvent(): DomainEvent
+    {
+        return $this->lastAppliedEvent;
     }
 
     public function toArray(): array

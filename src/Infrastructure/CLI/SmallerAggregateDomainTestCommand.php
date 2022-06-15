@@ -2,10 +2,14 @@
 
 namespace StockExchange\Infrastructure\CLI;
 
+use Ramsey\Uuid\Uuid;
 use StockExchange\StockExchange\BidAsk\Ask;
 use StockExchange\StockExchange\BidAsk\Bid;
 use StockExchange\StockExchange\Exchange\Exchange;
+use StockExchange\StockExchange\Exchange\Trade;
+use StockExchange\StockExchange\Price;
 use StockExchange\StockExchange\Share\Share;
+use StockExchange\StockExchange\Symbol;
 use StockExchange\StockExchange\Trader\Trader;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -14,6 +18,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsCommand(
     name: 'smaller-aggregate-domain-test',
@@ -21,6 +26,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class SmallerAggregateDomainTestCommand extends Command
 {
+    private MessageBusInterface $bus;
+
+    public function __construct(MessageBusInterface $bus)
+    {
+        $this->bus = $bus;
+
+        parent::__construct();
+    }
+
     protected function configure(): void
     {
         $this
@@ -33,30 +47,56 @@ class SmallerAggregateDomainTestCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $exchange = Exchange::create();
+        $exchange = Exchange::create(Uuid::uuid4());
 
-        $share = Share::create();
+        $share = Share::create(
+            Uuid::uuid4(),
+            Symbol::fromValue('FOO')
+        );
 
-        $traderA = Trader::create();
-        $traderB = Trader::create();
+        $traderA = Trader::create(Uuid::uuid4());
+        $traderB = Trader::create(Uuid::uuid4());
 
-        $share->transferOwnershipToTrader();
+        $share->transferOwnershipToTrader($traderA->id());
 
         // exchange needs to listen to the event emitted by this aggregate
-        $bid = Bid::create();
+        $bid = Bid::create(
+            Uuid::uuid4(),
+            $traderB->id(),
+            Symbol::fromValue('FOO'),
+            Price::fromValue(10)
+        );
+
         // exchange needs to listen to the event emitted by this aggregate
-        $ask = Ask::create();
+        $ask = Ask::create(
+            Uuid::uuid4(),
+            $traderA->id(),
+            Symbol::fromValue('FOO'),
+            Price::fromValue(10)
+        );
 
         // the exchange should then execute the trade
-        $exchange->ask();
-        $exchange->bid();
+        $exchange->ask(
+            $ask->id(),
+            $ask->traderId(),
+            $ask->symbol(),
+            $ask->price()
+        );
+        $exchange->bid(
+            $bid->id(),
+            $bid->traderId(),
+            $bid->symbol(),
+            $bid->price()
+        );
 
         // the share context needs to listen to the exchange aggregate to update ownership
-        $share->transferOwnershipToTrader();
+        $share->transferOwnershipToTrader($traderB->id());
 
         // the bidAsk context needs to listen to the exchange to remove the bid and ask
         $ask->remove();
         $bid->remove();
+
+        dump($exchange->trades());
 
         $io->success('Winner!');
 

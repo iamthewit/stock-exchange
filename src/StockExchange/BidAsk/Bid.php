@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange\BidAsk;
 
+use JsonSerializable;
 use Prooph\Common\Messaging\DomainEvent;
 use Ramsey\Uuid\UuidInterface;
+use StockExchange\StockExchange\ArrayableInterface;
 use StockExchange\StockExchange\BidAsk\Event\BidRemoved;
 use StockExchange\StockExchange\DispatchableEventsInterface;
 use StockExchange\StockExchange\Event\Event;
@@ -13,7 +15,7 @@ use StockExchange\StockExchange\HasDispatchableEventsTrait;
 use StockExchange\StockExchange\Price;
 use StockExchange\StockExchange\Symbol;
 
-class Bid implements DispatchableEventsInterface, \JsonSerializable, ArrayableInterface
+class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInterface
 {
     use HasDispatchableEventsTrait;
 
@@ -116,6 +118,19 @@ class Bid implements DispatchableEventsInterface, \JsonSerializable, ArrayableIn
         $this->addDispatchableEvent($bidRemoved);
 
         return $this;
+    }
+
+    /**
+     * @return Event[]
+     */
+    public function appliedEvents(): array
+    {
+        return $this->appliedEvents;
+    }
+
+    public function lastAppliedEvent(): DomainEvent
+    {
+        return $this->lastAppliedEvent;
     }
 
     public function toArray(): array
