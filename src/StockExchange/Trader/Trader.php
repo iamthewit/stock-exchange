@@ -25,14 +25,16 @@ class Trader implements DispatchableEventsInterface, \JsonSerializable, Arrayabl
     {
     }
 
-    public function create(UuidInterface $id)
+    public static function create(UuidInterface $id): Trader
     {
         $trader = new self();
         $trader->id = $id;
 
         $traderAdded = new TraderAddedToExchange($trader);
-        $traderAdded = $traderAdded->withMetadata($this->eventMetaData());
-        $this->addDispatchableEvent($traderAdded);
+        $traderAdded = $traderAdded->withMetadata($trader->eventMetaData());
+        $trader->addDispatchableEvent($traderAdded);
+
+        return $trader;
     }
 
     /**

@@ -9,6 +9,7 @@ use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\ArrayableInterface;
 use StockExchange\StockExchange\DispatchableEventsInterface;
 use StockExchange\StockExchange\HasDispatchableEventsTrait;
+use StockExchange\StockExchange\Share\Event\ShareCreated;
 use StockExchange\StockExchange\Symbol;
 
 class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableInterface
@@ -35,6 +36,10 @@ class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableI
         $share = new self();
         $share->id = $id;
         $share->symbol = $symbol;
+
+        $shareCreated = new ShareCreated($share);
+        $shareCreated = $shareCreated->withMetadata($share->eventMetaData());
+        $share->addDispatchableEvent($shareCreated);
 
         return $share;
     }
