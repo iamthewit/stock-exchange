@@ -3,6 +3,10 @@
 namespace StockExchange\Infrastructure\CLI;
 
 use Ramsey\Uuid\Uuid;
+use StockExchange\Application\Exchange\Command\CreateExchangeCommand;
+use StockExchange\Application\Share\Command\CreateShareCommand;
+use StockExchange\Application\Share\Command\TransferOwnershipToTraderCommand;
+use StockExchange\Application\Trader\Command\CreateTraderCommand;
 use StockExchange\StockExchange\BidAsk\Ask;
 use StockExchange\StockExchange\BidAsk\Bid;
 use StockExchange\StockExchange\Exchange\Exchange;
@@ -18,6 +22,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsCommand(
@@ -26,11 +31,11 @@ use Symfony\Component\Messenger\MessageBusInterface;
 )]
 class SmallerAggregateDomainTestCommand extends Command
 {
-    private MessageBusInterface $bus;
+    use HandleTrait;
 
-    public function __construct(MessageBusInterface $bus)
+    public function __construct(MessageBusInterface $messageBus)
     {
-        $this->bus = $bus;
+        $this->messageBus = $messageBus;
 
         parent::__construct();
     }
@@ -50,17 +55,46 @@ class SmallerAggregateDomainTestCommand extends Command
         // we can fake this and only have one exchange for now
         // if we had more than one exchange every others context
         // would need to pay attention to the exchange ID
-        $exchange = Exchange::create(Uuid::uuid4());
-
-        $share = Share::create(
-            Uuid::uuid4(),
-            Symbol::fromValue('FOO')
+        /** @var Exchange $exchange */
+        $exchange = $this->handle(
+            new CreateExchangeCommand(Uuid::uuid4())
         );
 
-        $traderA = Trader::create(Uuid::uuid4());
-        $traderB = Trader::create(Uuid::uuid4());
+        /** @var Share $share */
+        $share = $this->handle(
+            new CreateShareCommand(
+                $exchange->id(),
+                Uuid::uuid4(),
+                Symbol::fromValue('FOO')
+            )
+        );
 
-        $share->transferOwnershipToTrader($traderA->id());
+        /** @var Trader $traderA */
+        $traderA = $this->handle(
+            new CreateTraderCommand(
+                $exchange->id(),
+                Uuid::uuid4()
+            )
+        );
+        /** @var Trader $traderB */
+        $traderB = $this->handle(
+            new CreateTraderCommand(
+                $exchange->id(),
+                Uuid::uuid4()
+            )
+        );
+
+//        $share->transferOwnershipToTrader($traderA->id());
+
+        $shareWithOwner = $this->handle(
+            new TransferOwnershipToTraderCommand(
+                $exchange->id(),
+                $share->id(),
+                $traderA->id()
+            )
+        );
+
+        dd($exchange, $share, $traderA, $traderB, $shareWithOwner);
 
         // exchange needs to listen to the event emitted by this aggregate
         $bid = Bid::create(

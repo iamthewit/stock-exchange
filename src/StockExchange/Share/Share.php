@@ -12,6 +12,7 @@ use StockExchange\StockExchange\DispatchableEventsInterface;
 use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\HasDispatchableEventsTrait;
 use StockExchange\StockExchange\Share\Event\ShareCreated;
+use StockExchange\StockExchange\Share\Event\ShareOwnershipTransferred;
 use StockExchange\StockExchange\Symbol;
 
 class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableInterface
@@ -93,9 +94,15 @@ class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableI
     /**
      * @param UuidInterface $traderId
      */
-    public function transferOwnershipToTrader(UuidInterface $traderId): void
+    public function transferOwnershipToTrader(UuidInterface $traderId)
     {
         $this->ownerId = $traderId;
+
+        $shareOwnershipTransferred = new ShareOwnershipTransferred($this);
+        $shareOwnershipTransferred = $shareOwnershipTransferred->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($shareOwnershipTransferred);
+
+        return $this;
     }
 
     /**
