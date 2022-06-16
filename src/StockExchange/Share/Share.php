@@ -44,6 +44,7 @@ class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableI
         $share = new self();
         $share->id = $id;
         $share->symbol = $symbol;
+        // TODO: add $exchangeId
 
         $shareCreated = new ShareCreated($share);
         $shareCreated = $shareCreated->withMetadata($share->eventMetaData());

@@ -47,6 +47,9 @@ class SmallerAggregateDomainTestCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        // we can fake this and only have one exchange for now
+        // if we had more than one exchange every others context
+        // would need to pay attention to the exchange ID
         $exchange = Exchange::create(Uuid::uuid4());
 
         $share = Share::create(

@@ -54,6 +54,7 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
         $bid->traderId = $traderId;
         $bid->symbol = $symbol;
         $bid->price = $price;
+        // TODO: add $exchangeId
 
         $bidAdded = new BidRemoved($bid);
         $bidAdded = $bidAdded->withMetadata($bid->eventMetaData());

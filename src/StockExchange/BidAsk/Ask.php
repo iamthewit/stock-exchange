@@ -52,6 +52,7 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
         $ask->traderId = $traderId;
         $ask->symbol = $symbol;
         $ask->price = $price;
+        // TODO: add $exchangeId
 
         $askAdded = new AskRemoved($ask);
         $askAdded = $askAdded->withMetadata($ask->eventMetaData());

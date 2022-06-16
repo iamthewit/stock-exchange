@@ -31,6 +31,8 @@ class Trader implements DispatchableEventsInterface, JsonSerializable, Arrayable
         $trader = new self();
         $trader->id = $id;
 
+        // TODO: add $exchangeId - can a single trader be a member of multiple exchanges ???
+
         $traderAdded = new TraderAddedToExchange($trader);
         $traderAdded = $traderAdded->withMetadata($trader->eventMetaData());
         $trader->addDispatchableEvent($traderAdded);
