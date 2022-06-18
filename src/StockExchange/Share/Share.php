@@ -6,10 +6,12 @@ namespace StockExchange\StockExchange\Share;
 
 use JsonSerializable;
 use Prooph\Common\Messaging\DomainEvent;
+use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\ArrayableInterface;
 use StockExchange\StockExchange\DispatchableEventsInterface;
 use StockExchange\StockExchange\Event\Event;
+use StockExchange\StockExchange\Exception\StateRestorationException;
 use StockExchange\StockExchange\HasDispatchableEventsTrait;
 use StockExchange\StockExchange\Share\Event\ShareCreated;
 use StockExchange\StockExchange\Share\Event\ShareOwnershipTransferred;
@@ -50,6 +52,32 @@ class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableI
         $shareCreated = new ShareCreated($share);
         $shareCreated = $shareCreated->withMetadata($share->eventMetaData());
         $share->addDispatchableEvent($shareCreated);
+
+        return $share;
+    }
+
+    public static function restoreStateFromEvents(array $events): Share
+    {
+        $share = new self();
+
+        foreach ($events as $event) {
+            if (!is_a($event, Event::class)) {
+                // TODO: create a proper exception for this:
+                throw new StateRestorationException(
+                    'Can only restore state from objects that extend the Share class.'
+                );
+            }
+
+            switch ($event) {
+                case is_a($event, ShareCreated::class):
+                    $share->applyShareCreated($event);
+                    break;
+
+                case is_a($event, ShareOwnershipTransferred::class):
+                    $share->applyShareOwnershipTransferred($event);
+                    break;
+            }
+        }
 
         return $share;
     }
@@ -165,5 +193,28 @@ class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableI
     private function nextAggregateVersion(): int
     {
         return $this->aggregateVersion() + 1;
+    }
+
+    /**
+     * @param Event $event
+     */
+    private function addAppliedEvent(Event $event): void
+    {
+        $this->appliedEvents[] = $event;
+    }
+
+    private function applyShareCreated(ShareCreated $event): void
+    {
+        $this->id = Uuid::fromString($event->payload()['id']);
+        $this->symbol = Symbol::fromValue($event->payload()['symbol']);
+
+        $this->addAppliedEvent($event);
+    }
+
+    private function applyShareOwnershipTransferred(ShareOwnershipTransferred $event): void
+    {
+        $this->ownerId = Uuid::fromString($event->payload()['owner_id']);
+
+        $this->addAppliedEvent($event);
     }
 }

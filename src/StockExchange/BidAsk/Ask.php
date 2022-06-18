@@ -6,11 +6,14 @@ namespace StockExchange\StockExchange\BidAsk;
 
 use JsonSerializable;
 use Prooph\Common\Messaging\DomainEvent;
+use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\ArrayableInterface;
+use StockExchange\StockExchange\BidAsk\Event\AskAdded;
 use StockExchange\StockExchange\BidAsk\Event\AskRemoved;
 use StockExchange\StockExchange\DispatchableEventsInterface;
 use StockExchange\StockExchange\Event\Event;
+use StockExchange\StockExchange\Exception\StateRestorationException;
 use StockExchange\StockExchange\HasDispatchableEventsTrait;
 use StockExchange\StockExchange\Price;
 use StockExchange\StockExchange\Symbol;
@@ -54,7 +57,7 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
         $ask->price = $price;
         // TODO: add $exchangeId
 
-        $askAdded = new AskRemoved($ask);
+        $askAdded = new AskAdded($ask);
         $askAdded = $askAdded->withMetadata($ask->eventMetaData());
         $ask->addDispatchableEvent($askAdded);
 
@@ -72,6 +75,32 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
         $ask->traderId = $traderId;
         $ask->symbol = $symbol;
         $ask->price = $price;
+
+        return $ask;
+    }
+
+    public static function restoreStateFromEvents(array $events): Ask
+    {
+        $ask = new self();
+
+        foreach ($events as $event) {
+            if (!is_a($event, Event::class)) {
+                // TODO: create a proper exception for this:
+                throw new StateRestorationException(
+                    'Can only restore state from objects that extend the Ask class.'
+                );
+            }
+
+            switch ($event) {
+                case is_a($event, AskAdded::class):
+                    $ask->applyAskAdded($event);
+                    break;
+
+                case is_a($event, AskRemoved::class):
+                    $ask->applyaskRemoved($event);
+                    break;
+            }
+        }
 
         return $ask;
     }
@@ -174,5 +203,30 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     private function nextAggregateVersion(): int
     {
         return $this->aggregateVersion() + 1;
+    }
+
+    /**
+     * @param Event $event
+     */
+    private function addAppliedEvent(Event $event): void
+    {
+        $this->appliedEvents[] = $event;
+    }
+
+    private function applyAskAdded(AskAdded $event)
+    {
+        $this->id = Uuid::fromString($event->payload()['id']);
+        $this->traderId = Uuid::fromString($event->payload()['traderId']);
+        $this->symbol = Symbol::fromValue($event->payload()['symbol']['value']);
+        $this->price = Price::fromValue($event->payload()['price']['value']);
+
+        $this->addAppliedEvent($event);
+    }
+
+    private function applyAskRemoved(AskRemoved $event)
+    {
+        // TODO: set a status?
+
+        $this->addAppliedEvent($event);
     }
 }

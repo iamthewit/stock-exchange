@@ -3,6 +3,12 @@
 namespace StockExchange\Infrastructure\CLI;
 
 use Ramsey\Uuid\Uuid;
+use StockExchange\Application\BidAsk\Command\CreateAskCommand;
+use StockExchange\Application\BidAsk\Command\CreateBidCommand;
+use StockExchange\Application\BidAsk\Command\RemoveAskCommand;
+use StockExchange\Application\BidAsk\Command\RemoveBidCommand;
+use StockExchange\Application\Exchange\Command\AddAskToExchangeCommand;
+use StockExchange\Application\Exchange\Command\AddBidToExchangeCommand;
 use StockExchange\Application\Exchange\Command\CreateExchangeCommand;
 use StockExchange\Application\Share\Command\CreateShareCommand;
 use StockExchange\Application\Share\Command\TransferOwnershipToTraderCommand;
@@ -10,7 +16,7 @@ use StockExchange\Application\Trader\Command\CreateTraderCommand;
 use StockExchange\StockExchange\BidAsk\Ask;
 use StockExchange\StockExchange\BidAsk\Bid;
 use StockExchange\StockExchange\Exchange\Exchange;
-use StockExchange\StockExchange\Exchange\Trade;
+use StockExchange\StockExchange\ExchangeReadRepositoryInterface;
 use StockExchange\StockExchange\Price;
 use StockExchange\StockExchange\Share\Share;
 use StockExchange\StockExchange\Symbol;
@@ -33,9 +39,15 @@ class SmallerAggregateDomainTestCommand extends Command
 {
     use HandleTrait;
 
-    public function __construct(MessageBusInterface $messageBus)
+    private ExchangeReadRepositoryInterface $exchangeReadRepository;
+
+    public function __construct(
+        MessageBusInterface $messageBus,
+        ExchangeReadRepositoryInterface $exchangeReadRepository
+    )
     {
         $this->messageBus = $messageBus;
+        $this->exchangeReadRepository = $exchangeReadRepository;
 
         parent::__construct();
     }
@@ -59,6 +71,8 @@ class SmallerAggregateDomainTestCommand extends Command
         $exchange = $this->handle(
             new CreateExchangeCommand(Uuid::uuid4())
         );
+
+        $exchange = $this->exchangeReadRepository->findExchangeById($exchange->id()->toString());
 
         /** @var Share $share */
         $share = $this->handle(
@@ -84,9 +98,7 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-//        $share->transferOwnershipToTrader($traderA->id());
-
-        $shareWithOwner = $this->handle(
+        $share = $this->handle(
             new TransferOwnershipToTraderCommand(
                 $exchange->id(),
                 $share->id(),
@@ -94,44 +106,93 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-        dd($exchange, $share, $traderA, $traderB, $shareWithOwner);
+//        dd($exchange, $share, $traderA, $traderB, $shareWithOwner);
 
         // exchange needs to listen to the event emitted by this aggregate
-        $bid = Bid::create(
-            Uuid::uuid4(),
-            $traderB->id(),
-            Symbol::fromValue('FOO'),
-            Price::fromValue(10)
+        /** @var Bid $bid */
+        $bid = $this->handle(
+            new CreateBidCommand(
+                $exchange->id(),
+                Uuid::uuid4(),
+                $traderB->id(),
+                Symbol::fromValue('FOO'),
+                Price::fromValue(10)
+            )
         );
 
         // exchange needs to listen to the event emitted by this aggregate
-        $ask = Ask::create(
-            Uuid::uuid4(),
-            $traderA->id(),
-            Symbol::fromValue('FOO'),
-            Price::fromValue(10)
+        /** @var Ask $ask */
+        $ask = $this->handle(
+            new CreateAskCommand(
+                $exchange->id(),
+                Uuid::uuid4(),
+                $traderA->id(),
+                Symbol::fromValue('FOO'),
+                Price::fromValue(10)
+            )
         );
 
         // the exchange should then execute the trade
-        $exchange->ask(
-            $ask->id(),
-            $ask->traderId(),
-            $ask->symbol(),
-            $ask->price()
+//        $exchange->ask(
+//            $ask->id(),
+//            $ask->traderId(),
+//            $ask->symbol(),
+//            $ask->price()
+//        );
+
+        $this->handle(
+            new AddAskToExchangeCommand(
+                $exchange->id(),
+                $ask->id(),
+                $ask->traderId(),
+                $ask->symbol(),
+                $ask->price()
+            )
         );
-        $exchange->bid(
-            $bid->id(),
-            $bid->traderId(),
-            $bid->symbol(),
-            $bid->price()
+
+//        $exchange->bid(
+//            $bid->id(),
+//            $bid->traderId(),
+//            $bid->symbol(),
+//            $bid->price()
+//        );
+
+        $this->handle(
+            new AddBidToExchangeCommand(
+                $exchange->id(),
+                $bid->id(),
+                $bid->traderId(),
+                $bid->symbol(),
+                $bid->price()
+            )
         );
 
         // the share context needs to listen to the exchange aggregate to update ownership
-        $share->transferOwnershipToTrader($traderB->id());
+        $share = $this->handle(
+            new TransferOwnershipToTraderCommand(
+                $exchange->id(),
+                $share->id(),
+                $traderB->id()
+            )
+        );
+
+//        dd($exchange, $share, $traderA, $traderB);
 
         // the bidAsk context needs to listen to the exchange to remove the bid and ask
-        $ask->remove();
-        $bid->remove();
+//        $ask->remove();
+        $this->handle(
+            new RemoveAskCommand(
+                $exchange->id(),
+                $ask->id()
+            )
+        );
+//        $bid->remove();
+        $this->handle(
+            new RemoveBidCommand(
+                $exchange->id(),
+                $bid->id()
+            )
+        );
 
         dump($exchange->trades());
 

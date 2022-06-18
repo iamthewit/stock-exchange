@@ -17,6 +17,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 class TransferOwnershipToTraderHandler implements MessageHandlerInterface
 {
     private MessageBusInterface $messageBus;
+    private ExchangeReadRepositoryInterface $exchangeReadRepository;
 
     public function __construct(
         MessageBusInterface $messageBus,
@@ -24,17 +25,12 @@ class TransferOwnershipToTraderHandler implements MessageHandlerInterface
         ExchangeWriteRepositoryInterface $exchangeWriteRepository
     ) {
         $this->messageBus = $messageBus;
+        $this->exchangeReadRepository = $exchangeReadRepository;
     }
 
     public function __invoke(TransferOwnershipToTraderCommand $command)
     {
-        $share = $command->shareId(); // TODO: get share from repo by id
-        $share = Share::fromValues(
-            $command->shareId(),
-            Symbol::fromValue('FOO'), // TODO: remove this fakery#
-            null
-        );
-        // TODO: restore from events (so that we can set the applied events)
+        $share = $this->exchangeReadRepository->findShareById($command->shareId()->toString());
 
         $share->transferOwnershipToTrader($command->traderId());
 

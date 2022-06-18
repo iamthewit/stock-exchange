@@ -47,13 +47,13 @@ class Bid implements \JsonSerializable, ArrayableInterface
 
     public static function restoreFromValues(
         UuidInterface $id,
-        UuidInterface $traderId,
+        UuidInterface $bidId,
         Symbol $symbol,
         Price $price
     ): Bid {
         $bid = new self();
         $bid->id = $id;
-        $bid->bidId = $traderId;
+        $bid->bidId = $bidId;
         $bid->symbol = $symbol;
         $bid->price = $price;
 

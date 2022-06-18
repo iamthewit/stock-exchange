@@ -6,11 +6,14 @@ namespace StockExchange\StockExchange\BidAsk;
 
 use JsonSerializable;
 use Prooph\Common\Messaging\DomainEvent;
+use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\ArrayableInterface;
+use StockExchange\StockExchange\BidAsk\Event\BidAdded;
 use StockExchange\StockExchange\BidAsk\Event\BidRemoved;
 use StockExchange\StockExchange\DispatchableEventsInterface;
 use StockExchange\StockExchange\Event\Event;
+use StockExchange\StockExchange\Exception\StateRestorationException;
 use StockExchange\StockExchange\HasDispatchableEventsTrait;
 use StockExchange\StockExchange\Price;
 use StockExchange\StockExchange\Symbol;
@@ -56,7 +59,7 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
         $bid->price = $price;
         // TODO: add $exchangeId
 
-        $bidAdded = new BidRemoved($bid);
+        $bidAdded = new BidAdded($bid);
         $bidAdded = $bidAdded->withMetadata($bid->eventMetaData());
         $bid->addDispatchableEvent($bidAdded);
 
@@ -74,6 +77,32 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
         $bid->traderId = $traderId;
         $bid->symbol = $symbol;
         $bid->price = $price;
+
+        return $bid;
+    }
+
+    public static function restoreStateFromEvents(array $events): Bid
+    {
+        $bid = new self();
+
+        foreach ($events as $event) {
+            if (!is_a($event, Event::class)) {
+                // TODO: create a proper exception for this:
+                throw new StateRestorationException(
+                    'Can only restore state from objects that extend the Ask class.'
+                );
+            }
+
+            switch ($event) {
+                case is_a($event, BidAdded::class):
+                    $bid->applyBidAdded($event);
+                    break;
+
+                case is_a($event, BidRemoved::class):
+                    $bid->applyBidRemoved($event);
+                    break;
+            }
+        }
 
         return $bid;
     }
@@ -176,5 +205,30 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     private function nextAggregateVersion(): int
     {
         return $this->aggregateVersion() + 1;
+    }
+
+    /**
+     * @param Event $event
+     */
+    private function addAppliedEvent(Event $event): void
+    {
+        $this->appliedEvents[] = $event;
+    }
+
+    private function applyBidAdded(BidAdded $event)
+    {
+        $this->id = Uuid::fromString($event->payload()['id']);
+        $this->traderId = Uuid::fromString($event->payload()['traderId']);
+        $this->symbol = Symbol::fromValue($event->payload()['symbol']['value']);
+        $this->price = Price::fromValue($event->payload()['price']['value']);
+
+        $this->addAppliedEvent($event);
+    }
+
+    private function applyBidRemoved(BidRemoved $event)
+    {
+        // TODO: set a status?
+
+        $this->addAppliedEvent($event);
     }
 }

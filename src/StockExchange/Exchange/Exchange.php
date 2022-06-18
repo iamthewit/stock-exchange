@@ -10,6 +10,7 @@ use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\ArrayableInterface;
 use StockExchange\StockExchange\DispatchableEventsInterface;
 use StockExchange\StockExchange\Event\Event;
+use StockExchange\StockExchange\Exception\StateRestorationException;
 use StockExchange\StockExchange\Exchange\Event\AskAddedToExchange;
 use StockExchange\StockExchange\Exchange\Event\AskRemovedFromExchange;
 use StockExchange\StockExchange\Exchange\Event\BidAddedToExchange;
@@ -76,7 +77,44 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
     public static function restoreStateFromEvents(array $events): Exchange
     {
-        // TODO
+        $exchange = new self();
+
+        foreach ($events as $event) {
+            if (!is_a($event, Event::class)) {
+                // TODO: create a proper exception for this:
+                throw new StateRestorationException(
+                    'Can only restore state from objects that extend the Event class.'
+                );
+            }
+
+            switch ($event) {
+                case is_a($event, ExchangeCreated::class):
+                    $exchange->applyExchangeCreated($event);
+                    break;
+
+                case is_a($event, BidAddedToExchange::class):
+                    $exchange->applyBidAddedToExchange($event);
+                    break;
+
+                case is_a($event, AskAddedToExchange::class):
+                    $exchange->applyAskAddedToExchange($event);
+                    break;
+
+                case is_a($event, BidRemovedFromExchange::class):
+                    $exchange->applyBidRemovedFromExchange($event);
+                    break;
+
+                case is_a($event, AskRemovedFromExchange::class):
+                    $exchange->applyAskRemovedFromExchange($event);
+                    break;
+
+                case is_a($event, TradeExecuted::class):
+                    $exchange->applyTradeExecuted($event);
+                    break;
+            }
+        }
+
+        return $exchange;
     }
 
     public static function restoreFromValues(array $result): Exchange
@@ -340,5 +378,118 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private function addAppliedEvent(Event $event): void
     {
         $this->appliedEvents[] = $event;
+    }
+
+    /**
+     * @param ExchangeCreated $event
+     */
+    private function applyExchangeCreated(ExchangeCreated $event): void
+    {
+        $this->id = Uuid::fromString($event->payload()['id']);
+        $this->bids = new BidCollection([]);
+        $this->asks = new AskCollection([]);
+        $this->trades = new TradeCollection([]);
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param BidAddedToExchange $event
+     *
+     * @throws BidCollectionCreationException
+     */
+    private function applyBidAddedToExchange(BidAddedToExchange $event): void
+    {
+        // ensure we have the current state of the trader on the exchange
+        // create the bid
+        $bid = Bid::create(
+            Uuid::fromString($event->payload()['id']),
+            Uuid::fromString($event->payload()['bidId']),
+            Symbol::fromValue($event->payload()['symbol']['value']),
+            Price::fromValue($event->payload()['price']['value'])
+        );
+
+        // add bid to collection
+        $this->bids = new BidCollection($this->bids()->toArray() + [$bid]);
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param BidRemovedFromExchange $event
+     *
+     * @throws BidCollectionCreationException
+     */
+    private function applyBidRemovedFromExchange(BidRemovedFromExchange $event): void
+    {
+        $bids = $this->bids()->toArray();
+        unset($bids[$event->payload()['id']]);
+
+        $this->bids = new BidCollection($bids);
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param AskAddedToExchange $event
+     * @throws AskCollectionCreationException
+     */
+    private function applyAskAddedToExchange(AskAddedToExchange $event): void
+    {
+        $this->asks = new AskCollection(
+            $this->asks()->toArray() + [
+                Ask::restoreFromValues(
+                    Uuid::fromString($event->payload()['id']),
+                    Uuid::fromString($event->payload()['askId']),
+                    Symbol::fromValue($event->payload()['symbol']['value']),
+                    Price::fromValue($event->payload()['price']['value'])
+                )
+            ]
+        );
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param AskRemovedFromExchange $event
+     *
+     * @throws AskCollectionCreationException
+     */
+    private function applyAskRemovedFromExchange(AskRemovedFromExchange $event): void
+    {
+        $asks = $this->asks()->toArray();
+        unset($asks[$event->payload()['id']]);
+
+        $this->asks = new AskCollection($asks);
+
+        $this->addAppliedEvent($event);
+    }
+
+    /**
+     * @param TradeExecuted $event
+     * @throws TradeCollectionCreationException
+     */
+    private function applyTradeExecuted(TradeExecuted $event): void
+    {
+        $trade = Trade::fromBidAndAsk(
+            Uuid::fromString($event->payload()['id']),
+            Bid::restoreFromValues(
+                Uuid::fromString($event->payload()['bid']['id']),
+                Uuid::fromString($event->payload()['bid']['bidId']),
+                Symbol::fromValue($event->payload()['bid']['symbol']['value']),
+                Price::fromValue($event->payload()['bid']['price']['value'])
+            ),
+            Ask::restoreFromValues(
+                Uuid::fromString($event->payload()['ask']['id']),
+                Uuid::fromString($event->payload()['ask']['askId']),
+                Symbol::fromValue($event->payload()['ask']['symbol']['value']),
+                Price::fromValue($event->payload()['ask']['price']['value'])
+            ),
+        );
+        $this->trades = new TradeCollection(
+            $this->trades()->toArray() + [$trade]
+        );
+
+        $this->addAppliedEvent($event);
     }
 }

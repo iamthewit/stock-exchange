@@ -48,6 +48,9 @@ trait HasDispatchableEventsTrait
     private function addDispatchableEvent(Event $event): void
     {
         $this->dispatchableEvents[] = $event;
+        // TODO: why is this being set here?
+        // should it not be set in applyDispatchableEvents()
+        // maybe both????
         $this->lastAppliedEvent = $event;
     }
 }

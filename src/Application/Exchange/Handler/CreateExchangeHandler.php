@@ -20,14 +20,13 @@ class CreateExchangeHandler implements MessageHandlerInterface
     public function __invoke(CreateExchangeCommand $command)
     {
         $exchange = Exchange::create($command->id());
+        // TODO: store exchange
 
         foreach ($exchange->dispatchableEvents() as $event) {
             $this->messageBus->dispatch($event);
         }
 
         $exchange->clearDispatchableEvents();
-
-        // TODO: store exchange
 
         return $exchange; // TODO: remove this
     }

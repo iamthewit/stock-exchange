@@ -11,6 +11,9 @@ use StockExchange\StockExchange\Symbol;
 
 class Ask implements \JsonSerializable, ArrayableInterface
 {
+    // TODO: do we need two ids?
+    // $id represents the id of the Ask within the Exchange context
+    // $askId is the id of the Ask from the BidAsk context
     private UuidInterface $id;
     private UuidInterface $askId;
     private Symbol $symbol;
