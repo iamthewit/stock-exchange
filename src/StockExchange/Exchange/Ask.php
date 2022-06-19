@@ -11,12 +11,9 @@ use StockExchange\StockExchange\Symbol;
 
 class Ask implements \JsonSerializable, ArrayableInterface
 {
-    // TODO: do we need two ids?
-    // $id represents the id of the Ask within the Exchange context
-    // $askId is the id of the Ask from the BidAsk context
     private UuidInterface $id;
-    private UuidInterface $askId;
-    private Symbol $symbol;
+    private UuidInterface $traderId;
+    private Symbol        $symbol;
     private Price $price;
 
     private function __construct()
@@ -25,7 +22,7 @@ class Ask implements \JsonSerializable, ArrayableInterface
 
     /**
      * @param UuidInterface $id
-     * @param UuidInterface $askId
+     * @param UuidInterface $traderId
      * @param Symbol        $symbol
      * @param Price         $price
      *
@@ -33,13 +30,13 @@ class Ask implements \JsonSerializable, ArrayableInterface
      */
     public static function create(
         UuidInterface $id,
-        UuidInterface $askId,
+        UuidInterface $traderId,
         Symbol $symbol,
         Price $price
     ): Ask {
         $ask = new self();
         $ask->id = $id;
-        $ask->askId = $askId;
+        $ask->traderId = $traderId;
         $ask->symbol = $symbol;
         $ask->price = $price;
 
@@ -48,13 +45,13 @@ class Ask implements \JsonSerializable, ArrayableInterface
 
     public static function restoreFromValues(
         UuidInterface $id,
-        UuidInterface $askId,
+        UuidInterface $traderId,
         Symbol $symbol,
         Price $price
     ): Ask {
         $ask = new self();
         $ask->id = $id;
-        $ask->askId = $askId;
+        $ask->traderId = $traderId;
         $ask->symbol = $symbol;
         $ask->price = $price;
 
@@ -72,9 +69,9 @@ class Ask implements \JsonSerializable, ArrayableInterface
     /**
      * @return UuidInterface
      */
-    public function askId(): UuidInterface
+    public function traderId(): UuidInterface
     {
-        return $this->askId;
+        return $this->traderId;
     }
 
     /**
@@ -99,8 +96,8 @@ class Ask implements \JsonSerializable, ArrayableInterface
     public function toArray(): array
     {
         return [
-            'id' => $this->id()->toString(),
-            'askId' => $this->askId()->toString(),
+            'askId' => $this->id()->toString(),
+            'traderId' => $this->traderId()->toString(),
             'symbol' => $this->symbol()->toArray(),
             'price' => $this->price()->toArray()
         ];

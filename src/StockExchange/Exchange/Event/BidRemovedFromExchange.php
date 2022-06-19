@@ -2,29 +2,31 @@
 
 namespace StockExchange\StockExchange\Exchange\Event;
 
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\Exchange\Bid;
 
 class BidRemovedFromExchange extends Event
 {
-    private Bid $bid;
+    private UuidInterface $bidId;
 
     /**
      * RemoveBidFromExchange constructor.
-     * @param Bid $bid
+     *
+     * @param UuidInterface $bidId
      */
-    public function __construct(Bid $bid)
+    public function __construct(UuidInterface $bidId)
     {
         $this->init();
-        $this->setPayload($bid->toArray());
-        $this->bid = $bid;
+        $this->setPayload(['bidId' => $bidId->toString()]);
+        $this->bidId = $bidId;
     }
 
     /**
-     * @return Bid
+     * @return UuidInterface
      */
-    public function bid(): Bid
+    public function bidId(): UuidInterface
     {
-        return $this->bid;
+        return $this->bidId;
     }
 }

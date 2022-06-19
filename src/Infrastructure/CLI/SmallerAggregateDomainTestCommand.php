@@ -133,13 +133,6 @@ class SmallerAggregateDomainTestCommand extends Command
         );
 
         // the exchange should then execute the trade
-//        $exchange->ask(
-//            $ask->id(),
-//            $ask->traderId(),
-//            $ask->symbol(),
-//            $ask->price()
-//        );
-
         $this->handle(
             new AddAskToExchangeCommand(
                 $exchange->id(),
@@ -149,13 +142,6 @@ class SmallerAggregateDomainTestCommand extends Command
                 $ask->price()
             )
         );
-
-//        $exchange->bid(
-//            $bid->id(),
-//            $bid->traderId(),
-//            $bid->symbol(),
-//            $bid->price()
-//        );
 
         $this->handle(
             new AddBidToExchangeCommand(
@@ -179,14 +165,12 @@ class SmallerAggregateDomainTestCommand extends Command
 //        dd($exchange, $share, $traderA, $traderB);
 
         // the bidAsk context needs to listen to the exchange to remove the bid and ask
-//        $ask->remove();
         $this->handle(
             new RemoveAskCommand(
                 $exchange->id(),
                 $ask->id()
             )
         );
-//        $bid->remove();
         $this->handle(
             new RemoveBidCommand(
                 $exchange->id(),

@@ -188,6 +188,8 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // any trades possible
 
         // check ask collection for any matching asks
+        // TODO: filter out asks that are owned by the trader
+        // who submitted the bid ($bid->traderId)
         $asks = $this->asks()->filterBySymbolAndPrice($bid->symbol(), $bid->price());
 
         if (count($asks)) {
@@ -236,6 +238,8 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // any trades possible
 
         // check bid collection for any matching bids
+        // TODO: filter out bids that are owned by the trader
+        // who submitted the ask ($ask->traderId)
         $bids = $this->bids()->filterBySymbolAndPrice($ask->symbol(), $ask->price());
 
         // if match found execute trade
@@ -330,7 +334,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
         $this->bids = new BidCollection($bids);
 
-        $bidRemovedFromExchange = new BidRemovedFromExchange($bid);
+        $bidRemovedFromExchange = new BidRemovedFromExchange($bid->id());
         $bidRemovedFromExchange = $bidRemovedFromExchange->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($bidRemovedFromExchange);
     }
@@ -347,7 +351,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
 
         $this->asks = new AskCollection($asks);
 
-        $askRemovedFromExchange = new AskRemovedFromExchange($ask);
+        $askRemovedFromExchange = new AskRemovedFromExchange($ask->id());
         $askRemovedFromExchange = $askRemovedFromExchange->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($askRemovedFromExchange);
     }
@@ -403,8 +407,8 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         // ensure we have the current state of the trader on the exchange
         // create the bid
         $bid = Bid::create(
-            Uuid::fromString($event->payload()['id']),
             Uuid::fromString($event->payload()['bidId']),
+            Uuid::fromString($event->payload()['traderId']),
             Symbol::fromValue($event->payload()['symbol']['value']),
             Price::fromValue($event->payload()['price']['value'])
         );
@@ -423,7 +427,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private function applyBidRemovedFromExchange(BidRemovedFromExchange $event): void
     {
         $bids = $this->bids()->toArray();
-        unset($bids[$event->payload()['id']]);
+        unset($bids[$event->payload()['bidId']]);
 
         $this->bids = new BidCollection($bids);
 
@@ -439,8 +443,8 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         $this->asks = new AskCollection(
             $this->asks()->toArray() + [
                 Ask::restoreFromValues(
-                    Uuid::fromString($event->payload()['id']),
                     Uuid::fromString($event->payload()['askId']),
+                    Uuid::fromString($event->payload()['traderId']),
                     Symbol::fromValue($event->payload()['symbol']['value']),
                     Price::fromValue($event->payload()['price']['value'])
                 )
@@ -458,7 +462,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private function applyAskRemovedFromExchange(AskRemovedFromExchange $event): void
     {
         $asks = $this->asks()->toArray();
-        unset($asks[$event->payload()['id']]);
+        unset($asks[$event->payload()['askId']]);
 
         $this->asks = new AskCollection($asks);
 
@@ -472,7 +476,7 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     private function applyTradeExecuted(TradeExecuted $event): void
     {
         $trade = Trade::fromBidAndAsk(
-            Uuid::fromString($event->payload()['id']),
+            Uuid::fromString($event->payload()['tradeId']),
             Bid::restoreFromValues(
                 Uuid::fromString($event->payload()['bid']['id']),
                 Uuid::fromString($event->payload()['bid']['bidId']),

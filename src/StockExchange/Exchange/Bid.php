@@ -12,8 +12,8 @@ use StockExchange\StockExchange\Symbol;
 class Bid implements \JsonSerializable, ArrayableInterface
 {
     private UuidInterface $id;
-    private UuidInterface $bidId;
-    private Symbol $symbol;
+    private UuidInterface $traderId;
+    private Symbol        $symbol;
     private Price $price;
 
     private function __construct()
@@ -24,7 +24,7 @@ class Bid implements \JsonSerializable, ArrayableInterface
      * TODO: is issue a better name? are bids issued rather than created?
      *
      * @param UuidInterface $id
-     * @param UuidInterface $bidId
+     * @param UuidInterface $traderId
      * @param Symbol        $symbol
      * @param Price         $price
      *
@@ -32,13 +32,13 @@ class Bid implements \JsonSerializable, ArrayableInterface
      */
     public static function create(
         UuidInterface $id,
-        UuidInterface $bidId,
+        UuidInterface $traderId,
         Symbol $symbol,
         Price $price
     ): self {
         $bid = new self();
         $bid->id = $id;
-        $bid->bidId = $bidId;
+        $bid->traderId = $traderId;
         $bid->symbol = $symbol;
         $bid->price = $price;
 
@@ -47,13 +47,13 @@ class Bid implements \JsonSerializable, ArrayableInterface
 
     public static function restoreFromValues(
         UuidInterface $id,
-        UuidInterface $bidId,
+        UuidInterface $traderId,
         Symbol $symbol,
         Price $price
     ): Bid {
         $bid = new self();
         $bid->id = $id;
-        $bid->bidId = $bidId;
+        $bid->traderId = $traderId;
         $bid->symbol = $symbol;
         $bid->price = $price;
 
@@ -71,9 +71,9 @@ class Bid implements \JsonSerializable, ArrayableInterface
     /**
      * @return UuidInterface
      */
-    public function bidId(): UuidInterface
+    public function traderId(): UuidInterface
     {
-        return $this->bidId;
+        return $this->traderId;
     }
 
     /**
@@ -98,8 +98,8 @@ class Bid implements \JsonSerializable, ArrayableInterface
     public function toArray(): array
     {
         return [
-            'id' => $this->id()->toString(),
-            'bidId' => $this->bidId()->toString(),
+            'bidId' => $this->id()->toString(),
+            'traderId' => $this->traderId()->toString(),
             'symbol' => $this->symbol()->toArray(),
             'price' => $this->price()->toArray(),
         ];

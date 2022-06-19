@@ -16,6 +16,9 @@ class TradeExecuted extends Event
     public function __construct(Trade $trade)
     {
         $this->init();
+        // TODO: payload can be slimmed down to:
+        // - ask id
+        // - bid id
         $this->setPayload($trade->toArray());
         $this->trade = $trade;
     }

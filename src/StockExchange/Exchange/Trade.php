@@ -67,7 +67,7 @@ class Trade implements \JsonSerializable, ArrayableInterface
     public function toArray(): array
     {
         return [
-            'id' => $this->id()->toString(),
+            'tradeId' => $this->id()->toString(),
             'bid' => $this->bid()->toArray(),
             'ask' => $this->ask()->toArray()
         ];

@@ -11,6 +11,7 @@ class BidAddedToExchange extends Event
 
     /**
      * BidAdded constructor.
+     *
      * @param Bid $bid
      */
     public function __construct(Bid $bid)
