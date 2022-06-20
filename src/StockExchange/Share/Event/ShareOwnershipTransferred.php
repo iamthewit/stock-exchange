@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace StockExchange\StockExchange\Share\Event;
 
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\Event;
-use StockExchange\StockExchange\Share\Share;
 
 class ShareOwnershipTransferred extends Event
 {
-    private Share $share;
+    private UuidInterface $shareId;
 
     /**
-     * @param Share $share
+     * @param UuidInterface $shareId
      */
-    public function __construct(Share $share)
+    public function __construct(UuidInterface $shareId)
     {
         $this->init();
-        $this->setPayload($share->toArray());
-        $this->share = $share;
+        $this->setPayload(['ownerId' => $shareId]);
+        $this->shareId = $shareId;
     }
 
     /**
-     * @return Share
+     * @return UuidInterface
      */
-    public function share(): Share
+    public function shareId(): UuidInterface
     {
-        return $this->share;
+        return $this->shareId;
     }
 }

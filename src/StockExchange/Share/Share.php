@@ -126,7 +126,7 @@ class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableI
     {
         $this->ownerId = $traderId;
 
-        $shareOwnershipTransferred = new ShareOwnershipTransferred($this);
+        $shareOwnershipTransferred = new ShareOwnershipTransferred($this->id());
         $shareOwnershipTransferred = $shareOwnershipTransferred->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($shareOwnershipTransferred);
 
@@ -154,7 +154,7 @@ class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableI
         return [
             'id' => $this->id()->toString(),
             'symbol' => $this->symbol()->value(),
-            'owner_id' => !is_null($this->ownerId()) ? $this->ownerId()->toString() : null,
+            'ownerId' => !is_null($this->ownerId()) ? $this->ownerId()->toString() : null,
         ];
     }
 
@@ -213,7 +213,7 @@ class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableI
 
     private function applyShareOwnershipTransferred(ShareOwnershipTransferred $event): void
     {
-        $this->ownerId = Uuid::fromString($event->payload()['owner_id']);
+        $this->ownerId = Uuid::fromString($event->payload()['ownerId']);
 
         $this->addAppliedEvent($event);
     }

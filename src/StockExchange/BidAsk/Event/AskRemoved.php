@@ -2,29 +2,30 @@
 
 namespace StockExchange\StockExchange\BidAsk\Event;
 
-use StockExchange\StockExchange\BidAsk\Ask;
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Event\Event;
 
 class AskRemoved extends Event
 {
-    private Ask $ask;
+    private UuidInterface $askId;
 
     /**
      * AskAdded constructor.
-     * @param Ask $ask
+     *
+     * @param UuidInterface $askId
      */
-    public function __construct(Ask $ask)
+    public function __construct(UuidInterface $askId)
     {
         $this->init();
-        $this->setPayload($ask->toArray());
-        $this->ask = $ask;
+        $this->setPayload(['id' => $askId]);
+        $this->ask = $askId;
     }
 
     /**
-     * @return Ask
+     * @return UuidInterface
      */
-    public function ask(): Ask
+    public function askId(): UuidInterface
     {
-        return $this->ask;
+        return $this->askId();
     }
 }

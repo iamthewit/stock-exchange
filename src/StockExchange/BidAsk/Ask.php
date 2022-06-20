@@ -141,7 +141,7 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     {
         // TODO: does a bid/ask need a status? a removedAt date?
 
-        $askRemoved = new AskRemoved($this);
+        $askRemoved = new AskRemoved($this->id());
         $askRemoved = $askRemoved->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($askRemoved);
 
