@@ -28,6 +28,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -40,14 +41,17 @@ class SmallerAggregateDomainTestCommand extends Command
     use HandleTrait;
 
     private ExchangeReadRepositoryInterface $exchangeReadRepository;
+    private ParameterBagInterface $params;
 
     public function __construct(
         MessageBusInterface $messageBus,
-        ExchangeReadRepositoryInterface $exchangeReadRepository
+        ExchangeReadRepositoryInterface $exchangeReadRepository,
+        ParameterBagInterface $params,
     )
     {
         $this->messageBus = $messageBus;
         $this->exchangeReadRepository = $exchangeReadRepository;
+        $this->params = $params;
 
         parent::__construct();
     }
@@ -64,20 +68,25 @@ class SmallerAggregateDomainTestCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        // we can fake this and only have one exchange for now
-        // if we had more than one exchange every others context
-        // would need to pay attention to the exchange ID
-        /** @var Exchange $exchange */
-        $exchange = $this->handle(
-            new CreateExchangeCommand(Uuid::uuid4())
+        // TODO: add exchange entity to all other contexts (that refer to an exchange id)
+        // this is because there COULD be multiple exchanges
+        // for now we are assuming there is one
+
+        $exchangeId = Uuid::fromString(
+            $this->params->get('stock_exchange.default_exchange_id')
         );
 
-        $exchange = $this->exchangeReadRepository->findExchangeById($exchange->id()->toString());
+//        $exchangeId = Uuid::uuid4();
+
+        /** @var Exchange $exchange */
+        $this->handle(
+            new CreateExchangeCommand($exchangeId)
+        );
 
         /** @var Share $share */
         $share = $this->handle(
             new CreateShareCommand(
-                $exchange->id(),
+                $exchangeId,
                 Uuid::uuid4(),
                 Symbol::fromValue('FOO')
             )
@@ -86,33 +95,31 @@ class SmallerAggregateDomainTestCommand extends Command
         /** @var Trader $traderA */
         $traderA = $this->handle(
             new CreateTraderCommand(
-                $exchange->id(),
+                $exchangeId,
                 Uuid::uuid4()
             )
         );
         /** @var Trader $traderB */
         $traderB = $this->handle(
             new CreateTraderCommand(
-                $exchange->id(),
+                $exchangeId,
                 Uuid::uuid4()
             )
         );
 
         $share = $this->handle(
             new TransferOwnershipToTraderCommand(
-                $exchange->id(),
+                $exchangeId,
                 $share->id(),
                 $traderA->id()
             )
         );
 
-//        dd($exchange, $share, $traderA, $traderB, $shareWithOwner);
-
         // exchange needs to listen to the event emitted by this aggregate
         /** @var Bid $bid */
         $bid = $this->handle(
             new CreateBidCommand(
-                $exchange->id(),
+                $exchangeId,
                 Uuid::uuid4(),
                 $traderB->id(),
                 Symbol::fromValue('FOO'),
@@ -124,7 +131,7 @@ class SmallerAggregateDomainTestCommand extends Command
         /** @var Ask $ask */
         $ask = $this->handle(
             new CreateAskCommand(
-                $exchange->id(),
+                $exchangeId,
                 Uuid::uuid4(),
                 $traderA->id(),
                 Symbol::fromValue('FOO'),
@@ -135,7 +142,7 @@ class SmallerAggregateDomainTestCommand extends Command
         // the exchange should then execute the trade
         $this->handle(
             new AddAskToExchangeCommand(
-                $exchange->id(),
+                $exchangeId,
                 $ask->id(),
                 $ask->traderId(),
                 $ask->symbol(),
@@ -145,7 +152,7 @@ class SmallerAggregateDomainTestCommand extends Command
 
         $this->handle(
             new AddBidToExchangeCommand(
-                $exchange->id(),
+                $exchangeId,
                 $bid->id(),
                 $bid->traderId(),
                 $bid->symbol(),
@@ -156,28 +163,27 @@ class SmallerAggregateDomainTestCommand extends Command
         // the share context needs to listen to the exchange aggregate to update ownership
         $share = $this->handle(
             new TransferOwnershipToTraderCommand(
-                $exchange->id(),
+                $exchangeId,
                 $share->id(),
                 $traderB->id()
             )
         );
 
-//        dd($exchange, $share, $traderA, $traderB);
+        // AskRemovedFromExchangeListener removes the ask from the BidAsk context
+        // by listening for the AskRemovedFromExchange event from the exchange context
 
-        // the bidAsk context needs to listen to the exchange to remove the bid and ask
-        $this->handle(
-            new RemoveAskCommand(
-                $exchange->id(),
-                $ask->id()
-            )
-        );
-        $this->handle(
-            new RemoveBidCommand(
-                $exchange->id(),
-                $bid->id()
-            )
-        );
+        // BidRemovedFromExchangeListener removes the bid from the BidAsk context
+        // by listening for the BidRemovedFromExchange event from the exchange context
 
+        // TODO: in the future these events will be coming via kafka event streams
+        // at the moment they are happening internally within symfony
+        // we need to refactor to listen to the events from kafka instead
+
+        // TODO: the exchange context should also listen for the BidAsk remove events
+        // as bids and asks could be removed by traders - if this happens the exchange
+        // needs to update itself
+
+        $exchange = $this->exchangeReadRepository->findExchangeById($exchangeId->toString());
         dump($exchange->trades());
 
         $io->success('Winner!');

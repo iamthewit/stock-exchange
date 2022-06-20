@@ -478,14 +478,14 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         $trade = Trade::fromBidAndAsk(
             Uuid::fromString($event->payload()['tradeId']),
             Bid::restoreFromValues(
-                Uuid::fromString($event->payload()['bid']['id']),
                 Uuid::fromString($event->payload()['bid']['bidId']),
+                Uuid::fromString($event->payload()['bid']['traderId']),
                 Symbol::fromValue($event->payload()['bid']['symbol']['value']),
                 Price::fromValue($event->payload()['bid']['price']['value'])
             ),
             Ask::restoreFromValues(
-                Uuid::fromString($event->payload()['ask']['id']),
                 Uuid::fromString($event->payload()['ask']['askId']),
+                Uuid::fromString($event->payload()['ask']['traderId']),
                 Symbol::fromValue($event->payload()['ask']['symbol']['value']),
                 Price::fromValue($event->payload()['ask']['price']['value'])
             ),
