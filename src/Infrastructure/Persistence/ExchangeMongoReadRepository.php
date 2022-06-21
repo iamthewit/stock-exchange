@@ -3,8 +3,10 @@
 namespace StockExchange\Infrastructure\Persistence;
 
 use MongoDB\Client;
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\ExchangeReadRepositoryInterface;
+use StockExchange\StockExchange\Symbol;
 
 class ExchangeMongoReadRepository implements ExchangeReadRepositoryInterface
 {
@@ -51,5 +53,10 @@ class ExchangeMongoReadRepository implements ExchangeReadRepositoryInterface
     public function findBidById(string $id): \StockExchange\StockExchange\BidAsk\Bid
     {
         // TODO: Implement findBidById() method.
+    }
+
+    public function findShareIdsBySymbolAndTraderId(Symbol $symbol, UuidInterface $traderId): array
+    {
+        // TODO: Implement findShareBySymbolAndTraderId() method.
     }
 }

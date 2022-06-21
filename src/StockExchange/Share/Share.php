@@ -126,7 +126,7 @@ class Share implements DispatchableEventsInterface, JsonSerializable, ArrayableI
     {
         $this->ownerId = $traderId;
 
-        $shareOwnershipTransferred = new ShareOwnershipTransferred($this->id());
+        $shareOwnershipTransferred = new ShareOwnershipTransferred($this->ownerId());
         $shareOwnershipTransferred = $shareOwnershipTransferred->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($shareOwnershipTransferred);
 

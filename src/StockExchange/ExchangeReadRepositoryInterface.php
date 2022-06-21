@@ -2,6 +2,7 @@
 
 namespace StockExchange\StockExchange;
 
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\Exception\ExchangeNotFoundException;
 
 interface ExchangeReadRepositoryInterface
@@ -18,6 +19,8 @@ interface ExchangeReadRepositoryInterface
     public function findExchangeById(string $id): Exchange\Exchange;
 
     public function findShareById(string $id): \StockExchange\StockExchange\Share\Share;
+
+    public function findShareIdsBySymbolAndTraderId(Symbol $symbol, UuidInterface $traderId): array;
 
     public function findAskById(string $id): \StockExchange\StockExchange\BidAsk\Ask;
 

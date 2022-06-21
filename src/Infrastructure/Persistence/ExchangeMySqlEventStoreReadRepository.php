@@ -4,11 +4,15 @@ namespace StockExchange\Infrastructure\Persistence;
 
 use Prooph\Common\Messaging\Message;
 use Prooph\EventStore\Projection\ProjectionManager;
+use Ramsey\Uuid\UuidInterface;
 use StockExchange\StockExchange\BidAsk\Ask;
 use StockExchange\StockExchange\BidAsk\Bid;
 use StockExchange\StockExchange\Exchange;
 use StockExchange\StockExchange\ExchangeReadRepositoryInterface;
+use StockExchange\StockExchange\Share\Event\ShareCreated;
+use StockExchange\StockExchange\Share\Event\ShareOwnershipTransferred;
 use StockExchange\StockExchange\Share\Share;
+use StockExchange\StockExchange\Symbol;
 
 class ExchangeMySqlEventStoreReadRepository implements ExchangeReadRepositoryInterface
 {
@@ -88,6 +92,54 @@ class ExchangeMySqlEventStoreReadRepository implements ExchangeReadRepositoryInt
         // if not throw ExchangeNotFoundException
 
         return Share::restoreStateFromEvents($getShareQuery->getState());
+    }
+
+    public function findShareIdsBySymbolAndTraderId(Symbol $symbol, UuidInterface $traderId): array
+    {
+        // TODO: this should be a projection
+        $getShareQuery = $this->projectionManager->createQuery();
+        $getShareQuery
+            ->init(function (): array {
+                return [];
+            })
+            ->fromCategory(Share::class)
+            ->when([
+                ShareCreated::class => function (array $state, Message $event) use ($symbol): array {
+                    /** @var Symbol $symbol */
+                    $state['shares_and_symbols'][$event->metadata()['_aggregate_id']] = $event->payload()['symbol'];
+
+                    return $state;
+                },
+                ShareOwnershipTransferred::class => function (array $state, Message $event) use ($symbol): array {
+                    /** @var Symbol $symbol */
+                   $state['shares_and_owners'][$event->metadata()['_aggregate_id']] = $event->payload()['ownerId'];
+
+                    return $state;
+                }
+            ])
+            ->run()
+        ;
+
+        // filter out share that do not match the given symbol value
+        $sharesAndSymbols = array_filter(
+            $getShareQuery->getState()['shares_and_symbols'],
+            function ($value) use ($symbol) {
+                /** @var Symbol $symbol */
+                return $value === $symbol->value();
+            }
+        );
+
+        $sharesAndOwners = array_filter(
+            $getShareQuery->getState()['shares_and_owners'],
+            function($value) use ($traderId) {
+                /** @var UuidInterface $traderId */
+                return $value === $traderId->toString();
+            }
+        );
+
+        $sharesThatMatchSymbolAndOwnerId = array_intersect_key($sharesAndOwners, $sharesAndSymbols);
+
+        return array_keys($sharesThatMatchSymbolAndOwnerId);
     }
 
     public function findAskById(string $id): \StockExchange\StockExchange\BidAsk\Ask

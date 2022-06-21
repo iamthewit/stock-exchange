@@ -160,14 +160,8 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-        // the share context needs to listen to the exchange aggregate to update ownership
-        $share = $this->handle(
-            new TransferOwnershipToTraderCommand(
-                $exchangeId,
-                $share->id(),
-                $traderB->id()
-            )
-        );
+        // TradeExecutedListener transfers the ownership of a share from the asker to the bidder
+        // in the Share context by listening to the event from the Exchange context
 
         // AskRemovedFromExchangeListener removes the ask from the BidAsk context
         // by listening for the AskRemovedFromExchange event from the exchange context
