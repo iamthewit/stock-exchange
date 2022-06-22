@@ -19,6 +19,7 @@ class CreateBidHandler implements MessageHandlerInterface
     {
         $bid = Bid::create(
             $command->id(),
+            $command->exchangeId(),
             $command->traderId(),
             $command->symbol(),
             $command->price()

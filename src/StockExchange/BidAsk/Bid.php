@@ -23,6 +23,7 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     use HasDispatchableEventsTrait;
 
     private UuidInterface $id;
+    private UuidInterface $exchangeId;
     private UuidInterface $traderId;
     private Symbol $symbol;
     private Price $price;
@@ -48,16 +49,17 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
      */
     public static function create(
         UuidInterface $id,
+        UuidInterface $exchangeId,
         UuidInterface $traderId,
         Symbol $symbol,
         Price $price
     ): self {
         $bid = new self();
         $bid->id = $id;
+        $bid->exchangeId = $exchangeId;
         $bid->traderId = $traderId;
         $bid->symbol = $symbol;
         $bid->price = $price;
-        // TODO: add $exchangeId
 
         $bidAdded = new BidAdded($bid);
         $bidAdded = $bidAdded->withMetadata($bid->eventMetaData());
@@ -68,12 +70,14 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
 
     public static function restoreFromValues(
         UuidInterface $id,
+        UuidInterface $exchangeId,
         UuidInterface $traderId,
         Symbol $symbol,
         Price $price
     ): Bid {
         $bid = new self();
         $bid->id = $id;
+        $bid->exchangeId = $exchangeId;
         $bid->traderId = $traderId;
         $bid->symbol = $symbol;
         $bid->price = $price;
@@ -113,6 +117,14 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     public function id(): UuidInterface
     {
         return $this->id;
+    }
+
+    /**
+     * @return UuidInterface
+     */
+    public function exchangeId(): UuidInterface
+    {
+        return $this->exchangeId;
     }
 
     /**
@@ -167,6 +179,7 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     {
         return [
             'id' => $this->id()->toString(),
+            'exchangeId' => $this->exchangeId()->toString(),
             'traderId' => $this->traderId()->toString(),
             'symbol' => $this->symbol()->toArray(),
             'price' => $this->price()->toArray(),
@@ -218,6 +231,7 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     private function applyBidAdded(BidAdded $event)
     {
         $this->id = Uuid::fromString($event->payload()['id']);
+        $this->exchangeId = Uuid::fromString($event->payload()['exchangeId']);
         $this->traderId = Uuid::fromString($event->payload()['traderId']);
         $this->symbol = Symbol::fromValue($event->payload()['symbol']['value']);
         $this->price = Price::fromValue($event->payload()['price']['value']);

@@ -16,6 +16,7 @@ use StockExchange\StockExchange\Symbol;
 
 class ExchangeMySqlEventStoreReadRepository implements ExchangeReadRepositoryInterface
 {
+    // TODO: rename this class ExchangeEventMySqlEventStoreReadRepository
     private ProjectionManager $projectionManager;
 
     public function __construct(ProjectionManager $projectionManager)

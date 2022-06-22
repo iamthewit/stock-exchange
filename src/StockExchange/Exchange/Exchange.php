@@ -304,11 +304,25 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
      */
     private function trade(Bid $bid, Ask $ask): void
     {
+        // TODO: the exchange should not be removing the bids
+        // and asks immediately - it is not the exchanges responsibility
+        // The bids and asks are owned by the BidAsk context, the exchange
+        // needs to wait for the BidAsk context to remove the bid and ask before
+        // it can remove them:
+        // Exchange emits trade executed
+        // BidAsk listens for trade executed
+        // BidAsk removes Bid and emits event
+        // BidAsk removes Ask and emits event
+        // Exchange listens for Bid removed and Ask removed from BidAsk context
+        // exchange removes bid and ask from it's own context
+
+        // the exchange is not in charge of bids and asks!!!!
+
         // remove bid from collection
-        $this->removeBid($bid);
+//        $this->removeBid($bid);
 
         // remove ask from collection
-        $this->removeAsk($ask);
+//        $this->removeAsk($ask);
 
         // add trade to collection
         $trade = Trade::fromBidAndAsk(Uuid::uuid4(), $bid, $ask);

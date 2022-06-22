@@ -76,7 +76,7 @@ class SmallerAggregateDomainTestCommand extends Command
             $this->params->get('stock_exchange.default_exchange_id')
         );
 
-//        $exchangeId = Uuid::uuid4();
+        $exchangeId = Uuid::uuid4();
 
         /** @var Exchange $exchange */
         $this->handle(
@@ -115,7 +115,6 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-        // exchange needs to listen to the event emitted by this aggregate
         /** @var Bid $bid */
         $bid = $this->handle(
             new CreateBidCommand(
@@ -127,7 +126,6 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-        // exchange needs to listen to the event emitted by this aggregate
         /** @var Ask $ask */
         $ask = $this->handle(
             new CreateAskCommand(
@@ -139,26 +137,10 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-        // the exchange should then execute the trade
-        $this->handle(
-            new AddAskToExchangeCommand(
-                $exchangeId,
-                $ask->id(),
-                $ask->traderId(),
-                $ask->symbol(),
-                $ask->price()
-            )
-        );
+        // exchange listens to BidAsk context events to update its
+        // aggregate with the atest bidask data (i.e bids and asks have been added)
 
-        $this->handle(
-            new AddBidToExchangeCommand(
-                $exchangeId,
-                $bid->id(),
-                $bid->traderId(),
-                $bid->symbol(),
-                $bid->price()
-            )
-        );
+        // the exchange should then execute the trade
 
         // TradeExecutedListener transfers the ownership of a share from the asker to the bidder
         // in the Share context by listening to the event from the Exchange context

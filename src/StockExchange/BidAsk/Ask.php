@@ -23,6 +23,7 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     use HasDispatchableEventsTrait;
 
     private UuidInterface $id;
+    private UuidInterface $exchangeId;
     private UuidInterface $traderId;
     private Symbol $symbol;
     private Price $price;
@@ -38,6 +39,7 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
 
     /**
      * @param UuidInterface $id
+     * @param UuidInterface $exchangeId
      * @param UuidInterface $traderId
      * @param Symbol        $symbol
      * @param Price         $price
@@ -46,16 +48,17 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
      */
     public static function create(
         UuidInterface $id,
+        UuidInterface $exchangeId,
         UuidInterface $traderId,
         Symbol $symbol,
         Price $price
     ): Ask {
         $ask = new self();
         $ask->id = $id;
+        $ask->exchangeId = $exchangeId;
         $ask->traderId = $traderId;
         $ask->symbol = $symbol;
         $ask->price = $price;
-        // TODO: add $exchangeId
 
         $askAdded = new AskAdded($ask);
         $askAdded = $askAdded->withMetadata($ask->eventMetaData());
@@ -66,12 +69,14 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
 
     public static function restoreFromValues(
         UuidInterface $id,
+        UuidInterface $exchangeId,
         UuidInterface $traderId,
         Symbol $symbol,
         Price $price
     ): Ask {
         $ask = new self();
         $ask->id = $id;
+        $ask->exchangeId = $exchangeId;
         $ask->traderId = $traderId;
         $ask->symbol = $symbol;
         $ask->price = $price;
@@ -111,6 +116,14 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     public function id(): UuidInterface
     {
         return $this->id;
+    }
+
+    /**
+     * @return UuidInterface
+     */
+    public function exchangeId(): UuidInterface
+    {
+        return $this->exchangeId;
     }
 
     /**
@@ -165,6 +178,7 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     {
         return [
             'id' => $this->id()->toString(),
+            'exchangeId' => $this->exchangeId()->toString(),
             'traderId' => $this->traderId()->toString(),
             'symbol' => $this->symbol()->toArray(),
             'price' => $this->price()->toArray()
@@ -216,6 +230,7 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     private function applyAskAdded(AskAdded $event)
     {
         $this->id = Uuid::fromString($event->payload()['id']);
+        $this->exchangeId = Uuid::fromString($event->payload()['exchangeId']);
         $this->traderId = Uuid::fromString($event->payload()['traderId']);
         $this->symbol = Symbol::fromValue($event->payload()['symbol']['value']);
         $this->price = Price::fromValue($event->payload()['price']['value']);

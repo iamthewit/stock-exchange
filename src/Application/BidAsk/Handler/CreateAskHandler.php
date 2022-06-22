@@ -21,6 +21,7 @@ class CreateAskHandler implements MessageHandlerInterface
     {
         $ask = Ask::create(
             $command->id(),
+            $command->exchangeId(),
             $command->traderId(),
             $command->symbol(),
             $command->price()
