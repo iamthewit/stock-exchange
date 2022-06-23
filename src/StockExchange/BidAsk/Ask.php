@@ -38,6 +38,8 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     }
 
     /**
+     * TODO: is issue a better name? are asks issued rather than created?
+     *
      * @param UuidInterface $id
      * @param UuidInterface $exchangeId
      * @param UuidInterface $traderId
@@ -86,13 +88,20 @@ class Ask implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
 
     public static function restoreStateFromEvents(array $events): Ask
     {
+        // TODO: add this to the other restoreStateFromEvents methods
+        if (empty($events)) {
+            throw new StateRestorationException(
+                'Can not restore state from an empty events array.'
+            );
+        }
+
         $ask = new self();
 
         foreach ($events as $event) {
             if (!is_a($event, Event::class)) {
                 // TODO: create a proper exception for this:
                 throw new StateRestorationException(
-                    'Can only restore state from objects that extend the Ask class.'
+                    'Can only restore state from objects that extend the Event class.'
                 );
             }
 

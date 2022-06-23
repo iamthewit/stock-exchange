@@ -17,3 +17,4 @@ framework:
         routing:
             # Route your messages to the transports
             'Prooph\Common\Messaging\DomainEvent': [sync, async]
+            'StockExchange\Application\Message\GenericMessage': 'sync'

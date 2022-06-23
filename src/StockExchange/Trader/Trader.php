@@ -9,7 +9,7 @@ use StockExchange\StockExchange\ArrayableInterface;
 use StockExchange\StockExchange\DispatchableEventsInterface;
 use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\HasDispatchableEventsTrait;
-use StockExchange\StockExchange\Trader\Event\TraderAddedToExchange;
+use StockExchange\StockExchange\Trader\Event\TraderCreated;
 
 class Trader implements DispatchableEventsInterface, JsonSerializable, ArrayableInterface
 {
@@ -33,7 +33,7 @@ class Trader implements DispatchableEventsInterface, JsonSerializable, Arrayable
 
         // TODO: add $exchangeId - can a single trader be a member of multiple exchanges ???
 
-        $traderAdded = new TraderAddedToExchange($trader);
+        $traderAdded = new TraderCreated($trader);
         $traderAdded = $traderAdded->withMetadata($trader->eventMetaData());
         $trader->addDispatchableEvent($traderAdded);
 

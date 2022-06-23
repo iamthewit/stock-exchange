@@ -27,14 +27,14 @@ class AskAddedListener implements MessageHandlerInterface
 
     public function __invoke(AskAdded $event)
     {
-        $this->handle(
-            new AddAskToExchangeCommand(
-                Uuid::fromString($event->payload()['exchangeId']),
-                Uuid::fromString($event->payload()['id']),
-                Uuid::fromString($event->payload()['traderId']),
-                Symbol::fromValue($event->payload()['symbol']['value']),
-                Price::fromValue($event->payload()['price']['value'])
-            )
-        );
+//        $this->handle(
+//            new AddAskToExchangeCommand(
+//                Uuid::fromString($event->payload()['exchangeId']),
+//                Uuid::fromString($event->payload()['id']),
+//                Uuid::fromString($event->payload()['traderId']),
+//                Symbol::fromValue($event->payload()['symbol']['value']),
+//                Price::fromValue($event->payload()['price']['value'])
+//            )
+//        );
     }
 }

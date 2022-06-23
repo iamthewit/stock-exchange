@@ -33,7 +33,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsCommand(
-    name: 'smaller-aggregate-domain-test',
+    name: 'sadt', // smaller-aggregate-domain-test
     description: 'Add a short description for your command',
 )]
 class SmallerAggregateDomainTestCommand extends Command
@@ -115,6 +115,17 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
+        /** @var Ask $ask */
+        $ask = $this->handle(
+            new CreateAskCommand(
+                $exchangeId,
+                Uuid::uuid4(),
+                $traderA->id(),
+                Symbol::fromValue('FOO'),
+                Price::fromValue(10)
+            )
+        );
+
         /** @var Bid $bid */
         $bid = $this->handle(
             new CreateBidCommand(
@@ -126,16 +137,7 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-        /** @var Ask $ask */
-        $ask = $this->handle(
-            new CreateAskCommand(
-                $exchangeId,
-                Uuid::uuid4(),
-                $traderA->id(),
-                Symbol::fromValue('FOO'),
-                Price::fromValue(10)
-            )
-        );
+
 
         // exchange listens to BidAsk context events to update its
         // aggregate with the atest bidask data (i.e bids and asks have been added)

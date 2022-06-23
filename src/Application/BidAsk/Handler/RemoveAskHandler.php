@@ -29,6 +29,8 @@ class RemoveAskHandler implements MessageHandlerInterface
     {
         $ask = $this->exchangeReadRepository->findAskById($command->id()->toString());
 
+        dd($ask);
+
         $ask->remove();
 
         foreach ($ask->dispatchableEvents() as $event) {

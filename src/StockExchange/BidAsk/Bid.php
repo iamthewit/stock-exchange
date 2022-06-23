@@ -41,6 +41,7 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
      * TODO: is issue a better name? are bids issued rather than created?
      *
      * @param UuidInterface $id
+     * @param UuidInterface $exchangeId
      * @param UuidInterface $traderId
      * @param Symbol        $symbol
      * @param Price         $price
@@ -87,6 +88,12 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
 
     public static function restoreStateFromEvents(array $events): Bid
     {
+        if (empty($events)) {
+            throw new StateRestorationException(
+                'Can not restore state from an empty events array.'
+            );
+        }
+
         $bid = new self();
 
         foreach ($events as $event) {

@@ -1,10 +1,12 @@
 <?php
 
 
-namespace StockExchange\Application\Share\Listener;
+namespace StockExchange\Application\BidAsk\Listener;
 
 
 use Ramsey\Uuid\Uuid;
+use StockExchange\Application\BidAsk\Command\RemoveAskCommand;
+use StockExchange\Application\BidAsk\Command\RemoveBidCommand;
 use StockExchange\Application\Share\Command\TransferOwnershipToTraderCommand;
 use StockExchange\Infrastructure\Persistence\ExchangeMySqlEventStoreReadRepository;
 use StockExchange\StockExchange\Exchange\Event\TradeExecuted;
@@ -37,24 +39,25 @@ class TradeExecutedListener implements MessageHandlerInterface
 
     public function __invoke(TradeExecuted $event)
     {
-        // load one shares with:
-        // - symbol $event->payload()['ask']['symbol']
-        // - traderId $event->payload()['ask']['traderId']
+        // once a trade is executed remove the bid and the ask
 
-        // transfer the ownership of that share
-        $shareIds = $this->eventStoreReadRepository->findShareIdsBySymbolAndTraderId(
-            Symbol::fromValue($event->payload()['ask']['symbol']['value']),
-            Uuid::fromString($event->payload()['ask']['traderId'])
-        );
+//        $bid = $this->eventStoreReadRepository->findBidById($event->payload()['bid']['bidId']);
 
-        $share = $this->eventStoreReadRepository->findShareById($shareIds[array_rand($shareIds)]);
+//        $ask = $this->eventStoreReadRepository->findAskById($event->payload()['ask']['askId']);
 
-        // Transfer share from ASKer to BIDer
+        // remove the bid
 //        $this->handle(
-//            new TransferOwnershipToTraderCommand(
-//                Uuid::fromString($event->metadata()['_aggregate_id']),
-//                $share->id(),
-//                Uuid::fromString($event->payload()['bid']['traderId'])
+//            new RemoveBidCommand(
+//                Uuid::fromString($event->metadata()['_aggregate_id']), // the trade is part of the exchange aggregate - so the aggregate id here is the exchange id
+//                Uuid::fromString($event->payload()['bid']['bidId'])
+//            )
+//        );
+
+        // remove the ask
+//        $this->handle(
+//            new RemoveAskCommand(
+//                Uuid::fromString($event->metadata()['_aggregate_id']), // the trade is part of the exchange aggregate - so the aggregate id here is the exchange id
+//                Uuid::fromString($event->payload()['ask']['askId'])
 //            )
 //        );
     }

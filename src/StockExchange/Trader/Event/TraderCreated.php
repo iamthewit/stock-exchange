@@ -7,7 +7,7 @@ namespace StockExchange\StockExchange\Trader\Event;
 use StockExchange\StockExchange\Event\Event;
 use StockExchange\StockExchange\Trader\Trader;
 
-class TraderAddedToExchange extends Event
+class TraderCreated extends Event
 {
     private Trader $trader;
 
