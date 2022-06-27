@@ -162,7 +162,10 @@ class Bid implements DispatchableEventsInterface, JsonSerializable, ArrayableInt
     {
         // TODO: does a bid/ask need a status? a removedAt date?
 
-        $bidRemoved = new BidRemoved($this->id());
+        $bidRemoved = new BidRemoved(
+            $this->id(),
+            $this->exchangeId()
+        );
         $bidRemoved = $bidRemoved->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($bidRemoved);
 

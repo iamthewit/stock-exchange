@@ -137,33 +137,6 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-
-
-        // exchange listens to BidAsk context events to update its
-        // aggregate with the atest bidask data (i.e bids and asks have been added)
-
-        // the exchange should then execute the trade
-
-        // TradeExecutedListener transfers the ownership of a share from the asker to the bidder
-        // in the Share context by listening to the event from the Exchange context
-
-        // AskRemovedFromExchangeListener removes the ask from the BidAsk context
-        // by listening for the AskRemovedFromExchange event from the exchange context
-
-        // BidRemovedFromExchangeListener removes the bid from the BidAsk context
-        // by listening for the BidRemovedFromExchange event from the exchange context
-
-        // TODO: in the future these events will be coming via kafka event streams
-        // at the moment they are happening internally within symfony
-        // we need to refactor to listen to the events from kafka instead
-
-        // TODO: the exchange context should also listen for the BidAsk remove events
-        // as bids and asks could be removed by traders - if this happens the exchange
-        // needs to update itself
-
-        $exchange = $this->exchangeReadRepository->findExchangeById($exchangeId->toString());
-        dump($exchange->trades());
-
         $io->success('Winner!');
 
         return Command::SUCCESS;

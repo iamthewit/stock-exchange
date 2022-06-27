@@ -10,18 +10,18 @@ namespace StockExchange\Application\Message;
 class GenericMessage
 {
     private string $type;
-    private array $payload;
+    private array  $data;
 
     /**
      * GenericMessage constructor.
      *
      * @param string $type
-     * @param array  $payload
+     * @param array  $data
      */
-    public function __construct(string $type, array $payload)
+    public function __construct(string $type, array $data)
     {
-        $this->type    = $type;
-        $this->payload = $payload;
+        $this->type = $type;
+        $this->data = $data;
     }
 
     public function type(): string
@@ -29,8 +29,8 @@ class GenericMessage
         return $this->type;
     }
 
-    public function payload(): array
+    public function data(): array
     {
-        return $this->payload;
+        return $this->data;
     }
 }

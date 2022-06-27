@@ -256,6 +256,40 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
     }
 
     /**
+     * @param UuidInterface $bidId
+     *
+     * @throws BidCollectionCreationException
+     */
+    public function removeBid(UuidInterface $bidId): void
+    {
+        $bids = $this->bids()->toArray();
+        unset($bids[$bidId->toString()]);
+
+        $this->bids = new BidCollection($bids);
+
+        $bidRemovedFromExchange = new BidRemovedFromExchange($bidId);
+        $bidRemovedFromExchange = $bidRemovedFromExchange->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($bidRemovedFromExchange);
+    }
+
+    /**
+     * @param UuidInterface $askId
+     *
+     * @throws AskCollectionCreationException
+     */
+    public function removeAsk(UuidInterface $askId): void
+    {
+        $asks = $this->asks()->toArray();
+        unset($asks[$askId->toString()]);
+
+        $this->asks = new AskCollection($asks);
+
+        $askRemovedFromExchange = new AskRemovedFromExchange($askId);
+        $askRemovedFromExchange = $askRemovedFromExchange->withMetadata($this->eventMetaData());
+        $this->addDispatchableEvent($askRemovedFromExchange);
+    }
+
+    /**
      * @return Event[]
      */
     public function appliedEvents(): array
@@ -334,40 +368,6 @@ class Exchange implements DispatchableEventsInterface, \JsonSerializable, Arraya
         $tradeExecuted = new TradeExecuted($trade);
         $tradeExecuted = $tradeExecuted->withMetadata($this->eventMetaData());
         $this->addDispatchableEvent($tradeExecuted);
-    }
-
-    /**
-     * @param Bid $bid
-     *
-     * @throws BidCollectionCreationException
-     */
-    private function removeBid(Bid $bid): void
-    {
-        $bids = $this->bids()->toArray();
-        unset($bids[$bid->id()->toString()]);
-
-        $this->bids = new BidCollection($bids);
-
-        $bidRemovedFromExchange = new BidRemovedFromExchange($bid->id());
-        $bidRemovedFromExchange = $bidRemovedFromExchange->withMetadata($this->eventMetaData());
-        $this->addDispatchableEvent($bidRemovedFromExchange);
-    }
-
-    /**
-     * @param Ask $ask
-     *
-     * @throws AskCollectionCreationException
-     */
-    private function removeAsk(Ask $ask): void
-    {
-        $asks = $this->asks()->toArray();
-        unset($asks[$ask->id()->toString()]);
-
-        $this->asks = new AskCollection($asks);
-
-        $askRemovedFromExchange = new AskRemovedFromExchange($ask->id());
-        $askRemovedFromExchange = $askRemovedFromExchange->withMetadata($this->eventMetaData());
-        $this->addDispatchableEvent($askRemovedFromExchange);
     }
 
     private function aggregateVersion(): int

@@ -28,9 +28,7 @@ class RemoveBidHandler implements MessageHandlerInterface
     public function __invoke(RemoveBidCommand $command)
     {
         $bid = $this->exchangeReadRepository->findBidById($command->id()->toString());
-
-//        dd($bid);
-
+        
         $bid->remove();
 
         foreach ($bid->dispatchableEvents() as $event) {

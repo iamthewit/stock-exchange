@@ -8,16 +8,20 @@ use StockExchange\StockExchange\Event\Event;
 class AskRemoved extends Event
 {
     private UuidInterface $askId;
+    private UuidInterface $exchangeId;
 
     /**
      * AskAdded constructor.
      *
      * @param UuidInterface $askId
      */
-    public function __construct(UuidInterface $askId)
+    public function __construct(UuidInterface $askId, UuidInterface $exchangeId)
     {
         $this->init();
-        $this->setPayload(['id' => $askId]);
+        $this->setPayload([
+            'id' => $askId,
+            'exchangeId' => $exchangeId
+        ]);
         $this->ask = $askId;
     }
 
@@ -27,5 +31,10 @@ class AskRemoved extends Event
     public function askId(): UuidInterface
     {
         return $this->askId();
+    }
+
+    public function exchangeId(): UuidInterface
+    {
+        return $this->exchangeId;
     }
 }

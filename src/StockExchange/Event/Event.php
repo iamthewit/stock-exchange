@@ -15,7 +15,10 @@ class Event extends DomainEvent implements \JsonSerializable
 
     public function jsonSerialize(): array
     {
-        return ['payload' => $this->payload];
+        return [
+            'payload' => $this->payload,
+            'metadata' => $this->metadata
+        ];
     }
 
     protected function setPayload(array $payload): void
