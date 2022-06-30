@@ -1,6 +1,6 @@
 <?php
 
-namespace StockExchange\Application\Handler;
+namespace StockExchange\Application\Exchange\Handler;
 
 use StockExchange\Application\Exchange\Command\CreateExchangeCommand;
 use StockExchange\StockExchange\Exchange\Exchange;
