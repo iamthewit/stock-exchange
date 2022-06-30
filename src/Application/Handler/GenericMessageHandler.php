@@ -2,6 +2,8 @@
 
 namespace StockExchange\Application\Handler;
 
+use StockExchange\Application\BidAsk\Command\CreateAskCommand;
+use StockExchange\Application\BidAsk\Command\CreateBidCommand;
 use StockExchange\Application\BidAsk\Command\RemoveAskCommand;
 use StockExchange\Application\BidAsk\Command\RemoveBidCommand;
 use StockExchange\Application\Exchange\Command\AddAskToExchangeCommand;
@@ -42,87 +44,71 @@ class GenericMessageHandler implements MessageHandlerInterface
     {
         /** BidAsk Events */
         if ($genericMessage->type() === "StockExchange\StockExchange\BidAsk\Event\AskAdded") {
-            $this->handle(
-                new AddAskToExchangeCommand(
-                    Uuid::fromString($genericMessage->data()['payload']['exchangeId']),
-                    Uuid::fromString($genericMessage->data()['payload']['id']),
-                    Uuid::fromString($genericMessage->data()['payload']['traderId']),
-                    Symbol::fromValue($genericMessage->data()['payload']['symbol']['value']),
-                    Price::fromValue($genericMessage->data()['payload']['price']['value'])
-                )
-            );
+            // do something???
         }
 
         if ($genericMessage->type() === "StockExchange\StockExchange\BidAsk\Event\BidAdded") {
-            $this->handle(
-                new AddBidToExchangeCommand(
-                    Uuid::fromString($genericMessage->data()['payload']['exchangeId']),
-                    Uuid::fromString($genericMessage->data()['payload']['id']),
-                    Uuid::fromString($genericMessage->data()['payload']['traderId']),
-                    Symbol::fromValue($genericMessage->data()['payload']['symbol']['value']),
-                    Price::fromValue($genericMessage->data()['payload']['price']['value'])
-                )
-            );
+            /// do something???
         }
 
         if ($genericMessage->type() === "StockExchange\StockExchange\BidAsk\Event\AskRemoved") {
-            $this->handle(
-                new RemoveAskFromExchangeCommand(
-                    Uuid::fromString($genericMessage->data()['payload']['exchangeId']),
-                    Uuid::fromString($genericMessage->data()['payload']['id']),
-                )
-            );
+            // do something???
         }
 
         if ($genericMessage->type() === "StockExchange\StockExchange\BidAsk\Event\BidRemoved") {
-            $this->handle(
-                new RemoveBidFromExchangeCommand(
-                    Uuid::fromString($genericMessage->data()['payload']['exchangeId']),
-                    Uuid::fromString($genericMessage->data()['payload']['id']),
-                )
-            );
+            // do something???
         }
         /** --- */
 
         /** Exchange Events */
-        if ($genericMessage->type() === "StockExchange\StockExchange\Event\Exchange\AskAddedToExchange") {
-            // do something?
+        if ($genericMessage->type() === "StockExchange\StockExchange\Exchange\Event\AskAddedToExchange") {
+            $this->handle(
+                new CreateAskCommand(
+                    Uuid::fromString($genericMessage->data()['metadata']['_aggregate_id']),
+                    Uuid::fromString($genericMessage->data()['payload']['askId']),
+                    Uuid::fromString($genericMessage->data()['payload']['traderId']),
+                    Symbol::fromValue($genericMessage->data()['payload']['symbol']['value']),
+                    Price::fromValue($genericMessage->data()['payload']['price']['value'])
+                )
+            );
         }
 
-        if ($genericMessage->type() === "StockExchange\StockExchange\Event\Exchange\AskRemovedFromExchange") {
-            // do something?
+        if ($genericMessage->type() === "StockExchange\StockExchange\Exchange\Event\AskRemovedFromExchange") {
+            $this->handle(
+                new RemoveAskCommand(
+                    Uuid::fromString($genericMessage->data()['metadata']['_aggregate_id']),
+                    Uuid::fromString($genericMessage->data()['payload']['askId']),
+                )
+            );
         }
 
-        if ($genericMessage->type() === "StockExchange\StockExchange\Event\Exchange\BidAddedToExchange") {
-            // do something?
+        if ($genericMessage->type() === "StockExchange\StockExchange\Exchange\Event\BidAddedToExchange") {
+            $this->handle(
+                new CreateBidCommand(
+                    Uuid::fromString($genericMessage->data()['metadata']['_aggregate_id']),
+                    Uuid::fromString($genericMessage->data()['payload']['bidId']),
+                    Uuid::fromString($genericMessage->data()['payload']['traderId']),
+                    Symbol::fromValue($genericMessage->data()['payload']['symbol']['value']),
+                    Price::fromValue($genericMessage->data()['payload']['price']['value'])
+                )
+            );
         }
 
-        if ($genericMessage->type() === "StockExchange\StockExchange\Event\Exchange\BidRemovedFromExchange") {
-            // do something?
+        if ($genericMessage->type() === "StockExchange\StockExchange\Exchange\Event\BidRemovedFromExchange") {
+            $this->handle(
+                new RemoveBidCommand(
+                    Uuid::fromString($genericMessage->data()['metadata']['_aggregate_id']),
+                    Uuid::fromString($genericMessage->data()['payload']['bidId']),
+                )
+            );
         }
 
-        if ($genericMessage->type() === "StockExchange\StockExchange\Event\Exchange\ExchangeCreated") {
+        if ($genericMessage->type() === "StockExchange\StockExchange\Exchange\Event\ExchangeCreated") {
             // do something?
         }
 
         if ($genericMessage->type() === "StockExchange\StockExchange\Exchange\Event\TradeExecuted") {
-            // remove the bid
-            $this->handle(
-                new RemoveBidCommand(
-                    Uuid::fromString($genericMessage->data()['metadata']['_aggregate_id']),
-                    Uuid::fromString($genericMessage->data()['payload']['bid']['bidId'])
-                )
-            );
-
-            // remove the ask
-            $this->handle(
-                new RemoveAskCommand(
-                    Uuid::fromString($genericMessage->data()['metadata']['_aggregate_id']),
-                    Uuid::fromString($genericMessage->data()['payload']['ask']['askId'])
-                )
-            );
-
-            // transfer the ownership of that share
+            // transfer the ownership of the share
             $shareIds = $this->exchangeReadRepository->findShareIdsBySymbolAndTraderId(
                 Symbol::fromValue($genericMessage->data()['payload']['ask']['symbol']['value']),
                 Uuid::fromString($genericMessage->data()['payload']['ask']['traderId'])

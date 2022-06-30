@@ -107,7 +107,7 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-        $share = $this->handle(
+       $this->handle(
             new TransferOwnershipToTraderCommand(
                 $exchangeId,
                 $share->id(),
@@ -115,9 +115,8 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-        /** @var Ask $ask */
-        $ask = $this->handle(
-            new CreateAskCommand(
+        $this->handle(
+            new AddAskToExchangeCommand(
                 $exchangeId,
                 Uuid::uuid4(),
                 $traderA->id(),
@@ -126,9 +125,8 @@ class SmallerAggregateDomainTestCommand extends Command
             )
         );
 
-        /** @var Bid $bid */
-        $bid = $this->handle(
-            new CreateBidCommand(
+        $this->handle(
+            new AddBidToExchangeCommand(
                 $exchangeId,
                 Uuid::uuid4(),
                 $traderB->id(),
